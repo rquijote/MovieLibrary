@@ -8,6 +8,6 @@ namespace Api.Controllers.Dto
         [JsonPropertyName("status_code")]
         public required string StatusCode { get; init; }
         [JsonPropertyName("status_message")]
-        public required string StatusMessage { get; init; }
+        public string? StatusMessage { get; init; }
     }
 }

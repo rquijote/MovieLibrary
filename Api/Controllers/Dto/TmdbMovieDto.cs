@@ -2,7 +2,7 @@
 
 namespace Api.Controllers.Dto
 {
-    public sealed record MovieDto
+    public sealed record TmdbMovieDto
     {
         [JsonPropertyName("adult")] public bool Adult { get; init; }
         [JsonPropertyName("backdrop_path")] public string? BackdropPath { get; init; }
