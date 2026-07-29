@@ -5,7 +5,7 @@ using Api.Controllers.Dto.MovieTV;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
 
-namespace Tests.Integration.Api.Movies
+namespace Tests.Integration.Api.Details
 {
     public class GetMovieDetails(WebApplicationFactory<Program> factory) : IClassFixture<WebApplicationFactory<Program>>
     {
