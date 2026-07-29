@@ -1,79 +1,76 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
 using Api.Controllers.Dto;
+using Api.Controllers.Dto.MovieTV;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Xunit;
 
-namespace Tests.Integration.Api
+namespace Tests.Integration.Api.Movies
 {
-    public class TMDBApiTests(WebApplicationFactory<Program> factory) : IClassFixture<WebApplicationFactory<Program>>
+    public class GetMovieDetails(WebApplicationFactory<Program> factory) : IClassFixture<WebApplicationFactory<Program>>
     {
         private readonly HttpClient _client = factory.CreateClient();
 
         // MethodName_StateUnderTest_ExpectedBehavior
         [Fact]
-        public async Task GetMovie_ValidId_ReturnsCorrectValue()
+        public async Task GetMovieDetails_ValidId_ReturnsCorrectValue()
         {
             int movieId = 11;
-            MovieDto expected = new() 
+            MovieSummaryDto expected = new() 
             { 
                 Id = movieId, 
-                Title = "Star Wars", 
-                ReleaseDate = "1977-05-25" 
+                Title = "Star Wars"
             };
             var response = await _client.GetAsync($"/api/movie/{movieId}");
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            var actual = await response.Content.ReadFromJsonAsync<MovieDto>();
+            var actual = await response.Content.ReadFromJsonAsync<MovieSummaryDto>();
             actual.Should().NotBeNull();
             actual.Should().BeEquivalentTo(expected);
         }
 
         [Fact]
-        public async Task GetMovie_ValidId_ReturnsCorrectValue2()
+        public async Task GetMovieDetails_ValidId_ReturnsCorrectValue2()
         {
             int movieId = 12;
-            MovieDto expected = new() 
+            MovieSummaryDto expected = new() 
             { 
                 Id = movieId, 
-                Title = "Finding Nemo", 
-                ReleaseDate = "2003-05-30" 
+                Title = "Finding Nemo"
             };
             var response = await _client.GetAsync($"/api/movie/{movieId}");
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            var actual = await response.Content.ReadFromJsonAsync<MovieDto>();
+            var actual = await response.Content.ReadFromJsonAsync<MovieSummaryDto>();
             actual.Should().NotBeNull();
             actual.Should().BeEquivalentTo(expected);
         }
 
         [Fact]
-        public async Task GetMovie_ValidId_ReturnsCorrectValue3()
+        public async Task GetMovieDetails_ValidId_ReturnsCorrectValue3()
         {
             int movieId = 120;
-            MovieDto expected = new() 
+            MovieSummaryDto expected = new() 
             { 
                 Id = movieId, 
-                Title = "The Lord of the Rings: The Fellowship of the Ring", 
-                ReleaseDate = "2001-12-18" 
+                Title = "The Lord of the Rings: The Fellowship of the Ring"
             };
             var response = await _client.GetAsync($"/api/movie/{movieId}");
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            var actual = await response.Content.ReadFromJsonAsync<MovieDto>();
+            var actual = await response.Content.ReadFromJsonAsync<MovieSummaryDto>();
             actual.Should().NotBeNull();
             actual.Should().BeEquivalentTo(expected);
         }
 
         [Fact]
-        public async Task GetMovie_InvalidId_ReturnsInvalid()
+        public async Task GetMovieDetails_InvalidId_ReturnsInvalid()
         {
             int movieId = -1;
             StatusDto expected = new() 
             { 
                 Success = false, 
-                StatusCode = "6"
+                StatusCode = 6
             };
             var response = await _client.GetAsync($"/api/movie/{movieId}");
             response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -84,13 +81,13 @@ namespace Tests.Integration.Api
         }
 
         [Fact]
-        public async Task GetMovie_NonExistentId_ReturnsNotFound()
+        public async Task GetMovieDetails_NonExistentId_ReturnsNotFound()
         {
             int movieId = 999999999;
             StatusDto expected = new()
             {
                 Success = false,
-                StatusCode = "34"
+                StatusCode = 34
             };
             var response = await _client.GetAsync($"/api/movie/{movieId}");
             response.StatusCode.Should().Be(HttpStatusCode.OK);
