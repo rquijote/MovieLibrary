@@ -1,4 +1,4 @@
-﻿namespace Api.Controllers.Dto.MovieTV
+namespace Application.Models.Dto
 {
     public sealed record TVSummaryDto
     {

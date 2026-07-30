@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Api.Controllers.Dto
+namespace Api.Controllers.Dto.Status
 {
     public sealed record StatusDto
     {

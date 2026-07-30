@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc.Testing;
 using Moq;
 using Application.Interfaces;
-using Api.Controllers.Dto.MovieTV;
+using Application.Models.Dto;
+using FluentAssertions;
 
 namespace Tests.Unit.Search
 {
@@ -24,6 +25,14 @@ namespace Tests.Unit.Search
                 });
 
             // TODO: Add Act and Assert sections
+            var result = await tmdbClientMock.Object.SearchMoviesAsync("star");
+            result.Should().NotBeNull();
+            result.Movies.Should().BeEquivalentTo(
+                [
+                        new MovieSummaryDto { Id = 11, Title = "Star Wars" },
+                        new MovieSummaryDto { Id = 1255778, Title = "Lucky Star" },
+                        new MovieSummaryDto { Id = 13475, Title = "Star Trek" }
+                ]);
         }
     }
 }

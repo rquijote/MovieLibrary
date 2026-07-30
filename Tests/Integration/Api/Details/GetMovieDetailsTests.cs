@@ -1,13 +1,13 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
-using Api.Controllers.Dto;
-using Api.Controllers.Dto.MovieTV;
+using Api.Controllers.Dto.Status;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Application.Models.Dto;
 
 namespace Tests.Integration.Api.Details
 {
-    public class GetMovieDetails(WebApplicationFactory<Program> factory) : IClassFixture<WebApplicationFactory<Program>>
+    public class GetMovieDetailsTests(WebApplicationFactory<Program> factory) : IClassFixture<WebApplicationFactory<Program>>
     {
         private readonly HttpClient _client = factory.CreateClient();
 

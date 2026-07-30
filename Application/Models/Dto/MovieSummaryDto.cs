@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace Api.Controllers.Dto.MovieTV
+namespace Application.Models.Dto
 {
     public sealed record MovieSummaryDto
     {
