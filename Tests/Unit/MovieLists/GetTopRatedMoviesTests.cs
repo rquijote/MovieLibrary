@@ -1,5 +1,5 @@
 using Application.Interfaces;
-using Application.Models.Dto;
+using Application.Models.Dto.Requests;
 using Moq;
 using FluentAssertions;
 
