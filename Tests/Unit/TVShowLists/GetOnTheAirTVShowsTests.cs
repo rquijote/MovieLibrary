@@ -67,16 +67,5 @@ namespace Tests.Unit.TVShowLists
             result.Should().NotBeNull();
             result.TVShows.Should().NotBeNull().And.HaveCount(9).And.BeEquivalentTo(expected.TVShows);
         }
-
-            var tmdbClientMock = new Mock<ITmdbClient>();
-            tmdbClientMock
-                .Setup(x => x.GetOnTheAirTVShowsAsync(2))
-                .ReturnsAsync(expected);
-
-            var result = await tmdbClientMock.Object.GetOnTheAirTVShowsAsync(2);
-
-            result.Should().NotBeNull();
-            result.TVShows.Should().NotBeNull().And.HaveCount(20).And.BeEquivalentTo(expected.TVShows);
-        }
     }
 }
