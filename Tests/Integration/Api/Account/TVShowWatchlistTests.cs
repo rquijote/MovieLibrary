@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using FluentAssertions;
 using System.Net;
 using Api.Controllers.Dto.Status;
+using Application.Enums;
 
 namespace Tests.Integration.Api.Account
 {
@@ -14,7 +15,7 @@ namespace Tests.Integration.Api.Account
         [Fact]
         public async Task AddTVShowToWatchlist_AddGameOfThrones_Successful()
         {
-            var request = new AddMediaDto { Media = MediaType.tv, MediaId = 1399, AddToList = true };
+            var request = new AddMediaWatchlistDto { Media = MediaType.tv, MediaId = 1399, AddToList = true };
             var response = await _client.PostAsJsonAsync($"/api/account/watchlist", request);
 
             response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -24,7 +25,7 @@ namespace Tests.Integration.Api.Account
         [Fact]
         public async Task AddTVShowToWatchlist_AddBreakingBad_Successful()
         {
-            var request = new AddMediaDto { Media = MediaType.tv, MediaId = 1396, AddToList = true };
+            var request = new AddMediaWatchlistDto { Media = MediaType.tv, MediaId = 1396, AddToList = true };
             var response = await _client.PostAsJsonAsync($"/api/account/watchlist", request);
 
             response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -34,7 +35,7 @@ namespace Tests.Integration.Api.Account
         [Fact]
         public async Task AddTVShowToWatchlist_AddTheSopranos_Successful()
         {
-            var request = new AddMediaDto { Media = MediaType.tv, MediaId = 1398, AddToList = true };
+            var request = new AddMediaWatchlistDto { Media = MediaType.tv, MediaId = 1398, AddToList = true };
             var response = await _client.PostAsJsonAsync($"/api/account/watchlist", request);
 
             response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -44,7 +45,7 @@ namespace Tests.Integration.Api.Account
         [Fact]
         public async Task AddTVShowToWatchlist_InvalidMediaId_ReturnsNotFound()
         {
-            var request = new AddMediaDto { Media = MediaType.tv, MediaId = 999999999, AddToList = true };
+            var request = new AddMediaWatchlistDto { Media = MediaType.tv, MediaId = 999999999, AddToList = true };
             var response = await _client.PostAsJsonAsync($"/api/account/watchlist", request);
 
             response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -54,7 +55,7 @@ namespace Tests.Integration.Api.Account
         [Fact]
         public async Task RemoveTVShowFromWatchlist_RemoveTheSopranos_Successful()
         {
-            var request = new AddMediaDto { Media = MediaType.tv, MediaId = 1398, AddToList = false };
+            var request = new AddMediaWatchlistDto { Media = MediaType.tv, MediaId = 1398, AddToList = false };
             var response = await _client.PostAsJsonAsync($"/api/account/watchlist", request);
 
             response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -64,7 +65,7 @@ namespace Tests.Integration.Api.Account
         [Fact]
         public async Task RemoveTVShowFromWatchlist_RemoveGameOfThrones_Successful()
         {
-            var request = new AddMediaDto { Media = MediaType.tv, MediaId = 1399, AddToList = false };
+            var request = new AddMediaWatchlistDto { Media = MediaType.tv, MediaId = 1399, AddToList = false };
             var response = await _client.PostAsJsonAsync($"/api/account/watchlist", request);
 
             response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -74,7 +75,7 @@ namespace Tests.Integration.Api.Account
         [Fact]
         public async Task RemoveTVShowFromWatchlist_RemoveBreakingBad_Successful()
         {
-            var request = new AddMediaDto { Media = MediaType.tv, MediaId = 1396, AddToList = false };
+            var request = new AddMediaWatchlistDto { Media = MediaType.tv, MediaId = 1396, AddToList = false };
             var response = await _client.PostAsJsonAsync($"/api/account/watchlist", request);
 
             response.StatusCode.Should().Be(HttpStatusCode.OK);

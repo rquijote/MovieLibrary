@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using FluentAssertions;
 using System.Net;
 using Api.Controllers.Dto.Status;
+using Application.Enums;
 
 namespace Tests.Integration.Api.Account
 {
@@ -15,7 +16,7 @@ namespace Tests.Integration.Api.Account
         public async Task GetFavoriteTVShows_AddGameOfThronesCheckRemove_Successful()
         {
             // Add Game of Thrones to favorites
-            var addRequest = new AddMediaDto { Media = MediaType.tv, MediaId = 1399, AddToList = true };
+            var addRequest = new AddMediaWatchlistDto { Media = MediaType.tv, MediaId = 1399, AddToList = true };
             var addResponse = await _client.PostAsJsonAsync($"/api/account/favorite", addRequest);
             addResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 
@@ -29,7 +30,7 @@ namespace Tests.Integration.Api.Account
             favorites.TVShows.Should().ContainSingle(t => t.Id == 1399 && t.Name == "Game of Thrones");
 
             // Remove Game of Thrones from favorites
-            var removeRequest = new AddMediaDto { Media = MediaType.tv, MediaId = 1399, AddToList = false };
+            var removeRequest = new AddMediaWatchlistDto { Media = MediaType.tv, MediaId = 1399, AddToList = false };
             var removeResponse = await _client.PostAsJsonAsync($"/api/account/favorite", removeRequest);
             removeResponse.StatusCode.Should().Be(HttpStatusCode.OK);
             removeResponse.Content.Should().BeEquivalentTo(new StatusDto { StatusCode = 13, Success = true });
@@ -39,7 +40,7 @@ namespace Tests.Integration.Api.Account
         public async Task GetFavoriteTVShows_AddBreakingBadCheckRemove_Successful()
         {
             // Add Breaking Bad to favorites
-            var addRequest = new AddMediaDto { Media = MediaType.tv, MediaId = 1396, AddToList = true };
+            var addRequest = new AddMediaWatchlistDto { Media = MediaType.tv, MediaId = 1396, AddToList = true };
             var addResponse = await _client.PostAsJsonAsync($"/api/account/favorite", addRequest);
             addResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 
@@ -53,7 +54,7 @@ namespace Tests.Integration.Api.Account
             favorites.TVShows.Should().ContainSingle(t => t.Id == 1396 && t.Name == "Breaking Bad");
 
             // Remove Breaking Bad from favorites
-            var removeRequest = new AddMediaDto { Media = MediaType.tv, MediaId = 1396, AddToList = false };
+            var removeRequest = new AddMediaWatchlistDto { Media = MediaType.tv, MediaId = 1396, AddToList = false };
             var removeResponse = await _client.PostAsJsonAsync($"/api/account/favorite", removeRequest);
             removeResponse.StatusCode.Should().Be(HttpStatusCode.OK);
             removeResponse.Content.Should().BeEquivalentTo(new StatusDto { StatusCode = 13, Success = true });
@@ -63,7 +64,7 @@ namespace Tests.Integration.Api.Account
         public async Task GetFavoriteTVShows_AddTheSopranosCheckRemove_Successful()
         {
             // Add The Sopranos to favorites
-            var addRequest = new AddMediaDto { Media = MediaType.tv, MediaId = 1398, AddToList = true };
+            var addRequest = new AddMediaWatchlistDto { Media = MediaType.tv, MediaId = 1398, AddToList = true };
             var addResponse = await _client.PostAsJsonAsync($"/api/account/favorite", addRequest);
             addResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 
@@ -77,7 +78,7 @@ namespace Tests.Integration.Api.Account
             favorites.TVShows.Should().ContainSingle(t => t.Id == 1398 && t.Name == "The Sopranos");
 
             // Remove The Sopranos from favorites
-            var removeRequest = new AddMediaDto { Media = MediaType.tv, MediaId = 1398, AddToList = false };
+            var removeRequest = new AddMediaWatchlistDto { Media = MediaType.tv, MediaId = 1398, AddToList = false };
             var removeResponse = await _client.PostAsJsonAsync($"/api/account/favorite", removeRequest);
             removeResponse.StatusCode.Should().Be(HttpStatusCode.OK);
             removeResponse.Content.Should().BeEquivalentTo(new StatusDto { StatusCode = 13, Success = true });
