@@ -15,71 +15,92 @@ namespace Tests.Integration.Api.Account
         [Fact]
         public async Task AddTVShowToFavorites_AddGameOfThrones_Successful()
         {
-            var request = new AddMediaWatchlistDto { Media = MediaType.tv, MediaId = 1399, AddToList = true };
+            var request = new AddMediaFavoriteDto { Media = MediaType.tv, MediaId = 1399, AddToList = true };
             var response = await _client.PostAsJsonAsync($"/api/account/favorite", request);
 
             response.StatusCode.Should().Be(HttpStatusCode.OK);
-            response.Content.Should().BeEquivalentTo(new StatusDto { StatusCode = 1, Success = true });
+            var result = await response.Content.ReadFromJsonAsync<StatusDto>();
+            result.Should().NotBeNull();
+            result!.Success.Should().BeTrue();
+            result.StatusCode.Should().Be(1);
         }
 
         [Fact]
         public async Task AddTVShowToFavorites_AddBreakingBad_Successful()
         {
-            var request = new AddMediaWatchlistDto { Media = MediaType.tv, MediaId = 1396, AddToList = true };
+            var request = new AddMediaFavoriteDto { Media = MediaType.tv, MediaId = 1396, AddToList = true };
             var response = await _client.PostAsJsonAsync($"/api/account/favorite", request);
 
             response.StatusCode.Should().Be(HttpStatusCode.OK);
-            response.Content.Should().BeEquivalentTo(new StatusDto { StatusCode = 1, Success = true });
+            var result = await response.Content.ReadFromJsonAsync<StatusDto>();
+            result.Should().NotBeNull();
+            result!.Success.Should().BeTrue();
+            result.StatusCode.Should().Be(1);
         }
 
         [Fact]
         public async Task AddTVShowToFavorites_AddTheSopranos_Successful()
         {
-            var request = new AddMediaWatchlistDto { Media = MediaType.tv, MediaId = 1398, AddToList = true };
+            var request = new AddMediaFavoriteDto { Media = MediaType.tv, MediaId = 1398, AddToList = true };
             var response = await _client.PostAsJsonAsync($"/api/account/favorite", request);
 
             response.StatusCode.Should().Be(HttpStatusCode.OK);
-            response.Content.Should().BeEquivalentTo(new StatusDto { StatusCode = 1, Success = true });
+            var result = await response.Content.ReadFromJsonAsync<StatusDto>();
+            result.Should().NotBeNull();
+            result!.Success.Should().BeTrue();
+            result.StatusCode.Should().Be(1);
         }
 
         [Fact]
         public async Task AddTVShowToFavorites_InvalidMediaId_ReturnsNotFound()
         {
-            var request = new AddMediaWatchlistDto { Media = MediaType.tv, MediaId = 999999999, AddToList = true };
+            var request = new AddMediaFavoriteDto { Media = MediaType.tv, MediaId = 999999999, AddToList = true };
             var response = await _client.PostAsJsonAsync($"/api/account/favorite", request);
 
             response.StatusCode.Should().Be(HttpStatusCode.OK);
-            response.Content.Should().BeEquivalentTo(new StatusDto { StatusCode = 34, Success = false });
+            var result = await response.Content.ReadFromJsonAsync<StatusDto>();
+            result.Should().NotBeNull();
+            result!.Success.Should().BeFalse();
+            result.StatusCode.Should().Be(34);
         }
 
         [Fact]
         public async Task RemoveTVShowFromFavorites_RemoveTheSopranos_Successful()
         {
-            var request = new AddMediaWatchlistDto { Media = MediaType.tv, MediaId = 1398, AddToList = false };
+            var request = new AddMediaFavoriteDto { Media = MediaType.tv, MediaId = 1398, AddToList = false };
             var response = await _client.PostAsJsonAsync($"/api/account/favorite", request);
 
             response.StatusCode.Should().Be(HttpStatusCode.OK);
-            response.Content.Should().BeEquivalentTo(new StatusDto { StatusCode = 13, Success = true });
+            var result = await response.Content.ReadFromJsonAsync<StatusDto>();
+            result.Should().NotBeNull();
+            result!.Success.Should().BeTrue();
+            result.StatusCode.Should().Be(13);
         }
 
         [Fact]
         public async Task RemoveTVShowFromFavorites_RemoveGameOfThrones_Successful()
         {
-            var request = new AddMediaWatchlistDto { Media = MediaType.tv, MediaId = 1399, AddToList = false };
+            var request = new AddMediaFavoriteDto { Media = MediaType.tv, MediaId = 1399, AddToList = false };
             var response = await _client.PostAsJsonAsync($"/api/account/favorite", request);
 
             response.StatusCode.Should().Be(HttpStatusCode.OK);
-            response.Content.Should().BeEquivalentTo(new StatusDto { StatusCode = 13, Success = true });
+            var result = await response.Content.ReadFromJsonAsync<StatusDto>();
+            result.Should().NotBeNull();
+            result!.Success.Should().BeTrue();
+            result.StatusCode.Should().Be(13);
         }
 
         [Fact]
         public async Task RemoveTVShowFromFavorites_RemoveBreakingBad_Successful()
         {
-            var request = new AddMediaWatchlistDto { Media = MediaType.tv, MediaId = 1396, AddToList = false };
+            var request = new AddMediaFavoriteDto { Media = MediaType.tv, MediaId = 1396, AddToList = false };
             var response = await _client.PostAsJsonAsync($"/api/account/favorite", request);
 
             response.StatusCode.Should().Be(HttpStatusCode.OK);
-            response.Content.Should().BeEquivalentTo(new StatusDto { StatusCode = 13, Success = true });
+            var result = await response.Content.ReadFromJsonAsync<StatusDto>();
+            result.Should().NotBeNull();
+            result!.Success.Should().BeTrue();
+            result.StatusCode.Should().Be(13);
         }
     }
 }

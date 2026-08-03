@@ -20,7 +20,10 @@ namespace Tests.Integration.Api.Account
             var response = await _client.PostAsJsonAsync($"/api/account/watchlist", request);
 
             response.StatusCode.Should().Be(HttpStatusCode.OK);
-            response.Content.Should().BeEquivalentTo(new StatusDto { StatusCode = 1, Success = true });
+            var result = await response.Content.ReadFromJsonAsync<StatusDto>();
+            result.Should().NotBeNull();
+            result!.Success.Should().BeTrue();
+            result.StatusCode.Should().Be(1);
         }
 
         [Fact]
@@ -30,7 +33,10 @@ namespace Tests.Integration.Api.Account
             var response = await _client.PostAsJsonAsync($"/api/account/watchlist", request);
 
             response.StatusCode.Should().Be(HttpStatusCode.OK);
-            response.Content.Should().BeEquivalentTo(new StatusDto { StatusCode = 1, Success = true });
+            var result = await response.Content.ReadFromJsonAsync<StatusDto>();
+            result.Should().NotBeNull();
+            result!.Success.Should().BeTrue();
+            result.StatusCode.Should().Be(1);
         }
 
         [Fact]
@@ -40,7 +46,10 @@ namespace Tests.Integration.Api.Account
             var response = await _client.PostAsJsonAsync($"/api/account/watchlist", request);
 
             response.StatusCode.Should().Be(HttpStatusCode.OK);
-            response.Content.Should().BeEquivalentTo(new StatusDto { StatusCode = 1, Success = true });
+            var result = await response.Content.ReadFromJsonAsync<StatusDto>();
+            result.Should().NotBeNull();
+            result!.Success.Should().BeTrue();
+            result.StatusCode.Should().Be(1);
         }
 
         [Fact]
@@ -50,7 +59,10 @@ namespace Tests.Integration.Api.Account
             var response = await _client.PostAsJsonAsync($"/api/account/watchlist", request);
 
             response.StatusCode.Should().Be(HttpStatusCode.OK);
-            response.Content.Should().BeEquivalentTo(new StatusDto { StatusCode = 34, Success = false });
+            var result = await response.Content.ReadFromJsonAsync<StatusDto>();
+            result.Should().NotBeNull();
+            result!.Success.Should().BeFalse();
+            result.StatusCode.Should().Be(34);
         }
 
         [Fact]
@@ -60,7 +72,10 @@ namespace Tests.Integration.Api.Account
             var response = await _client.PostAsJsonAsync($"/api/account/watchlist", request);
 
             response.StatusCode.Should().Be(HttpStatusCode.OK);
-            response.Content.Should().BeEquivalentTo(new StatusDto { StatusCode = 13, Success = true });
+            var result = await response.Content.ReadFromJsonAsync<StatusDto>();
+            result.Should().NotBeNull();
+            result!.Success.Should().BeTrue();
+            result.StatusCode.Should().Be(13);
         }
 
         [Fact]
@@ -70,7 +85,10 @@ namespace Tests.Integration.Api.Account
             var response = await _client.PostAsJsonAsync($"/api/account/watchlist", request);
 
             response.StatusCode.Should().Be(HttpStatusCode.OK);
-            response.Content.Should().BeEquivalentTo(new StatusDto { StatusCode = 13, Success = true });
+            var result = await response.Content.ReadFromJsonAsync<StatusDto>();
+            result.Should().NotBeNull();
+            result!.Success.Should().BeTrue();
+            result.StatusCode.Should().Be(13);
         }
 
         [Fact]
@@ -80,7 +98,10 @@ namespace Tests.Integration.Api.Account
             var response = await _client.PostAsJsonAsync($"/api/account/watchlist", request);
 
             response.StatusCode.Should().Be(HttpStatusCode.OK);
-            response.Content.Should().BeEquivalentTo(new StatusDto { StatusCode = 13, Success = true });
+            var result = await response.Content.ReadFromJsonAsync<StatusDto>();
+            result.Should().NotBeNull();
+            result!.Success.Should().BeTrue();
+            result.StatusCode.Should().Be(13);
         }
     }
 }

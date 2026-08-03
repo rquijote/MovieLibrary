@@ -62,5 +62,41 @@ namespace Api.Controllers
                 StatusMessage = tmdb?.StatusMessage ?? "Status Message not found."
             });
         }
+
+        [HttpGet("favourite/movies")]
+        public async Task<IActionResult> GetFavoriteMovies()
+        {
+            throw new NotImplementedException();
+        }
+
+        [HttpGet("favourite/tv")]
+        public async Task<IActionResult> GetFavoriteTVShows()
+        {
+            throw new NotImplementedException();
+        }
+
+        [HttpGet("watchlist/movies")]
+        public async Task<IActionResult> GetWatchlistMovies()
+        {
+            throw new NotImplementedException();
+        }
+
+        [HttpGet("watchlist/tv")]
+        public async Task<IActionResult> GetWatchlistTVShows()
+        {
+            throw new NotImplementedException();
+        }
+
+        [HttpGet("rated/movies")]
+        public async Task<IActionResult> GetRatedMovies()
+        {
+            throw new NotImplementedException();
+        }
+
+        [HttpGet("rated/tv")]
+        public async Task<IActionResult> GetRatedTVShows()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
