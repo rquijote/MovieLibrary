@@ -3,7 +3,7 @@ using System.Net.Http.Json;
 using Api.Controllers.Dto.Status;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Application.Models.Dto;
+using Application.Models.Dto.Requests;
 
 namespace Tests.Integration.Api.Details
 {

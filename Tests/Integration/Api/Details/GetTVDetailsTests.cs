@@ -3,7 +3,7 @@ using FluentAssertions;
 using System.Net;
 using System.Net.Http.Json;
 using Api.Controllers.Dto.Status;
-using Application.Models.Dto;
+using Application.Models.Dto.Requests;
 
 namespace Tests.Integration.Api.Movies
 {

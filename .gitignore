@@ -211,3 +211,4 @@ FakesAssemblies/
 
 # Temporary Blazor
 /Blazor
+Api/.env

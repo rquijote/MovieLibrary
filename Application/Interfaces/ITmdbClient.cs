@@ -1,5 +1,5 @@
 ﻿using Application.Enums;
-using Application.Models.Dto;
+using Application.Models.Dto.Requests;
 
 namespace Application.Interfaces
 {

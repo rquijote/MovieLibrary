@@ -1,4 +1,4 @@
-namespace Application.Models.Dto
+namespace Application.Models.Dto.Requests
 {
     public sealed record MovieSummaryDto
     {
