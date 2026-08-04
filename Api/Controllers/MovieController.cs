@@ -9,7 +9,8 @@ namespace Api.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetMovieById(int id)
         {
-            throw new NotImplementedException();
+
+            return Ok();
         }
     }
 }

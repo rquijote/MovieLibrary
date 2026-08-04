@@ -3,7 +3,6 @@ using Application.Models.Dto.Requests;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http.Headers;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace Api.Controllers
 {

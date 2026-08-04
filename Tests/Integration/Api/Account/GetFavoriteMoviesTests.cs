@@ -92,6 +92,5 @@ namespace Tests.Integration.Api.Account
             removeResult!.Success.Should().BeTrue();
             removeResult.StatusCode.Should().Be(13);
         }
-        }
     }
 }

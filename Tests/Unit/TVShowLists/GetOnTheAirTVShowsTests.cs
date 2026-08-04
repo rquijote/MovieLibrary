@@ -27,12 +27,12 @@ namespace Tests.Unit.TVShowLists
                 ]
             };
 
-            var tmdbClientMock = new Mock<ITmdbClient>();
-            tmdbClientMock
+            var tvShowListsClientMock = new Mock<ITVShowListsClient>();
+            tvShowListsClientMock
                 .Setup(x => x.GetOnTheAirTVShowsAsync(1))
                 .ReturnsAsync(expected);
 
-            var result = await tmdbClientMock.Object.GetOnTheAirTVShowsAsync();
+            var result = await tvShowListsClientMock.Object.GetOnTheAirTVShowsAsync();
 
             result.Should().NotBeNull();
             result.TVShows.Should().NotBeNull().And.HaveCount(10).And.BeEquivalentTo(expected.TVShows);
@@ -57,12 +57,12 @@ namespace Tests.Unit.TVShowLists
                 ]
             };
 
-            var tmdbClientMock = new Mock<ITmdbClient>();
-            tmdbClientMock
+            var tvShowListsClientMock = new Mock<ITVShowListsClient>();
+            tvShowListsClientMock
                 .Setup(x => x.GetOnTheAirTVShowsAsync(2))
                 .ReturnsAsync(expected);
 
-            var result = await tmdbClientMock.Object.GetOnTheAirTVShowsAsync(2);
+            var result = await tvShowListsClientMock.Object.GetOnTheAirTVShowsAsync(2);
 
             result.Should().NotBeNull();
             result.TVShows.Should().NotBeNull().And.HaveCount(9).And.BeEquivalentTo(expected.TVShows);

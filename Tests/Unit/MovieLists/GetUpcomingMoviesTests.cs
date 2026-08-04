@@ -33,12 +33,12 @@ namespace Tests.Unit.MovieLists
                 ]
             };
 
-            var tmdbClientMock = new Mock<ITmdbClient>();
-            tmdbClientMock
+            var movieListsClientMock = new Mock<IMovieListsClient>();
+            movieListsClientMock
                 .Setup(x => x.GetUpcomingMoviesAsync(1))
                 .ReturnsAsync(expected);
 
-            var result = await tmdbClientMock.Object.GetUpcomingMoviesAsync();
+            var result = await movieListsClientMock.Object.GetUpcomingMoviesAsync();
 
             result.Should().NotBeNull();
             result.Movies.Should().NotBeNull().And.HaveCount(16).And.BeEquivalentTo(expected.Movies);
@@ -68,12 +68,12 @@ namespace Tests.Unit.MovieLists
                 ]
             };
 
-            var tmdbClientMock = new Mock<ITmdbClient>();
-            tmdbClientMock
+            var movieListsClientMock = new Mock<IMovieListsClient>();
+            movieListsClientMock
                 .Setup(x => x.GetUpcomingMoviesAsync(2))
                 .ReturnsAsync(expected);
 
-            var result = await tmdbClientMock.Object.GetUpcomingMoviesAsync(2);
+            var result = await movieListsClientMock.Object.GetUpcomingMoviesAsync(2);
 
             result.Should().NotBeNull();
             result.Movies.Should().NotBeNull().And.HaveCount(14).And.BeEquivalentTo(expected.Movies);

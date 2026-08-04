@@ -20,12 +20,12 @@ namespace Tests.Unit.Search
                 ]
             };
 
-            var tmdbClientMock = new Mock<ITmdbClient>();
-            tmdbClientMock
+            var searchClientMock = new Mock<ISearchClient>();
+            searchClientMock
                 .Setup(x => x.SearchMoviesAsync("star"))
                 .ReturnsAsync(expected);
 
-            var result = await tmdbClientMock.Object.SearchMoviesAsync("star");
+            var result = await searchClientMock.Object.SearchMoviesAsync("star");
 
             result.Should().NotBeNull();
             result.Movies.Should().NotBeNull().And.HaveCount(3).And.BeEquivalentTo(expected.Movies);
@@ -44,12 +44,12 @@ namespace Tests.Unit.Search
                 ]
             };
 
-            var tmdbClientMock = new Mock<ITmdbClient>();
-            tmdbClientMock
+            var searchClientMock = new Mock<ISearchClient>();
+            searchClientMock
                 .Setup(x => x.SearchMoviesAsync("rings"))
                 .ReturnsAsync(expected);
 
-            var result = await tmdbClientMock.Object.SearchMoviesAsync("rings");
+            var result = await searchClientMock.Object.SearchMoviesAsync("rings");
 
             result.Should().NotBeNull();
             result.Movies.Should().NotBeNull().And.HaveCount(3).And.BeEquivalentTo(expected.Movies);
@@ -74,17 +74,17 @@ namespace Tests.Unit.Search
                 ]
             };
 
-            var tmdbClientMock = new Mock<ITmdbClient>();
-            tmdbClientMock
+            var searchClientMock = new Mock<ISearchClient>();
+            searchClientMock
                 .Setup(x => x.SearchMoviesAsync("time"))
                 .ReturnsAsync(new TmdbSearchResponseDto { Movies = expected.Movies });
 
-            tmdbClientMock
+            searchClientMock
                 .Setup(x => x.SearchTVShowsAsync("time"))
                 .ReturnsAsync(new TmdbSearchResponseDto { TVShows = expected.TVShows });
 
-            var movieResult = await tmdbClientMock.Object.SearchMoviesAsync("time");
-            var tvResult = await tmdbClientMock.Object.SearchTVShowsAsync("time");
+            var movieResult = await searchClientMock.Object.SearchMoviesAsync("time");
+            var tvResult = await searchClientMock.Object.SearchTVShowsAsync("time");
 
             movieResult.Should().NotBeNull();
             movieResult.Movies.Should().NotBeNull().And.HaveCount(3).And.BeEquivalentTo(expected.Movies);
@@ -101,12 +101,12 @@ namespace Tests.Unit.Search
                 Movies = []
             };
 
-            var tmdbClientMock = new Mock<ITmdbClient>();
-            tmdbClientMock
+            var searchClientMock = new Mock<ISearchClient>();
+            searchClientMock
                 .Setup(x => x.SearchMoviesAsync("qqqqqqqqq"))
                 .ReturnsAsync(expected);
 
-            var result = await tmdbClientMock.Object.SearchMoviesAsync("qqqqqqqqq");
+            var result = await searchClientMock.Object.SearchMoviesAsync("qqqqqqqqq");
 
             result.Should().NotBeNull();
             result.Movies.Should().NotBeNull().And.BeEmpty();
@@ -120,12 +120,12 @@ namespace Tests.Unit.Search
                 Movies = []
             };
 
-            var tmdbClientMock = new Mock<ITmdbClient>();
-            tmdbClientMock
+            var searchClientMock = new Mock<ISearchClient>();
+            searchClientMock
                 .Setup(x => x.SearchMoviesAsync(""))
                 .ReturnsAsync(expected);
 
-            var result = await tmdbClientMock.Object.SearchMoviesAsync("");
+            var result = await searchClientMock.Object.SearchMoviesAsync("");
 
             result.Should().NotBeNull();
             result.Movies.Should().NotBeNull().And.BeEmpty();

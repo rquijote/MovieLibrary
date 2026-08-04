@@ -24,12 +24,12 @@ namespace Tests.Unit.Trending
                 ]
             };
 
-            var TmdbClientMock = new Mock<ITmdbClient>();
-            TmdbClientMock
+            var trendingClientMock = new Mock<ITrendingClient>();
+            trendingClientMock
                 .Setup(x => x.GetTrendingMoviesAsync(TimeWindow.Day))
                 .ReturnsAsync(expected);
 
-            var result = await TmdbClientMock.Object.GetTrendingMoviesAsync(TimeWindow.Day);
+            var result = await trendingClientMock.Object.GetTrendingMoviesAsync(TimeWindow.Day);
 
             result.Should().NotBeNull();
             result.Movies.Should().NotBeNull().And.HaveCount(6).And.BeEquivalentTo(expected.Movies);
@@ -50,12 +50,12 @@ namespace Tests.Unit.Trending
                 ]
             };
 
-            var TmdbClientMock = new Mock<ITmdbClient>();
-            TmdbClientMock
+            var trendingClientMock = new Mock<ITrendingClient>();
+            trendingClientMock
                 .Setup(x => x.GetTrendingMoviesAsync(TimeWindow.Week))
                 .ReturnsAsync(expected);
 
-            var result = await TmdbClientMock.Object.GetTrendingMoviesAsync(TimeWindow.Week);
+            var result = await trendingClientMock.Object.GetTrendingMoviesAsync(TimeWindow.Week);
 
             result.Should().NotBeNull();
             result.Movies.Should().NotBeNull().And.HaveCount(5).And.BeEquivalentTo(expected.Movies);

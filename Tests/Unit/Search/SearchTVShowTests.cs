@@ -20,12 +20,12 @@ namespace Tests.Unit.Search
                 ]
             };
 
-            var tmdbClientMock = new Mock<ITmdbClient>();
-            tmdbClientMock
+            var searchClientMock = new Mock<ISearchClient>();
+            searchClientMock
                 .Setup(x => x.SearchTVShowsAsync("house"))
                 .ReturnsAsync(expected);
 
-            var result = await tmdbClientMock.Object.SearchTVShowsAsync("house");
+            var result = await searchClientMock.Object.SearchTVShowsAsync("house");
 
             result.Should().NotBeNull();
             result.TVShows.Should().NotBeNull().And.HaveCount(3).And.BeEquivalentTo(expected.TVShows);
@@ -44,12 +44,12 @@ namespace Tests.Unit.Search
                 ]
             };
 
-            var tmdbClientMock = new Mock<ITmdbClient>();
-            tmdbClientMock
+            var searchClientMock = new Mock<ISearchClient>();
+            searchClientMock
                 .Setup(x => x.SearchTVShowsAsync("law"))
                 .ReturnsAsync(expected);
 
-            var result = await tmdbClientMock.Object.SearchTVShowsAsync("law");
+            var result = await searchClientMock.Object.SearchTVShowsAsync("law");
 
             result.Should().NotBeNull();
             result.TVShows.Should().NotBeNull().And.HaveCount(3).And.BeEquivalentTo(expected.TVShows);
@@ -63,12 +63,12 @@ namespace Tests.Unit.Search
                 TVShows = []
             };
 
-            var tmdbClientMock = new Mock<ITmdbClient>();
-            tmdbClientMock
+            var searchClientMock = new Mock<ISearchClient>();
+            searchClientMock
                 .Setup(x => x.SearchTVShowsAsync("qqqqqqqqq"))
                 .ReturnsAsync(expected);
 
-            var result = await tmdbClientMock.Object.SearchTVShowsAsync("qqqqqqqqq");
+            var result = await searchClientMock.Object.SearchTVShowsAsync("qqqqqqqqq");
 
             result.Should().NotBeNull();
             result.TVShows.Should().NotBeNull().And.BeEmpty();
@@ -82,12 +82,12 @@ namespace Tests.Unit.Search
                 TVShows = []
             };
 
-            var tmdbClientMock = new Mock<ITmdbClient>();
-            tmdbClientMock
+            var searchClientMock = new Mock<ISearchClient>();
+            searchClientMock
                 .Setup(x => x.SearchTVShowsAsync(""))
                 .ReturnsAsync(expected);
 
-            var result = await tmdbClientMock.Object.SearchTVShowsAsync("");
+            var result = await searchClientMock.Object.SearchTVShowsAsync("");
 
             result.Should().NotBeNull();
             result.TVShows.Should().NotBeNull().And.BeEmpty();

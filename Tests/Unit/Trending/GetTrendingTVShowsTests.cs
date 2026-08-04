@@ -24,12 +24,12 @@ namespace Tests.Unit.Trending
                 ]
             };
 
-            var TmdbClientMock = new Mock<ITmdbClient>();
-            TmdbClientMock
+            var trendingClientMock = new Mock<ITrendingClient>();
+            trendingClientMock
                 .Setup(x => x.GetTrendingTVShowsAsync(TimeWindow.Day))
                 .ReturnsAsync(expected);
 
-            var result = await TmdbClientMock.Object.GetTrendingTVShowsAsync(TimeWindow.Day);
+            var result = await trendingClientMock.Object.GetTrendingTVShowsAsync(TimeWindow.Day);
 
             result.Should().NotBeNull();
             result.TVShows.Should().NotBeNull().And.HaveCount(6).And.BeEquivalentTo(expected.TVShows);
@@ -53,12 +53,12 @@ namespace Tests.Unit.Trending
                 ]
             };
 
-            var TmdbClientMock = new Mock<ITmdbClient>();
-            TmdbClientMock
+            var trendingClientMock = new Mock<ITrendingClient>();
+            trendingClientMock
                 .Setup(x => x.GetTrendingTVShowsAsync(TimeWindow.Week))
                 .ReturnsAsync(expected);
 
-            var result = await TmdbClientMock.Object.GetTrendingTVShowsAsync(TimeWindow.Week);
+            var result = await trendingClientMock.Object.GetTrendingTVShowsAsync(TimeWindow.Week);
 
             result.Should().NotBeNull();
             result.TVShows.Should().NotBeNull().And.HaveCount(8).And.BeEquivalentTo(expected.TVShows);

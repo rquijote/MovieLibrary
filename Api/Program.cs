@@ -1,6 +1,8 @@
+using Api.Options;
 using DotNetEnv;
 
 Env.Load();
+
 var builder = WebApplication.CreateBuilder(args);
 
 var bearerToken = builder.Configuration["BEARER_TOKEN"];
@@ -13,6 +15,8 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.Configure<TmdbOptions>(builder.Configuration.GetSection("TMDB"));
 
 var app = builder.Build();
 
