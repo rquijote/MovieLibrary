@@ -1,4 +1,4 @@
-﻿using Api.Controllers.Dto.Status;
+﻿using Application.Models.Dto.Responses;
 using Application.Models.Dto.Requests;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http.Headers;
@@ -66,37 +66,38 @@ namespace Api.Controllers
         [HttpGet("favourite/movies")]
         public async Task<IActionResult> GetFavoriteMovies()
         {
-            throw new NotImplementedException();
+            // Add query aprams to this later.
+            var response = await _client.GetAsync("favorite/movies");
+            var listResult = await response.Content.ReadFromJsonAsync<MovieListResponseDto>();
+
+            return Ok(listResult);
         }
 
         [HttpGet("favourite/tv")]
         public async Task<IActionResult> GetFavoriteTVShows()
         {
-            throw new NotImplementedException();
+            var response = await _client.GetAsync("favorite/tv");
+            var listResult = await response.Content.ReadFromJsonAsync<TvShowListResponseDto>();
+
+            return Ok(listResult);
         }
 
         [HttpGet("watchlist/movies")]
         public async Task<IActionResult> GetWatchlistMovies()
         {
-            throw new NotImplementedException();
+            var response = await _client.GetAsync("watchlist/movies");
+            var listResult = await response.Content.ReadFromJsonAsync<MovieListResponseDto>();
+
+            return Ok(listResult);
         }
 
         [HttpGet("watchlist/tv")]
         public async Task<IActionResult> GetWatchlistTVShows()
         {
-            throw new NotImplementedException();
-        }
+            var response = await _client.GetAsync("watchlist/tv");
+            var listResult = await response.Content.ReadFromJsonAsync<TvShowListResponseDto>();
 
-        [HttpGet("rated/movies")]
-        public async Task<IActionResult> GetRatedMovies()
-        {
-            throw new NotImplementedException();
-        }
-
-        [HttpGet("rated/tv")]
-        public async Task<IActionResult> GetRatedTVShows()
-        {
-            throw new NotImplementedException();
+            return Ok(listResult);
         }
     }
 }

@@ -1,6 +1,6 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
-namespace Api.Controllers.Dto.Status
+namespace Application.Models.Dto.Responses
 {
     public sealed record StatusDto
     {

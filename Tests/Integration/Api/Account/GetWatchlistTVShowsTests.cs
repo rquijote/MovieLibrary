@@ -3,7 +3,7 @@ using Application.Models.Dto.Requests;
 using Microsoft.AspNetCore.Mvc.Testing;
 using FluentAssertions;
 using System.Net;
-using Api.Controllers.Dto.Status;
+using Application.Models.Dto.Responses;
 using Application.Enums;
 using Application.Enums;
 

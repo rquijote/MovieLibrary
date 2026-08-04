@@ -1,6 +1,6 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
-using Api.Controllers.Dto.Status;
+using Application.Models.Dto.Responses;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Application.Models.Dto.Requests;

@@ -3,8 +3,7 @@ using Application.Models.Dto.Requests;
 using Microsoft.AspNetCore.Mvc.Testing;
 using FluentAssertions;
 using System.Net;
-using Api.Controllers.Dto.Status;
-using Application.Enums;
+using Application.Models.Dto.Responses;
 using Application.Enums;
 
 namespace Tests.Integration.Api.Account
