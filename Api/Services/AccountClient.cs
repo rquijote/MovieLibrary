@@ -1,43 +1,68 @@
-using Api.Options;
 using Application.Interfaces;
 using Application.Models.Dto.Requests;
 using Application.Models.Dto.Responses;
-using Microsoft.Extensions.Options;
+using System.Text.Json;
 
 namespace Api.Services
 {
-    public sealed class AccountClient(HttpClient http, IOptions<TmdbOptions> options) : IAccountClient
+    public sealed class AccountClient(HttpClient http) : IAccountClient
     {
-        private readonly TmdbOptions _tmdb = options.Value;
+        private readonly HttpClient _http = http;
 
-        public Task<StatusDto> AddToWatchlistAsync(AddMediaWatchlistDto request)
+        public async Task<StatusDto> AddToWatchlistAsync(AddMediaWatchlistDto request)
         {
-            throw new NotImplementedException();
+            var response = await _http.PostAsJsonAsync("watchlist", request);
+            var body = await response.Content.ReadAsStringAsync();
+            var tmdb = JsonSerializer.Deserialize<StatusDto>(body);
+
+            return new StatusDto
+            {
+                Success = tmdb?.Success ?? false,
+                StatusCode = tmdb?.StatusCode ?? (int)response.StatusCode,
+                StatusMessage = tmdb?.StatusMessage ?? "Status Message not found."
+            };
         }
 
-        public Task<MovieListResponseDto> GetWatchlistMoviesAsync()
+        public async Task<MovieListResponseDto> GetWatchlistMoviesAsync()
         {
-            throw new NotImplementedException();
+            var response = await _http.GetAsync("watchlist/movies");
+            var listResult = await response.Content.ReadFromJsonAsync<MovieListResponseDto>();
+            return listResult ?? new MovieListResponseDto();
         }
 
-        public Task<TvShowListResponseDto> GetWatchlistTVShowsAsync()
+        public async Task<TvShowListResponseDto> GetWatchlistTVShowsAsync()
         {
-            throw new NotImplementedException();
+            var response = await _http.GetAsync("watchlist/tv");
+            var listResult = await response.Content.ReadFromJsonAsync<TvShowListResponseDto>();
+            return listResult ?? new TvShowListResponseDto();
         }
 
-        public Task<StatusDto> AddToFavoritesAsync(AddMediaFavoriteDto request)
+        public async Task<StatusDto> AddToFavoritesAsync(AddMediaFavoriteDto request)
         {
-            throw new NotImplementedException();
+            var response = await _http.PostAsJsonAsync("favorite", request);
+            var body = await response.Content.ReadAsStringAsync();
+            var tmdb = JsonSerializer.Deserialize<StatusDto>(body);
+
+            return new StatusDto
+            {
+                Success = tmdb?.Success ?? false,
+                StatusCode = tmdb?.StatusCode ?? (int)response.StatusCode,
+                StatusMessage = tmdb?.StatusMessage ?? "Status Message not found."
+            };
         }
 
-        public Task<MovieListResponseDto> GetFavoriteMoviesAsync()
+        public async Task<MovieListResponseDto> GetFavoriteMoviesAsync()
         {
-            throw new NotImplementedException();
+            var response = await _http.GetAsync("favorite/movies");
+            var listResult = await response.Content.ReadFromJsonAsync<MovieListResponseDto>();
+            return listResult ?? new MovieListResponseDto();
         }
 
-        public Task<TvShowListResponseDto> GetFavoriteTVShowsAsync()
+        public async Task<TvShowListResponseDto> GetFavoriteTVShowsAsync()
         {
-            throw new NotImplementedException();
+            var response = await _http.GetAsync("favorite/tv");
+            var listResult = await response.Content.ReadFromJsonAsync<TvShowListResponseDto>();
+            return listResult ?? new TvShowListResponseDto();
         }
     }
 }
