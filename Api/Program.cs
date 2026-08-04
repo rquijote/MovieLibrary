@@ -62,6 +62,26 @@ builder.Services.AddHttpClient<ITVShowListsClient, TVShowListsClient>((servicePr
     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", bearerTokenValue);
 });
 
+// MovieDetailsClient - for getting individual movie details
+builder.Services.AddHttpClient<IMovieDetailsClient, MovieDetailsClient>((serviceProvider, client) =>
+{
+    var config = serviceProvider.GetRequiredService<IConfiguration>();
+    var bearerTokenValue = config["BEARER_TOKEN"] ?? "";
+
+    client.BaseAddress = new Uri($"{tmdbBaseUrl}movie/");
+    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", bearerTokenValue);
+});
+
+// TVDetailsClient - for getting individual TV show details
+builder.Services.AddHttpClient<ITVDetailsClient, TVDetailsClient>((serviceProvider, client) =>
+{
+    var config = serviceProvider.GetRequiredService<IConfiguration>();
+    var bearerTokenValue = config["BEARER_TOKEN"] ?? "";
+
+    client.BaseAddress = new Uri($"{tmdbBaseUrl}tv/");
+    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", bearerTokenValue);
+});
+
 // AccountClient - for favorites and watchlist
 builder.Services.AddHttpClient<IAccountClient, AccountClient>((serviceProvider, client) =>
 {

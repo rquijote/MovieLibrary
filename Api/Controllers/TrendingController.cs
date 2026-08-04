@@ -1,21 +1,27 @@
+using Application.Enums;
+using Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class TrendingController : ControllerBase
+    public class TrendingController(ITrendingClient trendingClient) : ControllerBase
     {
+        private readonly ITrendingClient _trendingClient = trendingClient;
+
         [HttpGet("movies")]
         public async Task<IActionResult> GetTrendingMovies()
         {
-            throw new NotImplementedException();
+            var result = await _trendingClient.GetTrendingMoviesAsync(TimeWindow.Day);
+            return Ok(result);
         }
 
         [HttpGet("tv")]
         public async Task<IActionResult> GetTrendingTv()
         {
-            throw new NotImplementedException();
+            var result = await _trendingClient.GetTrendingTVShowsAsync(TimeWindow.Day);
+            return Ok(result);
         }
     }
 }
