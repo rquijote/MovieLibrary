@@ -1,13 +1,16 @@
+using Api.Services;
 using Application.Interfaces;
+using Application.Models.Dto.Responses;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class TvController(ITVShowListsClient tvShowListsClient) : ControllerBase
+    public class TvController(ITVShowListsClient tvShowListsClient, ITvShowClient tvShowClient) : ControllerBase
     {
         private readonly ITVShowListsClient _tvShowListsClient = tvShowListsClient;
+        private readonly ITvShowClient _tvShowClient = tvShowClient;
 
         [HttpGet("airing-today")]
         public async Task<IActionResult> GetAiringToday([FromQuery] int page = 1)
@@ -40,7 +43,15 @@ namespace Api.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetTvShowById(int id)
         {
-            throw new NotImplementedException("TV show details endpoint not yet implemented");
+            try
+            {
+                var result = await _tvShowClient.GetTvShowById(id);
+                return Ok(result);
+            } 
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new StatusDto { Success = false, StatusCode = 34, StatusMessage = ex.Message });
+            }
         }
     }
 }
