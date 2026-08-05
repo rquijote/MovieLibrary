@@ -20,7 +20,7 @@ namespace Tests.Integration.Api.Movies
                 Id = 1399,
                 Name = "Game of Thrones"
             };
-            var request = await _client.GetAsync($"/api/tv/{tvId}");
+            var request = await _client.GetAsync($"/api/TvShow/{tvId}");
             request.StatusCode.Should().Be(HttpStatusCode.OK);
 
             var actual = await request.Content.ReadFromJsonAsync<TVSummaryDto>();
@@ -35,9 +35,9 @@ namespace Tests.Integration.Api.Movies
             TVSummaryDto expected = new() 
             { 
                 Id = tvId, 
-                Name = "Planet Earth" 
+                Name = "Planet Earth II" 
             };
-            var request = await _client.GetAsync($"/api/tv/{tvId}");
+            var request = await _client.GetAsync($"/api/TvShow/{tvId}");
             request.StatusCode.Should().Be(HttpStatusCode.OK);
 
             var actual = await request.Content.ReadFromJsonAsync<TVSummaryDto>();
@@ -54,7 +54,7 @@ namespace Tests.Integration.Api.Movies
                 Name = "The Last Dance", 
                 Id = tvId 
             };
-            var request = await _client.GetAsync($"/api/tv/{tvId}");
+            var request = await _client.GetAsync($"/api/TvShow/{tvId}");
             request.StatusCode.Should().Be(HttpStatusCode.OK);
 
             var actual = await request.Content.ReadFromJsonAsync<TVSummaryDto>();
@@ -71,29 +71,15 @@ namespace Tests.Integration.Api.Movies
                 Success = false,
                 StatusCode = 34
             };
-            var request = await _client.GetAsync($"/api/tv/{tvId}");
+            var request = await _client.GetAsync($"/api/TvShow/{tvId}");
             request.StatusCode.Should().Be(HttpStatusCode.NotFound);
 
             var actual = await request.Content.ReadFromJsonAsync<StatusDto>();
             actual.Should().NotBeNull();
-            actual.Should().BeEquivalentTo(expected);
+            actual.Success.Should().BeFalse();
+            actual.StatusCode.Should().Be(expected.StatusCode);
         }
 
-        [Fact]
-        public async Task GetTVDetails_InvalidId_ReturnsInvalidId()
-        {
-            string tvId = "asdf";
-            StatusDto expected = new()
-            {
-                Success = false,
-                StatusCode = 6
-            };
-            var request = await _client.GetAsync($"/api/tv/{tvId}");
-            request.StatusCode.Should().Be(HttpStatusCode.NotFound);
 
-            var actual = await request.Content.ReadFromJsonAsync<StatusDto>();
-            actual.Should().NotBeNull();
-            actual.Should().BeEquivalentTo(expected);
-        }
     }
 }

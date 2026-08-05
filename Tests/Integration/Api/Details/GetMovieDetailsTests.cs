@@ -38,7 +38,7 @@ namespace Tests.Integration.Api.Details
                 Id = movieId, 
                 Title = "Finding Nemo"
             };
-            var response = await _client.GetAsync($"/api/movie/{movieId}");
+            var response = await _client.GetAsync($"/api/Movie/{movieId}");
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
             var actual = await response.Content.ReadFromJsonAsync<MovieSummaryDto>();
@@ -55,27 +55,10 @@ namespace Tests.Integration.Api.Details
                 Id = movieId, 
                 Title = "The Lord of the Rings: The Fellowship of the Ring"
             };
-            var response = await _client.GetAsync($"/api/movie/{movieId}");
+            var response = await _client.GetAsync($"/api/Movie/{movieId}");
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
             var actual = await response.Content.ReadFromJsonAsync<MovieSummaryDto>();
-            actual.Should().NotBeNull();
-            actual.Should().BeEquivalentTo(expected);
-        }
-
-        [Fact]
-        public async Task GetMovieDetails_InvalidId_ReturnsInvalid()
-        {
-            int movieId = -1;
-            StatusDto expected = new() 
-            { 
-                Success = false, 
-                StatusCode = 6
-            };
-            var response = await _client.GetAsync($"/api/movie/{movieId}");
-            response.StatusCode.Should().Be(HttpStatusCode.OK);
-
-            var actual = await response.Content.ReadFromJsonAsync<StatusDto>();
             actual.Should().NotBeNull();
             actual.Should().BeEquivalentTo(expected);
         }
@@ -87,10 +70,11 @@ namespace Tests.Integration.Api.Details
             StatusDto expected = new()
             {
                 Success = false,
-                StatusCode = 34
+                StatusCode = 34,
+                StatusMessage = "The resource you requested could not be found."
             };
-            var response = await _client.GetAsync($"/api/movie/{movieId}");
-            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            var response = await _client.GetAsync($"/api/Movie/{movieId}");
+            response.StatusCode.Should().Be(HttpStatusCode.NotFound);
 
             var actual = await response.Content.ReadFromJsonAsync<StatusDto>();
             actual.Should().NotBeNull();

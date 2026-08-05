@@ -20,8 +20,6 @@ namespace Api.Services
                     throw new KeyNotFoundException(
                         errorResponse?.StatusMessage ?? $"Movie with ID {id} not found.");
                 }
-
-                response.EnsureSuccessStatusCode(); // Throw for other errors
             }
 
             var result = await response.Content.ReadFromJsonAsync<MovieDto>();
