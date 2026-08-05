@@ -9,28 +9,28 @@ namespace Api.Services
 
         public async Task<MovieListResponseDto> GetNowPlayingMoviesAsync(int page = 1)
         {
-            var response = await _http.GetAsync("now_playing");
+            var response = await _http.GetAsync($"now_playing?page={page}");
             var result = await response.Content.ReadFromJsonAsync<MovieListResponseDto>();
             return result ?? new MovieListResponseDto();
         }
 
         public async Task<MovieListResponseDto> GetPopularMoviesAsync(int page = 1)
         {
-            var response = await _http.GetAsync("popular");
+            var response = await _http.GetAsync($"popular?page={page}");
             var result = await response.Content.ReadFromJsonAsync<MovieListResponseDto>();
             return result ?? new MovieListResponseDto();
         }
 
         public async Task<MovieListResponseDto> GetTopRatedMoviesAsync(int page = 1)
         {
-            var response = await _http.GetAsync("top_rated");
+            var response = await _http.GetAsync($"top_rated?page={page}");
             var result = await response.Content.ReadFromJsonAsync<MovieListResponseDto>();
             return result ?? new MovieListResponseDto();
         }
 
         public async Task<MovieListResponseDto> GetUpcomingMoviesAsync(int page = 1)
         {
-            var response = await _http.GetAsync("upcoming");
+            var response = await _http.GetAsync($"upcoming?page={page}");
             var result = await response.Content.ReadFromJsonAsync<MovieListResponseDto>();
             return result ?? new MovieListResponseDto();
         }

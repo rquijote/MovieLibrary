@@ -62,7 +62,7 @@ namespace Tests.Unit.TVShowLists
                 .Setup(x => x.GetAiringTodayTVShowsAsync(2))
                 .ReturnsAsync(expected);
 
-            var result = await tv ShowListsClientMock.Object.GetAiringTodayTVShowsAsync(2);
+            var result = await tvShowListsClientMock.Object.GetAiringTodayTVShowsAsync(2);
 
             result.Should().NotBeNull();
             result.Results.Should().NotBeNull().And.HaveCount(8).And.BeEquivalentTo(expected.Results);

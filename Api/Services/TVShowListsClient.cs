@@ -7,24 +7,32 @@ namespace Api.Services
     {
         private readonly HttpClient _http = http;
 
-        public Task<TvShowListResponseDto> GetAiringTodayTVShowsAsync(int page = 1)
+        public async Task<TvShowListResponseDto> GetAiringTodayTVShowsAsync(int page = 1)
         {
-            throw new NotImplementedException();
+            var response = await _http.GetAsync($"airing_today?page={page}");
+            var result = await response.Content.ReadFromJsonAsync<TvShowListResponseDto>();
+            return result ?? new TvShowListResponseDto();
         }
 
-        public Task<TvShowListResponseDto> GetOnTheAirTVShowsAsync(int page = 1)
+        public async Task<TvShowListResponseDto> GetOnTheAirTVShowsAsync(int page = 1)
         {
-            throw new NotImplementedException();
+            var response = await _http.GetAsync($"on_the_air?page={page}");
+            var result = await response.Content.ReadFromJsonAsync<TvShowListResponseDto>();
+            return result ?? new TvShowListResponseDto();
         }
 
-        public Task<TvShowListResponseDto> GetPopularTVShowsAsync(int page = 1)
+        public async Task<TvShowListResponseDto> GetPopularTVShowsAsync(int page = 1)
         {
-            throw new NotImplementedException();
+            var response = await _http.GetAsync($"popular?page={page}");
+            var result = await response.Content.ReadFromJsonAsync<TvShowListResponseDto>();
+            return result ?? new TvShowListResponseDto();
         }
 
-        public Task<TvShowListResponseDto> GetTopRatedTVShowsAsync(int page = 1)
+        public async Task<TvShowListResponseDto> GetTopRatedTVShowsAsync(int page = 1)
         {
-            throw new NotImplementedException();
+            var response = await _http.GetAsync($"top_rated?page={page}");
+            var result = await response.Content.ReadFromJsonAsync<TvShowListResponseDto>();
+            return result ?? new TvShowListResponseDto();
         }
     }
 }

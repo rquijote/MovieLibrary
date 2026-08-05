@@ -8,14 +8,18 @@ namespace Api.Services
     {
         private readonly HttpClient _http = http;
 
-        public Task<MovieListResponseDto> GetTrendingMoviesAsync(TimeWindow timeWindow)
+        public async Task<MovieListResponseDto> GetTrendingMoviesAsync(TimeWindow timeWindow)
         {
-            throw new NotImplementedException();
+            var response = await _http.GetAsync($"movie/{timeWindow}");
+            var result = await response.Content.ReadFromJsonAsync<MovieListResponseDto>();
+            return result ?? new MovieListResponseDto();
         }
 
-        public Task<TvShowListResponseDto> GetTrendingTVShowsAsync(TimeWindow timeWindow)
+        public async Task<TvShowListResponseDto> GetTrendingTVShowsAsync(TimeWindow timeWindow)
         {
-            throw new NotImplementedException();
+            var response = await _http.GetAsync($"tv/{timeWindow}");
+            var result = await response.Content.ReadFromJsonAsync<TvShowListResponseDto>();
+            return result ?? new TvShowListResponseDto();
         }
     }
 }

@@ -15,9 +15,11 @@ namespace Api.Services
             return result ?? new MovieListResponseDto();
         }
 
-        public Task<TvShowListResponseDto> SearchTVShowsAsync(string query)
+        public async Task<TvShowListResponseDto> SearchTVShowsAsync(string query)
         {
-            throw new NotImplementedException();
+            var response = await _http.GetAsync($"tv?query={query}");
+            var result = await response.Content.ReadFromJsonAsync<TvShowListResponseDto>();
+            return result ?? new TvShowListResponseDto();
         }
     }
 }

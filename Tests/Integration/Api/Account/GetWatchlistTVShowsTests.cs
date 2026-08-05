@@ -5,7 +5,6 @@ using FluentAssertions;
 using System.Net;
 using Application.Models.Dto.Responses;
 using Application.Enums;
-using Application.Enums;
 
 namespace Tests.Integration.Api.Account
 {
