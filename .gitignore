@@ -209,6 +209,5 @@ FakesAssemblies/
 # JetBrains Rider
 *.sln.iml
 
-# Temporary Blazor
-/Blazor
+# .env file
 Api/.env
