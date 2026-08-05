@@ -73,6 +73,26 @@ builder.Services.AddHttpClient<IAccountClient, AccountClient>((serviceProvider, 
     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", bearerTokenValue);
 });
 
+// MovieClient - for only a single movie
+builder.Services.AddHttpClient<IMovieClient, MovieClient>((serviceProvider, client) =>
+{
+    var config = serviceProvider.GetRequiredService<IConfiguration>();
+    var bearerTokenValue = config["BEARER_TOKEN"] ?? "";
+
+    client.BaseAddress = new Uri($"{tmdbBaseUrl}movie/");
+    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", bearerTokenValue);
+});
+
+// TvShowClient - for only a single tv show
+builder.Services.AddHttpClient<ITvShowClient, TvShowClient>((serviceProvider, client) =>
+{
+    var config = serviceProvider.GetRequiredService<IConfiguration>();
+    var bearerTokenValue = config["BEARER_TOKEN"] ?? "";
+
+    client.BaseAddress = new Uri($"{tmdbBaseUrl}tv/");
+    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", bearerTokenValue);
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

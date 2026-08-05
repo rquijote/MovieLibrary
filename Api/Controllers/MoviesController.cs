@@ -5,9 +5,10 @@ namespace Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class MoviesController(IMovieListsClient movieListsClient) : ControllerBase
+    public class MoviesController(IMovieListsClient movieListsClient, IMovieClient movieClient) : ControllerBase
     {
         private readonly IMovieListsClient _movieListsClient = movieListsClient;
+        private readonly IMovieClient _movieClient = movieClient;
 
         [HttpGet("now-playing")]
         public async Task<IActionResult> GetNowPlaying([FromQuery] int page = 1)
@@ -35,6 +36,25 @@ namespace Api.Controllers
         {
             var result = await _movieListsClient.GetUpcomingMoviesAsync(page);
             return Ok(result);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetMovieById(int id)
+        {
+            try
+            {
+                var result = await _movieClient.GetMovieById(id);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new 
+                { 
+                    success = false,
+                    status_code = 34,
+                    status_message = ex.Message
+                });
+            }
         }
     }
 }

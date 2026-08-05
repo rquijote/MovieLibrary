@@ -40,7 +40,6 @@ namespace Api.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetTvShowById(int id)
         {
-            // TODO: This might need a separate detail client/endpoint
             throw new NotImplementedException("TV show details endpoint not yet implemented");
         }
     }
