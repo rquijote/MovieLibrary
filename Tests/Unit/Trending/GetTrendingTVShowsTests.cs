@@ -1,5 +1,6 @@
 using Application.Interfaces;
 using Application.Models.Dto.Requests;
+using Application.Models.Dto.Responses;
 using Application.Enums;
 using Moq;
 using FluentAssertions;
@@ -11,9 +12,9 @@ namespace Tests.Unit.Trending
         [Fact]
         public async Task GetTrendingTVShowsAsync_WithDayQuery_ReturnsMatchingShows()
         {
-            var expected = new TmdbSearchResponseDto
+            var expected = new TvShowListResponseDto
             {
-                TVShows =
+                Results =
                 [
                     new() { Id = 271016, Name = "Mystic Nine" },
                     new() { Id = 103516, Name = "Star Trek: Strange New Worlds" },
@@ -24,7 +25,7 @@ namespace Tests.Unit.Trending
                 ]
             };
 
-            var trendingClientMock = new Mock<ITrendingClient>();
+            var trendingClientMock =new Mock<ITrendingClient>();
             trendingClientMock
                 .Setup(x => x.GetTrendingTVShowsAsync(TimeWindow.Day))
                 .ReturnsAsync(expected);
@@ -32,15 +33,15 @@ namespace Tests.Unit.Trending
             var result = await trendingClientMock.Object.GetTrendingTVShowsAsync(TimeWindow.Day);
 
             result.Should().NotBeNull();
-            result.TVShows.Should().NotBeNull().And.HaveCount(6).And.BeEquivalentTo(expected.TVShows);
+            result.Results.Should().NotBeNull().And.HaveCount(6).And.BeEquivalentTo(expected.Results);
         }
 
         [Fact]
         public async Task GetTrendingTVShowsAsync_WithWeekQuery_ReturnsMatchingShows()
         {
-            var expected = new TmdbSearchResponseDto
+            var expected = new TvShowListResponseDto
             {
-                TVShows =
+                Results =
                 [
                     new() { Id = 94997, Name = "House of the Dragon" },
                     new() { Id = 103516, Name = "Star Trek: Strange New Worlds" },
@@ -61,7 +62,7 @@ namespace Tests.Unit.Trending
             var result = await trendingClientMock.Object.GetTrendingTVShowsAsync(TimeWindow.Week);
 
             result.Should().NotBeNull();
-            result.TVShows.Should().NotBeNull().And.HaveCount(8).And.BeEquivalentTo(expected.TVShows);
+            result.Results.Should().NotBeNull().And.HaveCount(8).And.BeEquivalentTo(expected.Results);
         }
     }
 }

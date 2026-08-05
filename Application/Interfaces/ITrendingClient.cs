@@ -1,11 +1,11 @@
 using Application.Enums;
-using Application.Models.Dto.Requests;
+using Application.Models.Dto.Responses;
 
 namespace Application.Interfaces
 {
     public interface ITrendingClient
     {
-        Task<TmdbSearchResponseDto> GetTrendingMoviesAsync(TimeWindow timeWindow);
-        Task<TmdbSearchResponseDto> GetTrendingTVShowsAsync(TimeWindow timeWindow);
+        Task<MovieListResponseDto> GetTrendingMoviesAsync(TimeWindow timeWindow);
+        Task<TvShowListResponseDto> GetTrendingTVShowsAsync(TimeWindow timeWindow);
     }
 }

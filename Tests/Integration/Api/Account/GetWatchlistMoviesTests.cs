@@ -24,10 +24,10 @@ namespace Tests.Integration.Api.Account
             var getResponse = await _client.GetAsync($"/api/account/watchlist/movies");
             getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            var watchlist = await getResponse.Content.ReadFromJsonAsync<TmdbSearchResponseDto>();
+            var watchlist = await getResponse.Content.ReadFromJsonAsync<MovieListResponseDto>();
             watchlist.Should().NotBeNull();
-            watchlist!.Movies.Should().NotBeNull();
-            watchlist.Movies.Should().ContainSingle(m => m.Id == 11 && m.Title == "Star Wars");
+            watchlist!.Results.Should().NotBeNull();
+            watchlist.Results.Should().ContainSingle(m => m.Id == 11 && m.Title == "Star Wars");
 
             // Remove Star Wars from watchlist
             var removeRequest = new AddMediaWatchlistDto { Media = MediaType.movie, MediaId = 11, AddToList = false };
@@ -48,10 +48,10 @@ namespace Tests.Integration.Api.Account
             var getResponse = await _client.GetAsync($"/api/account/watchlist/movies");
             getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            var watchlist = await getResponse.Content.ReadFromJsonAsync<TmdbSearchResponseDto>();
+            var watchlist = await getResponse.Content.ReadFromJsonAsync<MovieListResponseDto>();
             watchlist.Should().NotBeNull();
-            watchlist!.Movies.Should().NotBeNull();
-            watchlist.Movies.Should().ContainSingle(m => m.Id == 155 && m.Title == "The Dark Knight");
+            watchlist!.Results.Should().NotBeNull();
+            watchlist.Results.Should().ContainSingle(m => m.Id == 155 && m.Title == "The Dark Knight");
 
             // Remove The Dark Knight from watchlist
             var removeRequest = new AddMediaWatchlistDto { Media = MediaType.movie, MediaId = 155, AddToList = false };
@@ -72,10 +72,10 @@ namespace Tests.Integration.Api.Account
             var getResponse = await _client.GetAsync($"/api/account/watchlist/movies");
             getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            var watchlist = await getResponse.Content.ReadFromJsonAsync<TmdbSearchResponseDto>();
+            var watchlist = await getResponse.Content.ReadFromJsonAsync<MovieListResponseDto>();
             watchlist.Should().NotBeNull();
-            watchlist!.Movies.Should().NotBeNull();
-            watchlist.Movies.Should().ContainSingle(m => m.Id == 335977 && m.Title == "Indiana Jones and the Dial of Destiny");
+            watchlist!.Results.Should().NotBeNull();
+            watchlist.Results.Should().ContainSingle(m => m.Id == 335977 && m.Title == "Indiana Jones and the Dial of Destiny");
 
             // Remove Indiana Jones from watchlist
             var removeRequest = new AddMediaWatchlistDto { Media = MediaType.movie, MediaId = 335977, AddToList = false };

@@ -1,5 +1,5 @@
 using Application.Interfaces;
-using Application.Models.Dto.Requests;
+using Application.Models.Dto.Responses;
 
 namespace Api.Services
 {
@@ -7,24 +7,32 @@ namespace Api.Services
     {
         private readonly HttpClient _http = http;
 
-        public Task<TmdbSearchResponseDto> GetNowPlayingMoviesAsync(int page = 1)
+        public async Task<MovieListResponseDto> GetNowPlayingMoviesAsync(int page = 1)
         {
-            throw new NotImplementedException();
+            var response = await _http.GetAsync("now_playing");
+            var result = await response.Content.ReadFromJsonAsync<MovieListResponseDto>();
+            return result ?? new MovieListResponseDto();
         }
 
-        public Task<TmdbSearchResponseDto> GetPopularMoviesAsync(int page = 1)
+        public async Task<MovieListResponseDto> GetPopularMoviesAsync(int page = 1)
         {
-            throw new NotImplementedException();
+            var response = await _http.GetAsync("popular");
+            var result = await response.Content.ReadFromJsonAsync<MovieListResponseDto>();
+            return result ?? new MovieListResponseDto();
         }
 
-        public Task<TmdbSearchResponseDto> GetTopRatedMoviesAsync(int page = 1)
+        public async Task<MovieListResponseDto> GetTopRatedMoviesAsync(int page = 1)
         {
-            throw new NotImplementedException();
+            var response = await _http.GetAsync("top_rated");
+            var result = await response.Content.ReadFromJsonAsync<MovieListResponseDto>();
+            return result ?? new MovieListResponseDto();
         }
 
-        public Task<TmdbSearchResponseDto> GetUpcomingMoviesAsync(int page = 1)
+        public async Task<MovieListResponseDto> GetUpcomingMoviesAsync(int page = 1)
         {
-            throw new NotImplementedException();
+            var response = await _http.GetAsync("upcoming");
+            var result = await response.Content.ReadFromJsonAsync<MovieListResponseDto>();
+            return result ?? new MovieListResponseDto();
         }
     }
 }

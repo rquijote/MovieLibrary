@@ -1,10 +1,10 @@
-using Application.Models.Dto.Requests;
+using Application.Models.Dto.Responses;
 
 namespace Application.Interfaces
 {
     public interface ISearchClient
     {
-        Task<TmdbSearchResponseDto> SearchMoviesAsync(string query);
-        Task<TmdbSearchResponseDto> SearchTVShowsAsync(string query);
+        Task<MovieListResponseDto> SearchMoviesAsync(string query);
+        Task<TvShowListResponseDto> SearchTVShowsAsync(string query);
     }
 }

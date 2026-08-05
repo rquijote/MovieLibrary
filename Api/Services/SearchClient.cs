@@ -1,5 +1,6 @@
 using Application.Interfaces;
-using Application.Models.Dto.Requests;
+using Application.Models.Dto.Responses;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Services
 {
@@ -7,12 +8,14 @@ namespace Api.Services
     {
         private readonly HttpClient _http = http;
 
-        public Task<TmdbSearchResponseDto> SearchMoviesAsync(string query)
+        public async Task<MovieListResponseDto> SearchMoviesAsync([FromQuery] string query)
         {
-            throw new NotImplementedException();
+            var response = await _http.GetAsync($"movie?query={query}");
+            var result = await response.Content.ReadFromJsonAsync<MovieListResponseDto>();
+            return result ?? new MovieListResponseDto();
         }
 
-        public Task<TmdbSearchResponseDto> SearchTVShowsAsync(string query)
+        public Task<TvShowListResponseDto> SearchTVShowsAsync(string query)
         {
             throw new NotImplementedException();
         }

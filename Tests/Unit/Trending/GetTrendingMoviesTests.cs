@@ -1,5 +1,6 @@
 ﻿using Application.Interfaces;
 using Application.Models.Dto.Requests;
+using Application.Models.Dto.Responses;
 using Application.Enums;
 using Moq;
 using FluentAssertions;
@@ -11,9 +12,9 @@ namespace Tests.Unit.Trending
         [Fact]
         public async Task GetTrendingMoviesAsync_WithDayQuery_ReturnsMatchingMovies()
         {
-            var expected = new TmdbSearchResponseDto
+            var expected = new MovieListResponseDto
             {
-                Movies =
+                Results =
                 [
                     new() { Id = 934433, Title = "Scream VI" },
                     new() { Id = 868759, Title = "Ghosted" },
@@ -32,15 +33,15 @@ namespace Tests.Unit.Trending
             var result = await trendingClientMock.Object.GetTrendingMoviesAsync(TimeWindow.Day);
 
             result.Should().NotBeNull();
-            result.Movies.Should().NotBeNull().And.HaveCount(6).And.BeEquivalentTo(expected.Movies);
+            result.Results.Should().NotBeNull().And.HaveCount(6).And.BeEquivalentTo(expected.Results);
         }
 
         [Fact]
         public async Task GetTrendingMoviesAsync_WithWeekQuery_ReturnsMatchingMovies()
         {
-            var expected = new TmdbSearchResponseDto
+            var expected = new MovieListResponseDto
             {
-                Movies =
+                Results =
                 [
                     new() { Id = 969681, Title = "Spider-Man: Brand New Day" },
                     new() { Id = 1081003, Title = "Supergirl" },
@@ -58,7 +59,7 @@ namespace Tests.Unit.Trending
             var result = await trendingClientMock.Object.GetTrendingMoviesAsync(TimeWindow.Week);
 
             result.Should().NotBeNull();
-            result.Movies.Should().NotBeNull().And.HaveCount(5).And.BeEquivalentTo(expected.Movies);
+            result.Results.Should().NotBeNull().And.HaveCount(5).And.BeEquivalentTo(expected.Results);
         }
     }
 }

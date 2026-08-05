@@ -1,6 +1,6 @@
 using Application.Enums;
 using Application.Interfaces;
-using Application.Models.Dto.Requests;
+using Application.Models.Dto.Responses;
 
 namespace Api.Services
 {
@@ -8,12 +8,12 @@ namespace Api.Services
     {
         private readonly HttpClient _http = http;
 
-        public Task<TmdbSearchResponseDto> GetTrendingMoviesAsync(TimeWindow timeWindow)
+        public Task<MovieListResponseDto> GetTrendingMoviesAsync(TimeWindow timeWindow)
         {
             throw new NotImplementedException();
         }
 
-        public Task<TmdbSearchResponseDto> GetTrendingTVShowsAsync(TimeWindow timeWindow)
+        public Task<TvShowListResponseDto> GetTrendingTVShowsAsync(TimeWindow timeWindow)
         {
             throw new NotImplementedException();
         }

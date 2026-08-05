@@ -1,5 +1,6 @@
 using Application.Interfaces;
 using Application.Models.Dto.Requests;
+using Application.Models.Dto.Responses;
 using Moq;
 using FluentAssertions;
 
@@ -10,9 +11,9 @@ namespace Tests.Unit.TVShowLists
         [Fact]
         public async Task GetOnTheAirTVShowsAsync_WithDefaultPage_ReturnsMatchingShows()
         {
-            var expected = new TmdbSearchResponseDto
+            var expected = new TvShowListResponseDto
             {
-                TVShows =
+                Results =
                 [
                     new() { Id = 94997, Name = "House of the Dragon" },
                     new() { Id = 125988, Name = "Silo" },
@@ -35,15 +36,15 @@ namespace Tests.Unit.TVShowLists
             var result = await tvShowListsClientMock.Object.GetOnTheAirTVShowsAsync();
 
             result.Should().NotBeNull();
-            result.TVShows.Should().NotBeNull().And.HaveCount(10).And.BeEquivalentTo(expected.TVShows);
+            result.Results.Should().NotBeNull().And.HaveCount(10).And.BeEquivalentTo(expected.Results);
         }
 
         [Fact]
         public async Task GetOnTheAirTVShowsAsync_WithSpecificPage_ReturnsMatchingShows()
         {
-            var expected = new TmdbSearchResponseDto
+            var expected = new TvShowListResponseDto
             {
-                TVShows =
+                Results =
                 [
                     new() { Id = 4656, Name = "Raw" },
                     new() { Id = 65701, Name = "Good Mythical Morning" },
@@ -65,7 +66,7 @@ namespace Tests.Unit.TVShowLists
             var result = await tvShowListsClientMock.Object.GetOnTheAirTVShowsAsync(2);
 
             result.Should().NotBeNull();
-            result.TVShows.Should().NotBeNull().And.HaveCount(9).And.BeEquivalentTo(expected.TVShows);
+            result.Results.Should().NotBeNull().And.HaveCount(9).And.BeEquivalentTo(expected.Results);
         }
     }
 }

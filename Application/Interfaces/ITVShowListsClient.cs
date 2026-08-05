@@ -1,12 +1,12 @@
-using Application.Models.Dto.Requests;
+using Application.Models.Dto.Responses;
 
 namespace Application.Interfaces
 {
     public interface ITVShowListsClient
     {
-        Task<TmdbSearchResponseDto> GetAiringTodayTVShowsAsync(int page = 1);
-        Task<TmdbSearchResponseDto> GetOnTheAirTVShowsAsync(int page = 1);
-        Task<TmdbSearchResponseDto> GetPopularTVShowsAsync(int page = 1);
-        Task<TmdbSearchResponseDto> GetTopRatedTVShowsAsync(int page = 1);
+        Task<TvShowListResponseDto> GetAiringTodayTVShowsAsync(int page = 1);
+        Task<TvShowListResponseDto> GetOnTheAirTVShowsAsync(int page = 1);
+        Task<TvShowListResponseDto> GetPopularTVShowsAsync(int page = 1);
+        Task<TvShowListResponseDto> GetTopRatedTVShowsAsync(int page = 1);
     }
 }

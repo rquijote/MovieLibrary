@@ -1,5 +1,6 @@
 using Application.Interfaces;
 using Application.Models.Dto.Requests;
+using Application.Models.Dto.Responses;
 using FluentAssertions;
 using Moq;
 
@@ -10,9 +11,9 @@ namespace Tests.Unit.Search
         [Fact]
         public async Task SearchTVShowsAsync_WithHouseQuery_ReturnsMatchingShows()
         {
-            var expected = new TmdbSearchResponseDto
+            var expected = new TvShowListResponseDto
             {
-                TVShows =
+                Results =
                 [
                     new() { Id = 1408, Name = "House"},
                     new() { Id = 94997, Name = "House of the Dragon"},
@@ -28,15 +29,15 @@ namespace Tests.Unit.Search
             var result = await searchClientMock.Object.SearchTVShowsAsync("house");
 
             result.Should().NotBeNull();
-            result.TVShows.Should().NotBeNull().And.HaveCount(3).And.BeEquivalentTo(expected.TVShows);
+            result.Results.Should().NotBeNull().And.HaveCount(3).And.BeEquivalentTo(expected.Results);
         }
 
         [Fact] 
         public async Task SearchTVShowsAsync_WithLawQuery_ReturnsMatchingShows()
         {
-            var expected = new TmdbSearchResponseDto
+            var expected = new TvShowListResponseDto
             {
-                TVShows =
+                Results =
                 [
                     new() { Id = 549, Name = "Law & Order"},
                     new() { Id = 2734, Name = "Law & Order: Special Victims Unit"},
@@ -52,15 +53,15 @@ namespace Tests.Unit.Search
             var result = await searchClientMock.Object.SearchTVShowsAsync("law");
 
             result.Should().NotBeNull();
-            result.TVShows.Should().NotBeNull().And.HaveCount(3).And.BeEquivalentTo(expected.TVShows);
+            result.Results.Should().NotBeNull().And.HaveCount(3).And.BeEquivalentTo(expected.Results);
         }
 
         [Fact]
         public async Task SearchTVShowsAsync_WithNoMatchingQuery_ReturnsEmptyResults()
         {
-            var expected = new TmdbSearchResponseDto
+            var expected = new TvShowListResponseDto
             {
-                TVShows = []
+                Results = []
             };
 
             var searchClientMock = new Mock<ISearchClient>();
@@ -71,15 +72,15 @@ namespace Tests.Unit.Search
             var result = await searchClientMock.Object.SearchTVShowsAsync("qqqqqqqqq");
 
             result.Should().NotBeNull();
-            result.TVShows.Should().NotBeNull().And.BeEmpty();
+            result.Results.Should().NotBeNull().And.BeEmpty();
         }
 
         [Fact]
         public async Task SearchTVShowsAsync_WithEmptyQuery_ReturnsEmptyResults()
         {
-            var expected = new TmdbSearchResponseDto
+            var expected = new TvShowListResponseDto
             {
-                TVShows = []
+                Results = []
             };
 
             var searchClientMock = new Mock<ISearchClient>();
@@ -90,7 +91,7 @@ namespace Tests.Unit.Search
             var result = await searchClientMock.Object.SearchTVShowsAsync("");
 
             result.Should().NotBeNull();
-            result.TVShows.Should().NotBeNull().And.BeEmpty();
+            result.Results.Should().NotBeNull().And.BeEmpty();
         }
     }
 }

@@ -1,5 +1,6 @@
 using Application.Interfaces;
 using Application.Models.Dto.Requests;
+using Application.Models.Dto.Responses;
 using Moq;
 using FluentAssertions;
 
@@ -10,9 +11,9 @@ namespace Tests.Unit.TVShowLists
         [Fact]
         public async Task GetPopularTVShowsAsync_WithDefaultPage_ReturnsMatchingShows()
         {
-            var expected = new TmdbSearchResponseDto
+            var expected = new TvShowListResponseDto
             {
-                TVShows =
+                Results =
                 [
                     new() { Id = 94997, Name = "House of the Dragon" },
                     new() { Id = 5920, Name = "The Mentalist" },
@@ -39,15 +40,15 @@ namespace Tests.Unit.TVShowLists
             var result = await tvShowListsClientMock.Object.GetPopularTVShowsAsync();
 
             result.Should().NotBeNull();
-            result.TVShows.Should().NotBeNull().And.HaveCount(14).And.BeEquivalentTo(expected.TVShows);
+            result.Results.Should().NotBeNull().And.HaveCount(14).And.BeEquivalentTo(expected.Results);
         }
 
         [Fact]
         public async Task GetPopularTVShowsAsync_WithSpecificPage_ReturnsMatchingShows()
         {
-            var expected = new TmdbSearchResponseDto
+            var expected = new TvShowListResponseDto
             {
-                TVShows =
+                Results =
                 [
                     new() { Id = 4057, Name = "Criminal Minds" },
                     new() { Id = 63770, Name = "The Late Show with Stephen Colbert" },
@@ -75,7 +76,7 @@ namespace Tests.Unit.TVShowLists
             var result = await tvShowListsClientMock.Object.GetPopularTVShowsAsync(2);
 
             result.Should().NotBeNull();
-            result.TVShows.Should().NotBeNull().And.HaveCount(15).And.BeEquivalentTo(expected.TVShows);
+            result.Results.Should().NotBeNull().And.HaveCount(15).And.BeEquivalentTo(expected.Results);
         }
     }
 }

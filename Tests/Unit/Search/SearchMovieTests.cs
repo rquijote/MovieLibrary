@@ -1,5 +1,5 @@
 ﻿using Application.Interfaces;
-using Application.Models.Dto.Requests;
+using Application.Models.Dto.Responses;
 using FluentAssertions;
 using Moq;
 
@@ -10,9 +10,9 @@ namespace Tests.Unit.Search
         [Fact]
         public async Task SearchMoviesAsync_WithStarQuery_ReturnsMatchingMovies()
         {
-            var expected = new TmdbSearchResponseDto
+            var expected = new MovieListResponseDto
             {
-                Movies = 
+                Results = 
                 [
                     new() { Id = 11, Title = "Star Wars" },
                     new() { Id = 1255778, Title = "Lucky Star" },
@@ -28,15 +28,15 @@ namespace Tests.Unit.Search
             var result = await searchClientMock.Object.SearchMoviesAsync("star");
 
             result.Should().NotBeNull();
-            result.Movies.Should().NotBeNull().And.HaveCount(3).And.BeEquivalentTo(expected.Movies);
+            result.Results.Should().NotBeNull().And.HaveCount(3).And.BeEquivalentTo(expected.Results);
         }
 
         [Fact]
         public async Task SearchMoviesAsync_WithRingsQuery_ReturnsMatchingMovies()
         {
-            var expected = new TmdbSearchResponseDto
+            var expected = new MovieListResponseDto
             {
-                Movies = 
+                Results = 
                 [
                     new() { Id = 122, Title = "The Lord of the Rings: The Return of the King" },
                     new() { Id = 120, Title = "The Lord of the Rings: The Fellowship of the Ring" },
@@ -52,21 +52,25 @@ namespace Tests.Unit.Search
             var result = await searchClientMock.Object.SearchMoviesAsync("rings");
 
             result.Should().NotBeNull();
-            result.Movies.Should().NotBeNull().And.HaveCount(3).And.BeEquivalentTo(expected.Movies);
+            result.Results.Should().NotBeNull().And.HaveCount(3).And.BeEquivalentTo(expected.Results);
         }
 
         [Fact]
         public async Task SearchTVAndMoviesAsync_WithTimeQuery_ReturnBothMatchingMedia()
         {
-            var expected = new TmdbSearchResponseDto
+            var expectedMovies = new MovieListResponseDto
             {
-                Movies = 
+                Results = 
                 [
                     new() { Id = 122906, Title = "About Time" },
                     new() { Id = 429200, Title = "Good Time" },
                     new() { Id = 49530, Title = "In Time" }
-                ],
-                TVShows = 
+                ]
+            };
+
+            var expectedTV = new TvShowListResponseDto
+            {
+                Results = 
                 [
                     new() { Id = 44701, Name = "Adventure Time" },
                     new() { Id = 13354, Name = "Question Time" },
@@ -77,28 +81,28 @@ namespace Tests.Unit.Search
             var searchClientMock = new Mock<ISearchClient>();
             searchClientMock
                 .Setup(x => x.SearchMoviesAsync("time"))
-                .ReturnsAsync(new TmdbSearchResponseDto { Movies = expected.Movies });
+                .ReturnsAsync(expectedMovies);
 
             searchClientMock
                 .Setup(x => x.SearchTVShowsAsync("time"))
-                .ReturnsAsync(new TmdbSearchResponseDto { TVShows = expected.TVShows });
+                .ReturnsAsync(expectedTV);
 
             var movieResult = await searchClientMock.Object.SearchMoviesAsync("time");
             var tvResult = await searchClientMock.Object.SearchTVShowsAsync("time");
 
             movieResult.Should().NotBeNull();
-            movieResult.Movies.Should().NotBeNull().And.HaveCount(3).And.BeEquivalentTo(expected.Movies);
+            movieResult.Results.Should().NotBeNull().And.HaveCount(3).And.BeEquivalentTo(expectedMovies.Results);
 
             tvResult.Should().NotBeNull();
-            tvResult.TVShows.Should().NotBeNull().And.HaveCount(3).And.BeEquivalentTo(expected.TVShows);
+            tvResult.Results.Should().NotBeNull().And.HaveCount(3).And.BeEquivalentTo(expectedTV.Results);
         }
 
         [Fact]
         public async Task SearchMoviesAsync_WithNoMatchingQuery_ReturnsEmptyResults()
         {
-            var expected = new TmdbSearchResponseDto
+            var expected = new MovieListResponseDto
             {
-                Movies = []
+                Results = []
             };
 
             var searchClientMock = new Mock<ISearchClient>();
@@ -109,15 +113,15 @@ namespace Tests.Unit.Search
             var result = await searchClientMock.Object.SearchMoviesAsync("qqqqqqqqq");
 
             result.Should().NotBeNull();
-            result.Movies.Should().NotBeNull().And.BeEmpty();
+            result.Results.Should().NotBeNull().And.BeEmpty();
         }
 
         [Fact]
         public async Task SearchMoviesAsync_WithEmptyQuery_ReturnsEmptyResults()
         {
-            var expected = new TmdbSearchResponseDto
+            var expected = new MovieListResponseDto
             {
-                Movies = []
+                Results = []
             };
 
             var searchClientMock = new Mock<ISearchClient>();
@@ -128,7 +132,7 @@ namespace Tests.Unit.Search
             var result = await searchClientMock.Object.SearchMoviesAsync("");
 
             result.Should().NotBeNull();
-            result.Movies.Should().NotBeNull().And.BeEmpty();
+            result.Results.Should().NotBeNull().And.BeEmpty();
         }
     }
 }

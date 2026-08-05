@@ -1,5 +1,6 @@
 using Application.Interfaces;
 using Application.Models.Dto.Requests;
+using Application.Models.Dto.Responses;
 using Moq;
 using FluentAssertions;
 
@@ -10,9 +11,9 @@ namespace Tests.Unit.TVShowLists
         [Fact]
         public async Task GetAiringTodayTVShowsAsync_WithDefaultPage_ReturnsMatchingShows()
         {
-            var expected = new TmdbSearchResponseDto
+            var expected = new TvShowListResponseDto
             {
-                TVShows =
+                Results =
                 [
                     new() { Id = 125988, Name = "Silo" },
                     new() { Id = 22980, Name = "Watch What Happens Live with Andy Cohen" },
@@ -35,15 +36,15 @@ namespace Tests.Unit.TVShowLists
             var result = await tvShowListsClientMock.Object.GetAiringTodayTVShowsAsync();
 
             result.Should().NotBeNull();
-            result.TVShows.Should().NotBeNull().And.HaveCount(10).And.BeEquivalentTo(expected.TVShows);
+            result.Results.Should().NotBeNull().And.HaveCount(10).And.BeEquivalentTo(expected.Results);
         }
 
         [Fact]
         public async Task GetAiringTodayTVShowsAsync_WithSpecificPage_ReturnsMatchingShows()
         {
-            var expected = new TmdbSearchResponseDto
+            var expected = new TvShowListResponseDto
             {
-                TVShows =
+                Results =
                 [
                     new() { Id = 1685, Name = "Project Runway" },
                     new() { Id = 1871, Name = "EastEnders" },
@@ -61,10 +62,10 @@ namespace Tests.Unit.TVShowLists
                 .Setup(x => x.GetAiringTodayTVShowsAsync(2))
                 .ReturnsAsync(expected);
 
-            var result = await tvShowListsClientMock.Object.GetAiringTodayTVShowsAsync(2);
+            var result = await tv ShowListsClientMock.Object.GetAiringTodayTVShowsAsync(2);
 
             result.Should().NotBeNull();
-            result.TVShows.Should().NotBeNull().And.HaveCount(8).And.BeEquivalentTo(expected.TVShows);
+            result.Results.Should().NotBeNull().And.HaveCount(8).And.BeEquivalentTo(expected.Results);
         }
     }
 }

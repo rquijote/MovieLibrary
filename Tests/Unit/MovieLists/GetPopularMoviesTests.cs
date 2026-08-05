@@ -1,5 +1,6 @@
 using Application.Interfaces;
 using Application.Models.Dto.Requests;
+using Application.Models.Dto.Responses;
 using Moq;
 using FluentAssertions;
 
@@ -10,9 +11,9 @@ namespace Tests.Unit.MovieLists
         [Fact]
         public async Task GetPopularMoviesAsync_WithDefaultPage_ReturnsMatchingMovies()
         {
-            var expected = new TmdbSearchResponseDto
+            var expected = new MovieListResponseDto
             {
-                Movies =
+                Results =
                 [
                     new() { Id = 640146, Title = "Ant-Man and the Wasp: Quantumania" },
                     new() { Id = 502356, Title = "The Super Mario Bros. Movie" },
@@ -42,15 +43,15 @@ namespace Tests.Unit.MovieLists
             var result = await movieListsClientMock.Object.GetPopularMoviesAsync();
 
             result.Should().NotBeNull();
-            result.Movies.Should().NotBeNull().And.HaveCount(17).And.BeEquivalentTo(expected.Movies);
+            result.Results.Should().NotBeNull().And.HaveCount(17).And.BeEquivalentTo(expected.Results);
         }
 
         [Fact]
         public async Task GetPopularMoviesAsync_WithSpecificPage_ReturnsMatchingMovies()
         {
-            var expected = new TmdbSearchResponseDto
+            var expected = new MovieListResponseDto
             {
-                Movies =
+                Results =
                 [
                     new() { Id = 1273221, Title = "Scary Movie" },
                     new() { Id = 1314481, Title = "The Devil Wears Prada 2" },
@@ -77,7 +78,7 @@ namespace Tests.Unit.MovieLists
             var result = await movieListsClientMock.Object.GetPopularMoviesAsync(2);
 
             result.Should().NotBeNull();
-            result.Movies.Should().NotBeNull().And.HaveCount(14).And.BeEquivalentTo(expected.Movies);
+            result.Results.Should().NotBeNull().And.HaveCount(14).And.BeEquivalentTo(expected.Results);
         }
     }
 }

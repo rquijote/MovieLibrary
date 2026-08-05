@@ -25,10 +25,10 @@ namespace Tests.Integration.Api.Account
             var getResponse = await _client.GetAsync($"/api/account/watchlist/tv");
             getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            var watchlist = await getResponse.Content.ReadFromJsonAsync<TmdbSearchResponseDto>();
+            var watchlist = await getResponse.Content.ReadFromJsonAsync<TvShowListResponseDto>();
             watchlist.Should().NotBeNull();
-            watchlist!.TVShows.Should().NotBeNull();
-            watchlist.TVShows.Should().ContainSingle(t => t.Id == 1399 && t.Name == "Game of Thrones");
+            watchlist!.Results.Should().NotBeNull();
+            watchlist.Results.Should().ContainSingle(t => t.Id == 1399 && t.Name == "Game of Thrones");
 
             // Remove Game of Thrones from watchlist
             var removeRequest = new AddMediaWatchlistDto { Media = MediaType.tv, MediaId = 1399, AddToList = false };
@@ -49,10 +49,10 @@ namespace Tests.Integration.Api.Account
             var getResponse = await _client.GetAsync($"/api/account/watchlist/tv");
             getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            var watchlist = await getResponse.Content.ReadFromJsonAsync<TmdbSearchResponseDto>();
+            var watchlist = await getResponse.Content.ReadFromJsonAsync<TvShowListResponseDto>();
             watchlist.Should().NotBeNull();
-            watchlist!.TVShows.Should().NotBeNull();
-            watchlist.TVShows.Should().ContainSingle(t => t.Id == 1396 && t.Name == "Breaking Bad");
+            watchlist!.Results.Should().NotBeNull();
+            watchlist.Results.Should().ContainSingle(t => t.Id == 1396 && t.Name == "Breaking Bad");
 
             // Remove Breaking Bad from watchlist
             var removeRequest = new AddMediaWatchlistDto { Media = MediaType.tv, MediaId = 1396, AddToList = false };
@@ -73,10 +73,10 @@ namespace Tests.Integration.Api.Account
             var getResponse = await _client.GetAsync($"/api/account/watchlist/tv");
             getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            var watchlist = await getResponse.Content.ReadFromJsonAsync<TmdbSearchResponseDto>();
+            var watchlist = await getResponse.Content.ReadFromJsonAsync<TvShowListResponseDto>();
             watchlist.Should().NotBeNull();
-            watchlist!.TVShows.Should().NotBeNull();
-            watchlist.TVShows.Should().ContainSingle(t => t.Id == 1398 && t.Name == "The Sopranos");
+            watchlist!.Results.Should().NotBeNull();
+            watchlist.Results.Should().ContainSingle(t => t.Id == 1398 && t.Name == "The Sopranos");
 
             // Remove The Sopranos from watchlist
             var removeRequest = new AddMediaWatchlistDto { Media = MediaType.tv, MediaId = 1398, AddToList = false };

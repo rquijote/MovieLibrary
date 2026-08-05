@@ -1,5 +1,5 @@
 using Application.Interfaces;
-using Application.Models.Dto.Requests;
+using Application.Models.Dto.Responses;
 
 namespace Api.Services
 {
@@ -7,22 +7,22 @@ namespace Api.Services
     {
         private readonly HttpClient _http = http;
 
-        public Task<TmdbSearchResponseDto> GetAiringTodayTVShowsAsync(int page = 1)
+        public Task<TvShowListResponseDto> GetAiringTodayTVShowsAsync(int page = 1)
         {
             throw new NotImplementedException();
         }
 
-        public Task<TmdbSearchResponseDto> GetOnTheAirTVShowsAsync(int page = 1)
+        public Task<TvShowListResponseDto> GetOnTheAirTVShowsAsync(int page = 1)
         {
             throw new NotImplementedException();
         }
 
-        public Task<TmdbSearchResponseDto> GetPopularTVShowsAsync(int page = 1)
+        public Task<TvShowListResponseDto> GetPopularTVShowsAsync(int page = 1)
         {
             throw new NotImplementedException();
         }
 
-        public Task<TmdbSearchResponseDto> GetTopRatedTVShowsAsync(int page = 1)
+        public Task<TvShowListResponseDto> GetTopRatedTVShowsAsync(int page = 1)
         {
             throw new NotImplementedException();
         }
