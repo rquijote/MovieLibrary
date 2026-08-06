@@ -21,8 +21,8 @@ namespace Tests.Integration.Api.Account
             response.StatusCode.Should().Be(HttpStatusCode.OK);
             var result = await response.Content.ReadFromJsonAsync<StatusDto>();
             result.Should().NotBeNull();
-            result!.Success.Should().BeTrue();
-            result.StatusCode.Should().Be(1);
+            result!.StatusCode.Should().Be(1);
+            result.Success.Should().BeTrue();
         }
 
         [Fact]
@@ -34,8 +34,8 @@ namespace Tests.Integration.Api.Account
             response.StatusCode.Should().Be(HttpStatusCode.OK);
             var result = await response.Content.ReadFromJsonAsync<StatusDto>();
             result.Should().NotBeNull();
-            result!.Success.Should().BeTrue();
-            result.StatusCode.Should().Be(1);
+            result!.StatusCode.Should().Be(1);
+            result.Success.Should().BeTrue();
         }
 
         [Fact]
@@ -47,8 +47,8 @@ namespace Tests.Integration.Api.Account
             response.StatusCode.Should().Be(HttpStatusCode.OK);
             var result = await response.Content.ReadFromJsonAsync<StatusDto>();
             result.Should().NotBeNull();
-            result!.Success.Should().BeTrue();
-            result.StatusCode.Should().Be(1);
+            result!.StatusCode.Should().Be(1);
+            result.Success.Should().BeTrue();
         }
 
         [Fact]
@@ -60,8 +60,8 @@ namespace Tests.Integration.Api.Account
             response.StatusCode.Should().Be(HttpStatusCode.OK);
             var result = await response.Content.ReadFromJsonAsync<StatusDto>();
             result.Should().NotBeNull();
-            result!.Success.Should().BeFalse();
             result.StatusCode.Should().Be(34);
+            result.Success.Should().BeFalse();
         }
 
         [Fact]
@@ -73,8 +73,8 @@ namespace Tests.Integration.Api.Account
             response.StatusCode.Should().Be(HttpStatusCode.OK);
             var result = await response.Content.ReadFromJsonAsync<StatusDto>();
             result.Should().NotBeNull();
-            result!.Success.Should().BeTrue();
-            result.StatusCode.Should().Be(13);
+            result!.StatusCode.Should().Be(13);
+            result.Success.Should().BeTrue();
         }
 
         [Fact]
@@ -86,8 +86,8 @@ namespace Tests.Integration.Api.Account
             response.StatusCode.Should().Be(HttpStatusCode.OK);
             var result = await response.Content.ReadFromJsonAsync<StatusDto>();
             result.Should().NotBeNull();
-            result!.Success.Should().BeTrue();
-            result.StatusCode.Should().Be(13);
+            result!.StatusCode.Should().Be(13);
+            result.Success.Should().BeTrue();
         }
 
         [Fact]
@@ -99,8 +99,8 @@ namespace Tests.Integration.Api.Account
             response.StatusCode.Should().Be(HttpStatusCode.OK);
             var result = await response.Content.ReadFromJsonAsync<StatusDto>();
             result.Should().NotBeNull();
-            result!.Success.Should().BeTrue();
-            result.StatusCode.Should().Be(13);
+            result!.StatusCode.Should().Be(13);
+            result.Success.Should().BeTrue();
         }
     }
 }
