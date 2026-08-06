@@ -13,7 +13,7 @@ namespace Api.Controllers
         [HttpGet("movies")]
         public async Task<IActionResult> GetTrendingMovies([FromQuery] string timeWindow = "day")
         {
-            var window = timeWindow.ToLower() == "week" ? TimeWindow.Week : TimeWindow.Day;
+            var window = timeWindow == "week" ? TimeWindow.week : TimeWindow.day;
             var result = await _trendingClient.GetTrendingMoviesAsync(window);
             return Ok(result);
         }
@@ -21,7 +21,7 @@ namespace Api.Controllers
         [HttpGet("tv")]
         public async Task<IActionResult> GetTrendingTv([FromQuery] string timeWindow = "day")
         {
-            var window = timeWindow.ToLower() == "week" ? TimeWindow.Week : TimeWindow.Day;
+            var window = timeWindow == "week" ? TimeWindow.week : TimeWindow.day;
             var result = await _trendingClient.GetTrendingTVShowsAsync(window);
             return Ok(result);
         }

@@ -2,7 +2,7 @@
 {
     public enum TimeWindow
     {
-        Day,
-        Week
+        day,
+        week
     }
 }
