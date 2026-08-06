@@ -1,7 +1,28 @@
 ﻿@page "/"
+@page "/movies"
+@inject IHttpClientFactory HttpClientFactory
+@using Application.Models.Dto.Responses;
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Movies and TV homepage</PageTitle>
 
-<h1>Hello, world!</h1>
+@if (movies == null)
+{
+	<p>Loading...</p>
+} else
+{
+	<p>Page @movies.Page of @movies.TotalPages</p>
+	@foreach (var movie in movies.Results)
+	{
+		<div>@movie.Title</div>
+	}
+}
 
-Welcome to your new app.
+@code {
+	private MovieListResponseDto? movies;
+
+	protected override async Task OnInitializedAsync()
+	{
+		var client = HttpClientFactory.CreateClient("MovieLibraryApi");
+		movies = await client.GetFromJsonAsync<MovieListResponseDto>("/api/trending/movies");
+	}
+}
