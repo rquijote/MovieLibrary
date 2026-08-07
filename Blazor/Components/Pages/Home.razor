@@ -1,28 +1,64 @@
-﻿@page "/"
+@page "/"
 @page "/movies"
 @inject IHttpClientFactory HttpClientFactory
 @using Application.Models.Dto.Responses;
 
-<PageTitle>Movies and TV homepage</PageTitle>
+<PageTitle>Homepage</PageTitle>
 
-@if (movies == null)
+@if (watchlistMovies == null || watchlistTV == null)
 {
 	<p>Loading...</p>
 } else
 {
-	<p>Page @movies.Page of @movies.TotalPages</p>
-	@foreach (var movie in movies.Results)
+	<h3>Watchlist Movies</h3>
+	@foreach (var movie in watchlistMovies.Results)
 	{
-		<div>@movie.Title</div>
+		<div>@movie.Id: @movie.Title</div>
 	}
+	<p>Page @watchlistMovies.Page of @watchlistMovies.TotalPages</p>
+	<h3>Watchlist TV Shows</h3>
+
+	@foreach (var tv in watchlistTV.Results)
+	{
+		<div>@tv.Id: @tv.Name</div>
+	}
+	<p>Page @watchlistTV.Page of @watchlistTV.TotalPages</p>
+}
+
+<!-- TODO: Add Recommended Movies and TV Shows Here -->
+
+@if (trendingMovies == null || trendingTV == null)
+{
+	<p>Loading...</p>
+} else
+{
+	<h3>Trending Movies</h3>
+	@foreach (var movie in trendingMovies.Results)
+	{
+		<div>@movie.Id: @movie.Title</div>
+	}
+	<p>Page @trendingMovies.Page of @trendingMovies.TotalPages</p>
+	<h3>Trending TV Shows</h3>
+
+	@foreach (var tv in trendingTV.Results)
+	{
+		<div>@tv.Id: @tv.Name</div>
+	}
+	<p>Page @trendingTV.Page of @trendingTV.TotalPages</p>
 }
 
 @code {
-	private MovieListResponseDto? movies;
+	private MovieListResponseDto? watchlistMovies;
+	private TvShowListResponseDto? watchlistTV;
+	private MovieListResponseDto? trendingMovies;
+	private TvShowListResponseDto? trendingTV;
 
 	protected override async Task OnInitializedAsync()
 	{
 		var client = HttpClientFactory.CreateClient("MovieLibraryApi");
-		movies = await client.GetFromJsonAsync<MovieListResponseDto>("/api/trending/movies");
+		watchlistMovies = await client.GetFromJsonAsync<MovieListResponseDto>("/api/Account/watchlist/movies");
+		watchlistTV = await client.GetFromJsonAsync<TvShowListResponseDto>("/api/Account/watchlist/tv");
+		trendingMovies = await client.GetFromJsonAsync<MovieListResponseDto>("/api/trending/movies");
+		trendingTV = await client.GetFromJsonAsync<TvShowListResponseDto>("/api/trending/tv");
 	}
 }
