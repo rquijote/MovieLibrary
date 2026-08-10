@@ -1,0 +1,58 @@
+@page "/tvshows"
+@inject IHttpClientFactory HttpClientFactory
+@using Application.Models.Dto.Responses;
+
+<PageTitle>TV Shows</PageTitle>
+
+<h1>TV Shows</h1>
+
+@if (airingToday == null || onTheAir == null || popular == null || topRated == null)
+{
+	<p>Loading...</p>
+}
+else
+{
+	<h3>Airing Today</h3>
+	@foreach (var tv in airingToday.Results)
+	{
+		<div>@tv.Id: @tv.Name</div>
+	}
+	<p>Page @airingToday.Page of @airingToday.TotalPages</p>
+
+	<h3>On The Air</h3>
+	@foreach (var tv in onTheAir.Results)
+	{
+		<div>@tv.Id: @tv.Name</div>
+	}
+	<p>Page @onTheAir.Page of @onTheAir.TotalPages</p>
+
+	<h3>Popular</h3>
+	@foreach (var tv in popular.Results)
+	{
+		<div>@tv.Id: @tv.Name</div>
+	}
+	<p>Page @popular.Page of @popular.TotalPages</p>
+
+	<h3>Top Rated</h3>
+	@foreach (var tv in topRated.Results)
+	{
+		<div>@tv.Id: @tv.Name</div>
+	}
+	<p>Page @topRated.Page of @topRated.TotalPages</p>
+}
+
+@code {
+	private TvShowListResponseDto? airingToday;
+	private TvShowListResponseDto? onTheAir;
+	private TvShowListResponseDto? popular;
+	private TvShowListResponseDto? topRated;
+
+	protected override async Task OnInitializedAsync()
+	{
+		var client = HttpClientFactory.CreateClient("MovieLibraryApi");
+		airingToday = await client.GetFromJsonAsync<TvShowListResponseDto>("/api/tvshowlists/airing-today");
+		onTheAir = await client.GetFromJsonAsync<TvShowListResponseDto>("/api/tvshowlists/on-the-air");
+		popular = await client.GetFromJsonAsync<TvShowListResponseDto>("/api/tvshowlists/popular");
+		topRated = await client.GetFromJsonAsync<TvShowListResponseDto>("/api/tvshowlists/top-rated");
+	}
+}
