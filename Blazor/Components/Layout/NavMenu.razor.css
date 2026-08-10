@@ -1,1 +1,35 @@
 ﻿/* NavMenu styles */
+
+.top-row {
+    height: 60px;
+    background: rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+}
+
+.container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 0 1rem;
+}
+
+.navbar-brand {
+    color: white;
+    text-decoration: none;
+}
+
+.nav-menu {
+    display: flex;
+    gap: 1rem;
+}
+
+::deep .nav-link {
+    color: white;
+    text-decoration: none;
+}
+
+::deep .nav-link:hover {
+    opacity: 0.8;
+}

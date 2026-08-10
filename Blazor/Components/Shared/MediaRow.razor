@@ -1,0 +1,21 @@
+﻿@inject IHttpClientFactory http;
+@using Application.Models.Dto.Responses;
+
+<div class="media-row-container">
+	<div class="media-row">
+		@if (movies != null && tvs != null)
+		{
+			<p>ERROR: Movies and TVs shouldn't both have values.</p>
+		} 
+		else
+		{
+			
+		}
+	</div>
+</div>
+
+
+@code {
+	private MovieListResponseDto? movies;
+	private TvShowListResponseDto? tvs;
+}

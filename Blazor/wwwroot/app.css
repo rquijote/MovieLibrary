@@ -1,1 +1,4 @@
-﻿/* Your custom styles here */
+﻿* {
+    margin: 0;
+    padding: 0;
+}

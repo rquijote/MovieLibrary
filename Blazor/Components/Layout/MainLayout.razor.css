@@ -1,1 +1,4 @@
-/* MainLayout styles */
+.page {
+    background-color: black;
+    color: white;
+}

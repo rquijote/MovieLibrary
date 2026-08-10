@@ -1,8 +1,11 @@
 @page "/"
 @inject IHttpClientFactory HttpClientFactory
 @using Application.Models.Dto.Responses;
+@using Blazor.Components.Shared
 
 <PageTitle>Homepage</PageTitle>
+
+<MediaRow></MediaRow>
 
 @if (watchlistMovies == null || watchlistTV == null)
 {
