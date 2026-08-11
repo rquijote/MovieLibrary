@@ -1,0 +1,29 @@
+﻿@inject IHttpClientFactory http;
+@using Application.Models.Dto.Responses;
+
+<div class="media-row-container">
+	<div class="media-row">
+		@if (movies != null) 
+		{
+			@foreach (var movie in movies.Results)
+			{
+				<MediaRowItem title="@movie.Title"/>
+			}
+		} 
+		else if (tvs != null) 
+		{
+			@foreach (var tv in tvs.Results)
+			{
+				<MediaRowItem title="@tv.Name"/>
+			}
+		}
+	</div>
+</div>
+
+
+@code {
+	[Parameter]
+	public MovieListResponseDto? movies { get; set; }
+	[Parameter]
+	public TvShowListResponseDto? tvs { get; set; }
+}
