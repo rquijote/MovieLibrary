@@ -1,6 +1,17 @@
-﻿<p>@title</p>
+﻿<div class="media-row-item">
+	@if (posterPath != null)
+	{
+		<img src="https://image.tmdb.org/t/p/w185/@posterPath" alt="@title" />
+	} 
+	else
+	{
+		<img src="https://via.placeholder.com/185x278?text=No+Image" alt="@title" />
+	}
+</div>
 
 @code {
 	[Parameter]
 	public required string title { get; set; }
+	[Parameter]
+	public string? posterPath { get; set; }
 }

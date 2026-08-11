@@ -7,14 +7,14 @@
 		{
 			@foreach (var movie in movies.Results)
 			{
-				<MediaRowItem title="@movie.Title"/>
+				<MediaRowItem title="@movie.Title" posterPath="@movie.PosterPath"/>
 			}
 		} 
 		else if (tvs != null) 
 		{
 			@foreach (var tv in tvs.Results)
 			{
-				<MediaRowItem title="@tv.Name"/>
+				<MediaRowItem title="@tv.Name" posterPath="@tv.PosterPath"/>
 			}
 		}
 	</div>

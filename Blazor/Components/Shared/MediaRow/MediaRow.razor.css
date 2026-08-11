@@ -1,1 +1,18 @@
 /* CSS for MediaRow component */
+
+.media-row {
+	display: flex;
+	flex-direction: row;
+	gap: 16px;
+}
+
+.media-row-item {
+	width: 185px;
+	height: 278px;
+}
+
+.media-row-item img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
