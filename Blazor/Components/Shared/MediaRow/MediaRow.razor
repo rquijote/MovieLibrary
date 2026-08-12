@@ -1,10 +1,11 @@
 ﻿@inject IHttpClientFactory http;
 @using Application.Models.Dto.Responses;
+@inject NavigationManager Nav;
 
 <div class="media-row-container">
 	<div class="media-row-header">
 		<h3>@Title</h3>
-		<button class="view-more-btn">View More</button>
+		<button class="view-more-btn" @onclick="ViewMore">View More</button> <!-- Make this a bool if results is over a certain amount. -->
 	</div>
 	<div class="media-row">
 		@if (movies != null) 
@@ -32,4 +33,9 @@
 	public MovieListResponseDto? movies { get; set; }
 	[Parameter]
 	public TvShowListResponseDto? tvs { get; set; }
+
+	private void ViewMore()
+	{
+		Nav.NavigateTo("/view-more/type");
+	}
 }
