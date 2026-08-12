@@ -1,7 +1,27 @@
 /* CSS for MediaRow component */
 
-.media-row-container {
-	margin: 20px;
+.media-row-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.media-row-header h3 {
+	margin: 0;
+}
+
+.view-more-btn {
+	padding: 8px 16px;
+	background-color: black;
+	color: white;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 14px;
+}
+
+.view-more-btn:hover {
+	background-color: #333;
 }
 
 .media-row {

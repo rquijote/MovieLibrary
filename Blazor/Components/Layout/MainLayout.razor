@@ -1,15 +1,17 @@
 ﻿@inherits LayoutComponentBase
 
 <div class="page">
-    <header>
-        <NavMenu />
-    </header>
+    <div class="page-container">
+        <header>
+            <NavMenu />
+        </header>
 
-    <main>
-        <article class="content">
-            @Body
-        </article>
-    </main>
+        <main>
+            <article class="content">
+                @Body
+            </article>
+        </main>
+    </div>
 </div>
 <!--
     <div id="blazor-error-ui" data-nosnippet>

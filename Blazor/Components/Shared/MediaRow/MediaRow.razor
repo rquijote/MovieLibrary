@@ -2,7 +2,10 @@
 @using Application.Models.Dto.Responses;
 
 <div class="media-row-container">
-	<h3>@Title</h3>
+	<div class="media-row-header">
+		<h3>@Title</h3>
+		<button class="view-more-btn">View More</button>
+	</div>
 	<div class="media-row">
 		@if (movies != null) 
 		{
