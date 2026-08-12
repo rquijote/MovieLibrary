@@ -1,48 +1,24 @@
 @page "/movies"
 @inject IHttpClientFactory HttpClientFactory
 @using Application.Models.Dto.Responses;
+@using Blazor.Components.Shared.MediaRow;
 
 <PageTitle>Movies</PageTitle>
 
 <h1>Movies</h1>
 
-@if (nowPlaying == null || popular == null || topRated == null || upcoming == null)
+@if (popular == null || topRated == null || upcoming == null)
 {
 	<p>Loading...</p>
 }
 else
 {
-	<h3>Now Playing</h3>
-	@foreach (var movie in nowPlaying.Results)
-	{
-		<div>@movie.Id: @movie.Title</div>
-	}
-	<p>Page @nowPlaying.Page of @nowPlaying.TotalPages</p>
-
-	<h3>Popular</h3>
-	@foreach (var movie in popular.Results)
-	{
-		<div>@movie.Id: @movie.Title</div>
-	}
-	<p>Page @popular.Page of @popular.TotalPages</p>
-
-	<h3>Top Rated</h3>
-	@foreach (var movie in topRated.Results)
-	{
-		<div>@movie.Id: @movie.Title</div>
-	}
-	<p>Page @topRated.Page of @topRated.TotalPages</p>
-
-	<h3>Upcoming</h3>
-	@foreach (var movie in upcoming.Results)
-	{
-		<div>@movie.Id: @movie.Title</div>
-	}
-	<p>Page @upcoming.Page of @upcoming.TotalPages</p>
+	<MediaRow Title="Popular" movies="popular" />
+	<MediaRow Title="Top Rated" movies="topRated" />
+	<MediaRow Title="Upcoming" movies="upcoming" />
 }
 
 @code {
-	private MovieListResponseDto? nowPlaying;
 	private MovieListResponseDto? popular;
 	private MovieListResponseDto? topRated;
 	private MovieListResponseDto? upcoming;
@@ -50,7 +26,6 @@ else
 	protected override async Task OnInitializedAsync()
 	{
 		var client = HttpClientFactory.CreateClient("MovieLibraryApi");
-		nowPlaying = await client.GetFromJsonAsync<MovieListResponseDto>("/api/movielists/now-playing");
 		popular = await client.GetFromJsonAsync<MovieListResponseDto>("/api/movielists/popular");
 		topRated = await client.GetFromJsonAsync<MovieListResponseDto>("/api/movielists/top-rated");
 		upcoming = await client.GetFromJsonAsync<MovieListResponseDto>("/api/movielists/upcoming");

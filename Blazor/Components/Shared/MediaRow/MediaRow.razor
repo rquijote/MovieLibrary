@@ -2,6 +2,7 @@
 @using Application.Models.Dto.Responses;
 
 <div class="media-row-container">
+	<h3>@Title</h3>
 	<div class="media-row">
 		@if (movies != null) 
 		{
@@ -22,6 +23,8 @@
 
 
 @code {
+	[Parameter]
+	public required string Title { get; set; }
 	[Parameter]
 	public MovieListResponseDto? movies { get; set; }
 	[Parameter]

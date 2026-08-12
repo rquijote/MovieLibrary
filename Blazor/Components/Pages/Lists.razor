@@ -1,6 +1,7 @@
 @page "/lists"
 @inject IHttpClientFactory HttpClientFactory
 @using Application.Models.Dto.Responses;
+@using Blazor.Components.Shared.MediaRow
 
 <PageTitle>Lists</PageTitle>
 
@@ -12,19 +13,8 @@
 }
 else
 {
-	<h3>Favorite Movies</h3>
-	@foreach (var movie in favoriteMovies.Results)
-	{
-		<div>@movie.Id: @movie.Title</div>
-	}
-	<p>Page @favoriteMovies.Page of @favoriteMovies.TotalPages</p>
-
-	<h3>Favorite TV Shows</h3>
-	@foreach (var tv in favoriteTV.Results)
-	{
-		<div>@tv.Id: @tv.Name</div>
-	}
-	<p>Page @favoriteTV.Page of @favoriteTV.TotalPages</p>
+	<MediaRow Title="Favorite Movies" movies="favoriteMovies" />
+	<MediaRow Title="Favorite TV Shows" tvs="favoriteTV" />
 }
 
 @code {

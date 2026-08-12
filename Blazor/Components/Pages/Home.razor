@@ -13,11 +13,8 @@
 } 
 else
 {
-	<h3>Watchlist Movies</h3>
-	<MediaRow movies="watchlistMovies" />
-
-	<h3>Watchlist TV Shows</h3>
-	<MediaRow tvs="watchlistTV" />
+	<MediaRow Title="Watchlist Movies" movies="watchlistMovies" />
+	<MediaRow Title="Watchlist TV Shows" tvs="watchlistTV" />
 }
 
 <!-- TODO: Add Recommended Movies and TV Shows Here -->
@@ -28,11 +25,8 @@ else
 } 
 else
 {
-	<h3>Trending Movies</h3>
-	<MediaRow movies="trendingMovies" />
-
-	<h3>Trending TV Shows</h3>
-	<MediaRow tvs="trendingTV" />
+	<MediaRow Title="Trending Movies" movies="trendingMovies" />
+	<MediaRow Title="Trending TV Shows" tvs="trendingTV" />
 }
 
 @code {

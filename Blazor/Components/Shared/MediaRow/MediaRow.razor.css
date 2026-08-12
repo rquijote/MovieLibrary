@@ -1,5 +1,9 @@
 /* CSS for MediaRow component */
 
+.media-row-container {
+	margin: 20px;
+}
+
 .media-row {
 	display: flex;
 	flex-direction: row;
