@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @inject IHttpClientFactory HttpClientFactory
 @using Application.Models.Dto.Responses;
+@using static Blazor.Components.Enums;
 
 <PageTitle>Lists</PageTitle>
 
@@ -13,8 +14,8 @@
 }
 else
 {
-	<MediaRow Title="Favorite Movies" movies="favoriteMovies" />
-	<MediaRow Title="Favorite TV Shows" tvs="favoriteTV" />
+	<MediaRow Title="Favorite Movies" mediaType="MediaType.Movies" category="Category.Favorite" movies="favoriteMovies" />
+	<MediaRow Title="Favorite TV Shows" mediaType="MediaType.Tv" category="Category.Favorite" tvs="favoriteTV" />
 }
 
 @code {

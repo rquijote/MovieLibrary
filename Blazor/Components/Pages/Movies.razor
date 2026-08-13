@@ -3,6 +3,7 @@
 @inject IHttpClientFactory HttpClientFactory
 @using Application.Models.Dto.Responses;
 @using Blazor.Components.Shared.MediaRow;
+@using static Blazor.Components.Enums;
 
 <PageTitle>Movies</PageTitle>
 
@@ -14,9 +15,9 @@
 }
 else
 {
-	<MediaRow Title="Popular" movies="popular" />
-	<MediaRow Title="Top Rated" movies="topRated" />
-	<MediaRow Title="Upcoming" movies="upcoming" />
+	<MediaRow Title="Popular" mediaType="MediaType.Movies" category="Category.Popular" movies="popular" />
+	<MediaRow Title="Top Rated" mediaType="MediaType.Movies" category="Category.TopRated" movies="topRated" />
+	<MediaRow Title="Upcoming" mediaType="MediaType.Movies" category="Category.Upcoming" movies="upcoming" />
 }
 
 @code {

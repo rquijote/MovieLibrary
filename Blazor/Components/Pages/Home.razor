@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @inject IHttpClientFactory HttpClientFactory
 @using Application.Models.Dto.Responses;
+@using static Blazor.Components.Enums;
 
 <PageTitle>Homepage</PageTitle>
 
@@ -11,8 +12,8 @@
 } 
 else
 {
-	<MediaRow Title="Watchlist Movies" movies="watchlistMovies" />
-	<MediaRow Title="Watchlist TV Shows" tvs="watchlistTV" />
+	<MediaRow Title="Watchlist Movies" mediaType="MediaType.Movies" category="Category.Watchlist" movies="watchlistMovies" />
+	<MediaRow Title="Watchlist TV Shows" mediaType="MediaType.Tv" category="Category.Watchlist" tvs="watchlistTV" />
 }
 
 <!-- TODO: Add Recommended Movies and TV Shows Here -->
@@ -23,8 +24,8 @@ else
 } 
 else
 {
-	<MediaRow Title="Trending Movies" movies="trendingMovies" />
-	<MediaRow Title="Trending TV Shows" tvs="trendingTV" />
+	<MediaRow Title="Trending Movies" mediaType="MediaType.Movies" category="Category.Trending" movies="trendingMovies" />
+	<MediaRow Title="Trending TV Shows" mediaType="MediaType.Tv" category="Category.Trending" tvs="trendingTV" />
 }
 
 @code {

@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @inject IHttpClientFactory HttpClientFactory
 @using Application.Models.Dto.Responses;
+@using static Blazor.Components.Enums;
 
 <PageTitle>TV Shows</PageTitle>
 
@@ -13,10 +14,10 @@
 }
 else
 {
-	<MediaRow Title="Airing Today" tvs="airingToday" />
-	<MediaRow Title="On The Air" tvs="onTheAir" />
-	<MediaRow Title="Popular" tvs="popular" />
-	<MediaRow Title="Top Rated" tvs="topRated" />
+	<MediaRow Title="Airing Today" mediaType="MediaType.Tv" category="Category.AiringToday" tvs="airingToday" />
+	<MediaRow Title="On The Air" mediaType="MediaType.Tv" category="Category.OnTheAir" tvs="onTheAir" />
+	<MediaRow Title="Popular" mediaType="MediaType.Tv" category="Category.Popular" tvs="popular" />
+	<MediaRow Title="Top Rated" mediaType="MediaType.Tv" category="Category.TopRated" tvs="topRated" />
 }
 
 @code {

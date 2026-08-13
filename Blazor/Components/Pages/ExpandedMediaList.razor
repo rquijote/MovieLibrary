@@ -1,5 +1,37 @@
-﻿<h3>ExpandedMediaList</h3>
+﻿@page "/{mediaTypeParam}/{categoryParam}"
+@using static Blazor.Components.Enums;
+@inject NavigationManager NavigationManager
+
+<h1>Expanded Media List</h1>
+
+<p>Media Type: @mediaType</p>
+<p>Category: @category</p>
 
 @code {
+    [Parameter]
+    public string mediaTypeParam { get; set; } = string.Empty;
 
+    [Parameter]
+    public string categoryParam { get; set; } = string.Empty;
+
+    // We can remove these below.
+    private MediaType mediaType;
+    private Category category;
+
+    protected override void OnParametersSet()
+    {
+        // Parse and validate URL parameters
+        bool validMediaType = Enum.TryParse<MediaType>(mediaTypeParam, true, out var parsedMediaType);
+        bool validCategory = Enum.TryParse<Category>(categoryParam.Replace("-", ""), true, out var parsedCategory);
+
+        if (!validMediaType || !validCategory)
+        {
+            // Redirect to 404 or home if invalid
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+
+        mediaType = parsedMediaType;
+        category = parsedCategory;
+    }
 }
