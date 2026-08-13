@@ -38,8 +38,9 @@
 	public MediaType mediaType { get; set; }
 	[Parameter]
 	public Category category { get; set; }
+	[Parameter]
+	public required string endpoint { get; set; }
 
-	// This ViewMore() may need to be changed somewhere else for modularity.
 	private void ViewMore()
 	{
 		var mediaTypeStr = mediaType switch
@@ -63,6 +64,11 @@
 			_ => "popular"
 		};
 
-		Nav.NavigateTo($"/{mediaTypeStr}/{categoryStr}");
+		// Navigate with clean URL and pass endpoint via navigation state
+		var options = new NavigationOptions 
+		{ 
+			HistoryEntryState = endpoint 
+		};
+		Nav.NavigateTo($"/{mediaTypeStr}/{categoryStr}", options);
 	}
 }

@@ -14,10 +14,10 @@
 }
 else
 {
-	<MediaRow Title="Airing Today" mediaType="MediaType.Tv" category="Category.AiringToday" tvs="airingToday" />
-	<MediaRow Title="On The Air" mediaType="MediaType.Tv" category="Category.OnTheAir" tvs="onTheAir" />
-	<MediaRow Title="Popular" mediaType="MediaType.Tv" category="Category.Popular" tvs="popular" />
-	<MediaRow Title="Top Rated" mediaType="MediaType.Tv" category="Category.TopRated" tvs="topRated" />
+	<MediaRow Title="Airing Today" mediaType="MediaType.Tv" category="Category.AiringToday" endpoint="/api/TvShowLists/airing-today" tvs="airingToday" />
+	<MediaRow Title="On The Air" mediaType="MediaType.Tv" category="Category.OnTheAir" endpoint="/api/TvShowLists/on-the-air" tvs="onTheAir" />
+	<MediaRow Title="Popular" mediaType="MediaType.Tv" category="Category.Popular" endpoint="/api/TvShowLists/popular" tvs="popular" />
+	<MediaRow Title="Top Rated" mediaType="MediaType.Tv" category="Category.TopRated" endpoint="/api/TvShowLists/top-rated" tvs="topRated" />
 }
 
 @code {
