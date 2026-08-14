@@ -1,6 +1,4 @@
 ﻿@page "/{mediaType}/{category}"
-@using static Blazor.Components.Enums;
-@using Application.Models.Dto.Responses;
 @inject NavigationManager NavigationManager
 @inject IHttpClientFactory HttpClientFactory
 
@@ -9,103 +7,10 @@
 <p>Media Type: @mediaType</p>
 <p>Category: @category</p>
 
-@if (isLoading)
-{
-    <p>Loading...</p>
-}
-else if (movieData != null)
-{
-    <div>
-        @foreach (var movie in movieData.Results)
-        {
-            <div style="display: inline-block; margin: 10px;">
-                @if (!string.IsNullOrEmpty(movie.PosterPath))
-                {
-                    <img src="https://image.tmdb.org/t/p/w185/@movie.PosterPath" alt="@movie.Title" style="width: 185px; height: 278px;" />
-                }
-                else
-                {
-                    <img src="https://via.placeholder.com/185x278?text=No+Image" alt="@movie.Title" style="width: 185px; height: 278px;" />
-                }
-                <p>@movie.Title</p>
-            </div>
-        }
-    </div>
-}
-else if (tvData != null)
-{
-    <div>
-        @foreach (var tv in tvData.Results)
-        {
-            <div style="display: inline-block; margin: 10px;">
-                @if (!string.IsNullOrEmpty(tv.PosterPath))
-                {
-                    <img src="https://image.tmdb.org/t/p/w185/@tv.PosterPath" alt="@tv.Name" style="width: 185px; height: 278px;" />
-                }
-                else
-                {
-                    <img src="https://via.placeholder.com/185x278?text=No+Image" alt="@tv.Name" style="width: 185px; height: 278px;" />
-                }
-                <p>@tv.Name</p>
-            </div>
-        }
-    </div>
-}
-
 @code {
     [Parameter]
     public string mediaType { get; set; } = string.Empty;
 
     [Parameter]
     public string category { get; set; } = string.Empty;
-
-    private MovieListResponseDto? movieData;
-    private TvShowListResponseDto? tvData;
-    private bool isLoading = true;
-    private string? endpoint;
-
-    protected override void OnParametersSet()
-    {
-        // Parse and validate URL parameters
-        bool validMediaType = Enum.TryParse<MediaType>(mediaType, true, out var parsedMediaType);
-        bool validCategory = Enum.TryParse<Category>(category.Replace("-", ""), true, out var parsedCategory);
-
-        if (!validMediaType || !validCategory)
-        {
-            // Redirect to 404 if invalid
-            NavigationManager.NavigateTo("/not-found");
-            return;
-        }
-    }
-
-    protected override async Task OnInitializedAsync()
-    {
-        Console.WriteLine(endpoint);
-        // Try to get endpoint from navigation state
-        if (NavigationManager.HistoryEntryState != null)
-        {
-            endpoint = NavigationManager.HistoryEntryState as string;
-        }
-
-        // If no endpoint in state, user navigated directly - redirect to home
-        if (string.IsNullOrEmpty(endpoint))
-        {
-            NavigationManager.NavigateTo("/");
-            return;
-        }
-
-        var http = HttpClientFactory.CreateClient("MovieLibraryApi");
-
-        // Fetch the appropriate data
-        if (mediaType == "movies")
-        {
-            movieData = await http.GetFromJsonAsync<MovieListResponseDto>(endpoint);
-        } 
-        else if (mediaType == "tv")
-        {
-            tvData = await http.GetFromJsonAsync<TvShowListResponseDto>(endpoint);
-        }
-
-        isLoading = false;
-    }
 }

@@ -26,30 +26,30 @@ namespace Api.Controllers
         }
 
         [HttpGet("favourite/movies")]
-        public async Task<IActionResult> GetFavoriteMovies()
+        public async Task<IActionResult> GetFavoriteMovies([FromQuery] int page = 1)
         {
-            var result = await _accountClient.GetFavoriteMoviesAsync();
+            var result = await _accountClient.GetFavoriteMoviesAsync(page);
             return Ok(result);
         }
 
         [HttpGet("favourite/tv")]
-        public async Task<IActionResult> GetFavoriteTVShows()
+        public async Task<IActionResult> GetFavoriteTVShows([FromQuery] int page = 1)
         {
-            var result = await _accountClient.GetFavoriteTVShowsAsync();
+            var result = await _accountClient.GetFavoriteTVShowsAsync(page);
             return Ok(result);
         }
 
         [HttpGet("watchlist/movies")]
-        public async Task<IActionResult> GetWatchlistMovies()
+        public async Task<IActionResult> GetWatchlistMovies([FromQuery] int page = 1)
         {
-            var result = await _accountClient.GetWatchlistMoviesAsync();
+            var result = await _accountClient.GetWatchlistMoviesAsync(page);
             return Ok(result);
         }
 
         [HttpGet("watchlist/tv")]
-        public async Task<IActionResult> GetWatchlistTVShows()
+        public async Task<IActionResult> GetWatchlistTVShows([FromQuery] int page = 1)
         {
-            var result = await _accountClient.GetWatchlistTVShowsAsync();
+            var result = await _accountClient.GetWatchlistTVShowsAsync(page);
             return Ok(result);
         }
     }

@@ -11,18 +11,18 @@ namespace Api.Controllers
         private readonly ITrendingClient _trendingClient = trendingClient;
 
         [HttpGet("movies")]
-        public async Task<IActionResult> GetTrendingMovies([FromQuery] string timeWindow = "day")
+        public async Task<IActionResult> GetTrendingMovies([FromQuery] string timeWindow = "day", [FromQuery] int page = 1)
         {
             var window = timeWindow == "week" ? TimeWindow.week : TimeWindow.day;
-            var result = await _trendingClient.GetTrendingMoviesAsync(window);
+            var result = await _trendingClient.GetTrendingMoviesAsync(window, page);
             return Ok(result);
         }
 
         [HttpGet("tv")]
-        public async Task<IActionResult> GetTrendingTv([FromQuery] string timeWindow = "day")
+        public async Task<IActionResult> GetTrendingTv([FromQuery] string timeWindow = "day", [FromQuery] int page = 1)
         {
             var window = timeWindow == "week" ? TimeWindow.week : TimeWindow.day;
-            var result = await _trendingClient.GetTrendingTVShowsAsync(window);
+            var result = await _trendingClient.GetTrendingTVShowsAsync(window, page);
             return Ok(result);
         }
     }

@@ -38,8 +38,6 @@
 	public MediaType mediaType { get; set; }
 	[Parameter]
 	public Category category { get; set; }
-	[Parameter]
-	public required string endpoint { get; set; }
 
 	private void ViewMore()
 	{
@@ -64,11 +62,7 @@
 			_ => "popular"
 		};
 
-		// Navigate with clean URL and pass endpoint via navigation state
-		var options = new NavigationOptions 
-		{ 
-			HistoryEntryState = endpoint 
-		};
-		Nav.NavigateTo($"/{mediaTypeStr}/{categoryStr}", options);
+		// Navigate with clean URL
+		Nav.NavigateTo($"/{mediaTypeStr}/{categoryStr}");
 	}
 }

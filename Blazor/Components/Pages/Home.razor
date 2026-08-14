@@ -12,8 +12,8 @@
 } 
 else
 {
-	<MediaRow Title="Watchlist Movies" mediaType="MediaType.Movies" category="Category.Watchlist" endpoint="/api/Account/watchlist/movies" movies="watchlistMovies" />
-	<MediaRow Title="Watchlist TV Shows" mediaType="MediaType.Tv" category="Category.Watchlist" endpoint="/api/Account/watchlist/tv" tvs="watchlistTV" />
+	<MediaRow Title="Watchlist Movies" mediaType="MediaType.Movies" category="Category.Watchlist" movies="watchlistMovies" />
+	<MediaRow Title="Watchlist TV Shows" mediaType="MediaType.Tv" category="Category.Watchlist" tvs="watchlistTV" />
 }
 
 <!-- TODO: Add Recommended Movies and TV Shows Here -->
@@ -24,8 +24,8 @@ else
 } 
 else
 {
-	<MediaRow Title="Trending Movies" mediaType="MediaType.Movies" category="Category.Trending" endpoint="/api/Trending/movies" movies="trendingMovies" />
-	<MediaRow Title="Trending TV Shows" mediaType="MediaType.Tv" category="Category.Trending" endpoint="/api/Trending/tv" tvs="trendingTV" />
+	<MediaRow Title="Trending Movies" mediaType="MediaType.Movies" category="Category.Trending" movies="trendingMovies" />
+	<MediaRow Title="Trending TV Shows" mediaType="MediaType.Tv" category="Category.Trending" tvs="trendingTV" />
 }
 
 @code {

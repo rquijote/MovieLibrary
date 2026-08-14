@@ -5,7 +5,7 @@ namespace Application.Interfaces
 {
     public interface ITrendingClient
     {
-        Task<MovieListResponseDto> GetTrendingMoviesAsync(TimeWindow timeWindow);
-        Task<TvShowListResponseDto> GetTrendingTVShowsAsync(TimeWindow timeWindow);
+        Task<MovieListResponseDto> GetTrendingMoviesAsync(TimeWindow timeWindow, int pageNum);
+        Task<TvShowListResponseDto> GetTrendingTVShowsAsync(TimeWindow timeWindow, int pageNum);
     }
 }
