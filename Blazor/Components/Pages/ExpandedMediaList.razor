@@ -12,19 +12,9 @@
 	<p>Category: @category</p>
 	<p>Endpoint: @endpoint</p>
 
-	if (movieList != null)
+	@if (mediaList != null)
 	{
-		@foreach (var movie in movieList.Results)
-		{
-			<MediaGrid />
-		}
-	} 
-	else if (tvList != null)
-	{
-		@foreach (var tv in tvList.Results)
-		{
-			<MediaGrid />
-		}
+		<MediaGrid Items="@mediaList" MediaType="@parsedMediaType" />
 	}
 }
 else
@@ -43,10 +33,10 @@ else
 	private MediaType parsedMediaType;
 	private Category parsedCategory;
 	private string? endpoint;
-	private MovieListResponseDto? movieList;
-	private TvShowListResponseDto? tvList;
+	private object? mediaList;
+	private int page;
 
-	protected override void OnParametersSet()
+	protected override async Task OnInitializedAsync()
 	{
 		// Parse and validate URL parameters
 		bool validMediaType = Enum.TryParse<MediaType>(mediaType, true, out parsedMediaType);
@@ -57,21 +47,25 @@ else
 
 		if (isValidRoute)
 		{
-			endpoint = BuildEndpoint(1);
-			LoadMedia();
+			page = 1;
+			endpoint = BuildEndpoint(page);
+			await LoadMedia();
 		}
 	}
 
-	private async void LoadMedia()
+	private async Task LoadMedia()
 	{
 		var client = httpClientFactory.CreateClient("MovieLibraryApi");
+
 		if (parsedMediaType == MediaType.Movies)
 		{
-			movieList = await client.GetFromJsonAsync<MovieListResponseDto>(endpoint);
+			var response = await client.GetFromJsonAsync<MovieListResponseDto>(endpoint);
+			mediaList = response?.Results;
 		} 
 		else if (parsedMediaType == MediaType.Tv)
 		{
-			tvList = await client.GetFromJsonAsync<TvShowListResponseDto>(endpoint);
+			var response = await client.GetFromJsonAsync<TvShowListResponseDto>(endpoint);
+			mediaList = response?.Results;
 		}
 	}
 
