@@ -1,6 +1,7 @@
 ﻿@page "/{mediaType}/{category}"
-@inject IHttpClientFactory HttpClientFactory
+@inject IHttpClientFactory httpClientFactory;
 @using static Blazor.Components.Enums;
+@using Application.Models.Dto.Responses;
 
 @if (isValidRoute)
 {
@@ -8,10 +9,20 @@
 
 	<p>Media Type: @mediaType</p> 
 	<p>Category: @category</p>
+	<p>Endpoint: @endpoint</p>
+
+	if (movieList != null)
+	{
+		
+	} 
+	else if (tvList != null)
+	{
+		
+	}
 }
 else
 {
-	<Blazor.Components.Shared.NotFoundMessage />
+	<Blazor.Components.Shared.NotFound.NotFoundMessage />
 }
 
 @code {
@@ -22,14 +33,74 @@ else
 	public string category { get; set; } = string.Empty;
 
 	private bool isValidRoute = false;
+	private MediaType parsedMediaType;
+	private Category parsedCategory;
+	private string? endpoint;
+	private MovieListResponseDto? movieList;
+	private TvShowListResponseDto? tvList;
 
 	protected override void OnParametersSet()
 	{
 		// Parse and validate URL parameters
-		bool validMediaType = Enum.TryParse<MediaType>(mediaType, true, out var parsedMediaType);
-		bool validCategory = Enum.TryParse<Category>(category.Replace("-", ""), true, out var parsedCategory);
+		bool validMediaType = Enum.TryParse<MediaType>(mediaType, true, out parsedMediaType);
+		bool validCategory = Enum.TryParse<Category>(category.Replace("-", ""), true, out parsedCategory);
 
 		// Set flag based on validation
 		isValidRoute = validMediaType && validCategory;
+
+		if (isValidRoute)
+		{
+			endpoint = BuildEndpoint(1);
+			LoadMedia();
+		}
+	}
+
+	private async void LoadMedia()
+	{
+		var client = httpClientFactory.CreateClient();
+		if (parsedMediaType == MediaType.Movies)
+		{
+			movieList = await client.GetFromJsonAsync<MovieListResponseDto>(endpoint);
+		} 
+		else if (parsedMediaType == MediaType.Tv)
+		{
+			tvList = await client.GetFromJsonAsync<TvShowListResponseDto>(endpoint);
+		}
+	}
+
+	private string BuildEndpoint(int page)
+	{
+		var baseEndpoint = (parsedMediaType, parsedCategory) switch
+		{
+			// Movie Lists
+			(MediaType.Movies, Category.Popular) => "/api/MovieLists/popular",
+			(MediaType.Movies, Category.TopRated) => "/api/MovieLists/top-rated",
+			(MediaType.Movies, Category.NowPlaying) => "/api/MovieLists/now-playing",
+			(MediaType.Movies, Category.Upcoming) => "/api/MovieLists/upcoming",
+
+			// TV Lists
+			(MediaType.Tv, Category.Popular) => "/api/TvShowLists/popular",
+			(MediaType.Tv, Category.TopRated) => "/api/TvShowLists/top-rated",
+			(MediaType.Tv, Category.AiringToday) => "/api/TvShowLists/airing-today",
+			(MediaType.Tv, Category.OnTheAir) => "/api/TvShowLists/on-the-air",
+
+			// Trending (different controller + query param)
+			(MediaType.Movies, Category.Trending) => "/api/Trending/movies?timeWindow=day",
+			(MediaType.Tv, Category.Trending) => "/api/Trending/tv?timeWindow=day",
+
+			// Account - Watchlist
+			(MediaType.Movies, Category.Watchlist) => "/api/Account/watchlist/movies",
+			(MediaType.Tv, Category.Watchlist) => "/api/Account/watchlist/tv",
+
+			// Account - Favorites
+			(MediaType.Movies, Category.Favorite) => "/api/Account/favourite/movies",
+			(MediaType.Tv, Category.Favorite) => "/api/Account/favourite/tv",
+
+			_ => "/"
+		};
+
+		// Add page parameter - check if query params already exist
+		var separator = baseEndpoint.Contains('?') ? "&" : "?";
+		return $"{baseEndpoint}{separator}page={page}";
 	}
 }

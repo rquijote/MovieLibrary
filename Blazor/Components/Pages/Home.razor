@@ -41,15 +41,5 @@ else
 		watchlistTV = await client.GetFromJsonAsync<TvShowListResponseDto>("/api/Account/watchlist/tv");
 		trendingMovies = await client.GetFromJsonAsync<MovieListResponseDto>("/api/trending/movies");
 		trendingTV = await client.GetFromJsonAsync<TvShowListResponseDto>("/api/trending/tv");
-
-		/* Delete below later */
-		if (trendingMovies is not null)
-		{
-			Console.WriteLine(trendingMovies.Results.Count);
-			foreach (var x in trendingMovies.Results)
-			{
-				Console.WriteLine($"{x.Title} - {x.Id}");
-			}
-		}
 	}
 }
