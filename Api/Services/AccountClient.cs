@@ -23,16 +23,16 @@ namespace Api.Services
             };
         }
 
-        public async Task<MovieListResponseDto> GetWatchlistMoviesAsync()
+        public async Task<MovieListResponseDto> GetWatchlistMoviesAsync(int page)
         {
-            var response = await _http.GetAsync("watchlist/movies");
+            var response = await _http.GetAsync($"watchlist/movies?page={page}");
             var listResult = await response.Content.ReadFromJsonAsync<MovieListResponseDto>();
             return listResult ?? new MovieListResponseDto();
         }
 
-        public async Task<TvShowListResponseDto> GetWatchlistTVShowsAsync()
+        public async Task<TvShowListResponseDto> GetWatchlistTVShowsAsync(int page)
         {
-            var response = await _http.GetAsync("watchlist/tv");
+            var response = await _http.GetAsync($"watchlist/tv?page={page}");
             var listResult = await response.Content.ReadFromJsonAsync<TvShowListResponseDto>();
             return listResult ?? new TvShowListResponseDto();
         }
@@ -51,16 +51,16 @@ namespace Api.Services
             };
         }
 
-        public async Task<MovieListResponseDto> GetFavoriteMoviesAsync()
+        public async Task<MovieListResponseDto> GetFavoriteMoviesAsync(int page)
         {
-            var response = await _http.GetAsync("favorite/movies");
+            var response = await _http.GetAsync($"favorite/movies?page={page}");
             var listResult = await response.Content.ReadFromJsonAsync<MovieListResponseDto>();
             return listResult ?? new MovieListResponseDto();
         }
 
-        public async Task<TvShowListResponseDto> GetFavoriteTVShowsAsync()
+        public async Task<TvShowListResponseDto> GetFavoriteTVShowsAsync(int page)
         {
-            var response = await _http.GetAsync("favorite/tv");
+            var response = await _http.GetAsync($"favorite/tv?page={page}");
             var listResult = await response.Content.ReadFromJsonAsync<TvShowListResponseDto>();
             return listResult ?? new TvShowListResponseDto();
         }

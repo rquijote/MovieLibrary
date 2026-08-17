@@ -7,12 +7,12 @@ namespace Application.Interfaces
     {
         // Watchlist
         Task<StatusDto> AddToWatchlistAsync(AddMediaWatchlistDto request);
-        Task<MovieListResponseDto> GetWatchlistMoviesAsync();
-        Task<TvShowListResponseDto> GetWatchlistTVShowsAsync();
+        Task<MovieListResponseDto> GetWatchlistMoviesAsync(int page);
+        Task<TvShowListResponseDto> GetWatchlistTVShowsAsync(int page);
 
         // Favorites
         Task<StatusDto> AddToFavoritesAsync(AddMediaFavoriteDto request);
-        Task<MovieListResponseDto> GetFavoriteMoviesAsync();
-        Task<TvShowListResponseDto> GetFavoriteTVShowsAsync();
+        Task<MovieListResponseDto> GetFavoriteMoviesAsync(int page);
+        Task<TvShowListResponseDto> GetFavoriteTVShowsAsync(int page);
     }
 }

@@ -1,16 +1,35 @@
 ﻿@page "/{mediaType}/{category}"
-@inject NavigationManager NavigationManager
 @inject IHttpClientFactory HttpClientFactory
+@using static Blazor.Components.Enums;
 
-<h1>Expanded Media List</h1>
+@if (isValidRoute)
+{
+	<h1>Expanded Media List</h1>
 
-<p>Media Type: @mediaType</p>
-<p>Category: @category</p>
+	<p>Media Type: @mediaType</p> 
+	<p>Category: @category</p>
+}
+else
+{
+	<Blazor.Components.Shared.NotFoundMessage />
+}
 
 @code {
-    [Parameter]
-    public string mediaType { get; set; } = string.Empty;
+	[Parameter]
+	public string mediaType { get; set; } = string.Empty;
 
-    [Parameter]
-    public string category { get; set; } = string.Empty;
+	[Parameter]
+	public string category { get; set; } = string.Empty;
+
+	private bool isValidRoute = false;
+
+	protected override void OnParametersSet()
+	{
+		// Parse and validate URL parameters
+		bool validMediaType = Enum.TryParse<MediaType>(mediaType, true, out var parsedMediaType);
+		bool validCategory = Enum.TryParse<Category>(category.Replace("-", ""), true, out var parsedCategory);
+
+		// Set flag based on validation
+		isValidRoute = validMediaType && validCategory;
+	}
 }
