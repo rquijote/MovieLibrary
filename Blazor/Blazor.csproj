@@ -11,8 +11,4 @@
     <ProjectReference Include="..\Application\Application.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Components\Shared\MediaGrid\" />
-  </ItemGroup>
-
 </Project>

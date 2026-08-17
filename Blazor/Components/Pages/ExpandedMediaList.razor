@@ -1,7 +1,8 @@
-﻿@page "/{mediaType}/{category}"
+@page "/{mediaType}/{category}"
 @inject IHttpClientFactory httpClientFactory;
 @using static Blazor.Components.Enums;
 @using Application.Models.Dto.Responses;
+@using Blazor.Components.Shared.MediaGrid;
 
 @if (isValidRoute)
 {
@@ -13,11 +14,17 @@
 
 	if (movieList != null)
 	{
-		
+		@foreach (var movie in movieList.Results)
+		{
+			<MediaGrid />
+		}
 	} 
 	else if (tvList != null)
 	{
-		
+		@foreach (var tv in tvList.Results)
+		{
+			<MediaGrid />
+		}
 	}
 }
 else
@@ -57,7 +64,7 @@ else
 
 	private async void LoadMedia()
 	{
-		var client = httpClientFactory.CreateClient();
+		var client = httpClientFactory.CreateClient("MovieLibraryApi");
 		if (parsedMediaType == MediaType.Movies)
 		{
 			movieList = await client.GetFromJsonAsync<MovieListResponseDto>(endpoint);
