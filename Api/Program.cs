@@ -93,6 +93,26 @@ builder.Services.AddHttpClient<ITvShowClient, TvShowClient>((serviceProvider, cl
     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", bearerTokenValue);
 });
 
+// DiscoverMoviesClient - for discovering movies with advanced filters
+builder.Services.AddHttpClient<IDiscoverMoviesClient, DiscoverMoviesClient>((serviceProvider, client) =>
+{
+    var config = serviceProvider.GetRequiredService<IConfiguration>();
+    var bearerTokenValue = config["BEARER_TOKEN"] ?? "";
+
+    client.BaseAddress = new Uri($"{tmdbBaseUrl}");
+    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", bearerTokenValue);
+});
+
+// DiscoverTVShowsClient - for discovering TV shows with advanced filters
+builder.Services.AddHttpClient<IDiscoverTVShowsClient, DiscoverTVShowsClient>((serviceProvider, client) =>
+{
+    var config = serviceProvider.GetRequiredService<IConfiguration>();
+    var bearerTokenValue = config["BEARER_TOKEN"] ?? "";
+
+    client.BaseAddress = new Uri($"{tmdbBaseUrl}");
+    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", bearerTokenValue);
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
