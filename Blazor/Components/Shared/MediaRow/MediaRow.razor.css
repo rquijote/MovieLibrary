@@ -34,10 +34,18 @@
 .media-row-item {
 	width: 185px;
 	height: 278px;
+	cursor: pointer;
+	transition: transform 0.2s ease;
+}
+
+.media-row-item:hover {
+	transform: scale(1.05);
 }
 
 .media-row-item img {
 	width: 100%;
 	height: 100%;
 	object-fit: cover;
+	border-radius: 8px;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }

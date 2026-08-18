@@ -1,0 +1,111 @@
+@page "/movie/{id:int}"
+@inject IHttpClientFactory httpClientFactory
+@using Application.Models.Dto.Responses
+
+@if (movie != null)
+{
+	<div class="movie-details">
+		<div class="movie-header">
+			@if (!string.IsNullOrEmpty(movie.PosterPath))
+			{
+				<img src="@GetImageUrl(movie.PosterPath)" alt="@movie.Title" class="movie-poster" />
+			}
+			else if (!string.IsNullOrEmpty(movie.BackdropPath))
+			{
+				<img src="@GetImageUrl(movie.BackdropPath)" alt="@movie.Title" class="movie-poster" />
+			}
+
+			<div class="movie-info">
+				<h1>@movie.Title</h1>
+
+				@if (!string.IsNullOrEmpty(movie.OriginalTitle) && movie.OriginalTitle != movie.Title)
+				{
+					<p><strong>Original Title:</strong> @movie.OriginalTitle</p>
+				}
+
+				<p><strong>Release Date:</strong> @movie.ReleaseDate</p>
+				<p><strong>Rating:</strong> @movie.VoteAverage.ToString("F1") / 10 (@movie.VoteCount votes)</p>
+				<p><strong>Popularity:</strong> @movie.Popularity.ToString("F1")</p>
+				<p><strong>Original Language:</strong> @movie.OriginalLanguage.ToUpper()</p>
+				<p><strong>ID:</strong> @movie.Id</p>
+
+				@if (movie.Video)
+				{
+					<p><strong>Has Video:</strong> Yes</p>
+				}
+			</div>
+		</div>
+
+		@if (!string.IsNullOrEmpty(movie.Overview))
+		{
+			<div class="movie-overview">
+				<h2>Overview</h2>
+				<p>@movie.Overview</p>
+			</div>
+		}
+
+		@if (movie.GenreIds.Count > 0)
+		{
+			<div class="movie-genres">
+				<h3>Genre IDs</h3>
+				<p>@string.Join(", ", movie.GenreIds)</p>
+			</div>
+		}
+
+		@if (!string.IsNullOrEmpty(movie.BackdropPath))
+		{
+			<div class="movie-backdrop">
+				<h3>Backdrop Image</h3>
+				<img src="@GetImageUrl(movie.BackdropPath)" alt="@movie.Title backdrop" />
+			</div>
+		}
+	</div>
+}
+else if (isLoading)
+{
+	<p>Loading...</p>
+}
+else
+{
+	<p>Movie not found.</p>
+}
+
+@code {
+	[Parameter]
+	public int Id { get; set; }
+
+	private MovieDto? movie;
+	private bool isLoading = true;
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadMovieDetails();
+	}
+
+	private async Task LoadMovieDetails()
+	{
+		isLoading = true;
+		var client = httpClientFactory.CreateClient("MovieLibraryApi");
+
+		try
+		{
+			movie = await client.GetFromJsonAsync<MovieDto>($"/api/Movie/{Id}");
+		}
+		catch (Exception)
+		{
+			movie = null;
+		}
+		finally
+		{
+			isLoading = false;
+		}
+	}
+
+	private string GetImageUrl(string? imagePath)
+	{
+		if (string.IsNullOrEmpty(imagePath))
+			return "https://via.placeholder.com/500x750?text=No+Image";
+
+		return $"https://image.tmdb.org/t/p/w500{imagePath}";
+	}
+}

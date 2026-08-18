@@ -1,4 +1,7 @@
-﻿<div class="media-row-item">
+﻿@inject NavigationManager NavigationManager
+@using static Blazor.Components.Enums;
+
+<div class="media-row-item" @onclick="HandleClick">
 	@if (posterPath != null)
 	{
 		<img src="https://image.tmdb.org/t/p/w185/@posterPath" alt="@title" />
@@ -14,4 +17,20 @@
 	public required string title { get; set; }
 	[Parameter]
 	public string? posterPath { get; set; }
+	[Parameter]
+	public int id { get; set; }
+	[Parameter]
+	public MediaType mediaType { get; set; }
+
+	private void HandleClick()
+	{
+		var route = mediaType switch
+		{
+			MediaType.Movies => $"/movie/{id}",
+			MediaType.Tv => $"/tv/{id}",
+			_ => "/"
+		};
+
+		NavigationManager.NavigateTo(route);
+	}
 }

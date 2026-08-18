@@ -1,0 +1,111 @@
+@page "/tv/{id:int}"
+@inject IHttpClientFactory httpClientFactory
+@using Application.Models.Dto.Responses
+
+@if (tvShow != null)
+{
+	<div class="tv-details">
+		<div class="tv-header">
+			@if (!string.IsNullOrEmpty(tvShow.PosterPath))
+			{
+				<img src="@GetImageUrl(tvShow.PosterPath)" alt="@tvShow.Name" class="tv-poster" />
+			}
+			else if (!string.IsNullOrEmpty(tvShow.BackdropPath))
+			{
+				<img src="@GetImageUrl(tvShow.BackdropPath)" alt="@tvShow.Name" class="tv-poster" />
+			}
+
+			<div class="tv-info">
+				<h1>@tvShow.Name</h1>
+
+				@if (!string.IsNullOrEmpty(tvShow.OriginalName) && tvShow.OriginalName != tvShow.Name)
+				{
+					<p><strong>Original Name:</strong> @tvShow.OriginalName</p>
+				}
+
+				<p><strong>First Air Date:</strong> @tvShow.FirstAirDate</p>
+				<p><strong>Rating:</strong> @tvShow.VoteAverage.ToString("F1") / 10 (@tvShow.VoteCount votes)</p>
+				<p><strong>Popularity:</strong> @tvShow.Popularity.ToString("F1")</p>
+				<p><strong>Original Language:</strong> @tvShow.OriginalLanguage.ToUpper()</p>
+				<p><strong>ID:</strong> @tvShow.Id</p>
+
+				@if (tvShow.OriginCountry.Count > 0)
+				{
+					<p><strong>Origin Country:</strong> @string.Join(", ", tvShow.OriginCountry)</p>
+				}
+			</div>
+		</div>
+
+		@if (!string.IsNullOrEmpty(tvShow.Overview))
+		{
+			<div class="tv-overview">
+				<h2>Overview</h2>
+				<p>@tvShow.Overview</p>
+			</div>
+		}
+
+		@if (tvShow.GenreIds.Count > 0)
+		{
+			<div class="tv-genres">
+				<h3>Genre IDs</h3>
+				<p>@string.Join(", ", tvShow.GenreIds)</p>
+			</div>
+		}
+
+		@if (!string.IsNullOrEmpty(tvShow.BackdropPath))
+		{
+			<div class="tv-backdrop">
+				<h3>Backdrop Image</h3>
+				<img src="@GetImageUrl(tvShow.BackdropPath)" alt="@tvShow.Name backdrop" />
+			</div>
+		}
+	</div>
+}
+else if (isLoading)
+{
+	<p>Loading...</p>
+}
+else
+{
+	<p>TV show not found.</p>
+}
+
+@code {
+	[Parameter]
+	public int Id { get; set; }
+
+	private TvShowDto? tvShow;
+	private bool isLoading = true;
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadTvShowDetails();
+	}
+
+	private async Task LoadTvShowDetails()
+	{
+		isLoading = true;
+		var client = httpClientFactory.CreateClient("MovieLibraryApi");
+
+		try
+		{
+			tvShow = await client.GetFromJsonAsync<TvShowDto>($"/api/TvShow/{Id}");
+		}
+		catch (Exception)
+		{
+			tvShow = null;
+		}
+		finally
+		{
+			isLoading = false;
+		}
+	}
+
+	private string GetImageUrl(string? imagePath)
+	{
+		if (string.IsNullOrEmpty(imagePath))
+			return "https://via.placeholder.com/500x750?text=No+Image";
+
+		return $"https://image.tmdb.org/t/p/w500{imagePath}";
+	}
+}

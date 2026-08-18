@@ -1,3 +1,4 @@
+@inject NavigationManager NavigationManager
 @using Application.Models.Dto.Responses;
 @using static Blazor.Components.Enums;
 
@@ -6,7 +7,7 @@
 	{
 		@foreach (var movie in movies)
 		{
-			<div class="media-grid-item">
+			<div class="media-grid-item" @onclick="() => NavigateToMovie(movie.Id)">
 				<img src="@GetImageUrl(movie.PosterPath)" alt="@movie.Title" />
 				<h4>@movie.Title</h4>
 				<p>@movie.ReleaseDate</p>
@@ -17,7 +18,7 @@
 	{
 		@foreach (var show in tvShows)
 		{
-			<div class="media-grid-item">
+			<div class="media-grid-item" @onclick="() => NavigateToTvShow(show.Id)">
 				<img src="@GetImageUrl(show.PosterPath)" alt="@show.Name" />
 				<h4>@show.Name</h4>
 				<p>@show.FirstAirDate</p>
@@ -39,5 +40,15 @@
 			return "https://via.placeholder.com/300x450?text=No+Image";
 
 		return $"https://image.tmdb.org/t/p/w500{posterPath}";
+	}
+
+	private void NavigateToMovie(int movieId)
+	{
+		NavigationManager.NavigateTo($"/movie/{movieId}");
+	}
+
+	private void NavigateToTvShow(int tvShowId)
+	{
+		NavigationManager.NavigateTo($"/tv/{tvShowId}");
 	}
 }
