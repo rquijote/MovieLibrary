@@ -14,6 +14,15 @@
 
 	@if (mediaList != null)
 	{
+		<div class="pagination-controls">
+			@if (pageNum > 1)
+			{
+				<button @onclick="GoToPreviousPage">← Previous</button>
+			}
+			<span>Page @pageNum</span>
+			<button @onclick="GoToNextPage">Next →</button>
+		</div>
+
 		<MediaGrid Items="@mediaList" MediaType="@parsedMediaType" />
 	}
 }
@@ -34,7 +43,7 @@ else
 	private Category parsedCategory;
 	private string? endpoint;
 	private object? mediaList;
-	private int page;
+	private int pageNum;
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -47,8 +56,8 @@ else
 
 		if (isValidRoute)
 		{
-			page = 1;
-			endpoint = BuildEndpoint(page);
+			pageNum = 1;
+			endpoint = BuildEndpoint(pageNum);
 			await LoadMedia();
 		}
 	}
@@ -69,7 +78,7 @@ else
 		}
 	}
 
-	private string BuildEndpoint(int page)
+	private string BuildEndpoint(int pageNum)
 	{
 		var baseEndpoint = (parsedMediaType, parsedCategory) switch
 		{
@@ -102,6 +111,23 @@ else
 
 		// Add page parameter - check if query params already exist
 		var separator = baseEndpoint.Contains('?') ? "&" : "?";
-		return $"{baseEndpoint}{separator}page={page}";
+		return $"{baseEndpoint}{separator}page={pageNum}";
+	}
+
+	private async Task GoToNextPage()
+	{
+		pageNum++;
+		endpoint = BuildEndpoint(pageNum);
+		await LoadMedia();
+	}
+
+	private async Task GoToPreviousPage()
+	{
+		if (pageNum > 1)
+		{
+			pageNum--;
+			endpoint = BuildEndpoint(pageNum);
+			await LoadMedia();
+		}
 	}
 }

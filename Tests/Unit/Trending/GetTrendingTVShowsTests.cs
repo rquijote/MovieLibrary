@@ -27,10 +27,10 @@ namespace Tests.Unit.Trending
 
             var trendingClientMock =new Mock<ITrendingClient>();
             trendingClientMock
-                .Setup(x => x.GetTrendingTVShowsAsync(TimeWindow.day))
+                .Setup(x => x.GetTrendingTVShowsAsync(TimeWindow.day, 1))
                 .ReturnsAsync(expected);
 
-            var result = await trendingClientMock.Object.GetTrendingTVShowsAsync(TimeWindow.day);
+            var result = await trendingClientMock.Object.GetTrendingTVShowsAsync(TimeWindow.day, 1);
 
             result.Should().NotBeNull();
             result.Results.Should().NotBeNull().And.HaveCount(6).And.BeEquivalentTo(expected.Results);
@@ -56,10 +56,10 @@ namespace Tests.Unit.Trending
 
             var trendingClientMock = new Mock<ITrendingClient>();
             trendingClientMock
-                .Setup(x => x.GetTrendingTVShowsAsync(TimeWindow.week))
+                .Setup(x => x.GetTrendingTVShowsAsync(TimeWindow.week, 1))
                 .ReturnsAsync(expected);
 
-            var result = await trendingClientMock.Object.GetTrendingTVShowsAsync(TimeWindow.week);
+            var result = await trendingClientMock.Object.GetTrendingTVShowsAsync(TimeWindow.week, 1);
 
             result.Should().NotBeNull();
             result.Results.Should().NotBeNull().And.HaveCount(8).And.BeEquivalentTo(expected.Results);
