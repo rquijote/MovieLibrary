@@ -29,5 +29,45 @@ namespace Api.Controllers
                 return NotFound(statusDto);
             }
         }
+
+        [HttpPost("{id}/rating")]
+        public async Task<IActionResult> AddRatingTvShow(int id, double rating)
+        {
+            try
+            {
+                var result = await _tvShowClient.AddRatingTvShow(id, rating);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                var statusDto = new StatusDto
+                {
+                    Success = false,
+                    StatusCode = 34,
+                    StatusMessage = ex.Message
+                };
+                return NotFound(statusDto);
+            }
+        }
+
+        [HttpDelete("{id}/rating")]
+        public async Task<IActionResult> DeleteRatingTvShow(int id)
+        {
+            try
+            {
+                var result = await _tvShowClient.DeleteRatingTvShow(id);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                var statusDto = new StatusDto
+                {
+                    Success = false,
+                    StatusCode = 34,
+                    StatusMessage = ex.Message
+                };
+                return NotFound(statusDto);
+            }
+        }
     }
 }
