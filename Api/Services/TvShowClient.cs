@@ -11,7 +11,7 @@ namespace Api.Services
         public async Task<TvShowDto> GetTvShowById(int id)
         {
             var response = await _http.GetAsync($"{id}");
-            
+
             if (!response.IsSuccessStatusCode)
             {
                 if (response.StatusCode == HttpStatusCode.NotFound)
@@ -24,6 +24,16 @@ namespace Api.Services
 
             var result = await response.Content.ReadFromJsonAsync<TvShowDto>();
             return result ?? throw new InvalidOperationException("Failed to deserialize TV show response.");
+        }
+
+        public Task<StatusDto> AddRatingTvShow(int id, double rating)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<StatusDto> DeleteRatingTvShow(int id)
+        {
+            throw new NotImplementedException();
         }
     }
 }

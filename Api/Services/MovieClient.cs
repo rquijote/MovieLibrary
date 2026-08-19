@@ -25,5 +25,15 @@ namespace Api.Services
             var result = await response.Content.ReadFromJsonAsync<MovieDto>();
             return result ?? throw new InvalidOperationException("Failed to deserialize movie response.");
         }
+
+        public async Task<StatusDto> AddRatingMovie(int id, double rating)
+        {
+            throw new NotImplementedException("AddRatingMovie is not yet implemented.");
+        }
+
+        public async Task<StatusDto> DeleteRatingMovie(int id)
+        {
+            throw new NotImplementedException("DeleteRatingMovie is not yet implemented.");
+        }
     }
 }
