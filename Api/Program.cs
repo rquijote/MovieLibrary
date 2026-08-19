@@ -113,6 +113,16 @@ builder.Services.AddHttpClient<IDiscoverTVShowsClient, DiscoverTVShowsClient>((s
     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", bearerTokenValue);
 });
 
+// ListsClient - for discovering TV shows with advanced filters
+builder.Services.AddHttpClient<IListsClient, ListsClient>((serviceProvider, client) =>
+{
+    var config = serviceProvider.GetRequiredService<IConfiguration>();
+    var bearerTokenValue = config["BEARER_TOKEN"] ?? "";
+
+    client.BaseAddress = new Uri($"{tmdbBaseUrl}list");
+    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", bearerTokenValue);
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
