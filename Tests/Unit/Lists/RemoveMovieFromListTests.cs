@@ -17,10 +17,10 @@ namespace Tests.Unit.Lists
                 StatusMessage = "The item/record was deleted successfully." 
             };
             var listsClientMock = new Mock<IListsClient>();
-            listsClientMock.Setup(x => x.RemoveMovie())
+            listsClientMock.Setup(x => x.RemoveMovie(1, 299534))
                 .ReturnsAsync(expected);
 
-            var result = await listsClientMock.Object.RemoveMovie();
+            var result = await listsClientMock.Object.RemoveMovie(1, 299534);
 
             result.Success.Should().BeTrue();
             result.StatusCode.Should().Be(13);
@@ -37,10 +37,10 @@ namespace Tests.Unit.Lists
                 StatusMessage = "The item/record was deleted successfully." 
             };
             var listsClientMock = new Mock<IListsClient>();
-            listsClientMock.Setup(x => x.RemoveMovie())
+            listsClientMock.Setup(x => x.RemoveMovie(1, 284054))
                 .ReturnsAsync(expected);
 
-            var result = await listsClientMock.Object.RemoveMovie();
+            var result = await listsClientMock.Object.RemoveMovie(1, 284054);
 
             result.Success.Should().BeTrue();
             result.StatusCode.Should().Be(13);
@@ -56,10 +56,10 @@ namespace Tests.Unit.Lists
                 StatusMessage = "The resource you requested could not be found." 
             };
             var listsClientMock = new Mock<IListsClient>();
-            listsClientMock.Setup(x => x.RemoveMovie())
+            listsClientMock.Setup(x => x.RemoveMovie(1, 999999))
                 .ReturnsAsync(expected);
 
-            var result = await listsClientMock.Object.RemoveMovie();
+            var result = await listsClientMock.Object.RemoveMovie(1, 999999);
 
             result.Success.Should().BeFalse();
             result.StatusCode.Should().Be(34);

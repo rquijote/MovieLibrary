@@ -74,7 +74,7 @@ namespace Tests.Integration.Api.Details
                 StatusMessage = "The resource you requested could not be found."
             };
             var response = await _client.GetAsync($"/api/Movie/{movieId}");
-            response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
 
             var actual = await response.Content.ReadFromJsonAsync<StatusDto>();
             actual.Should().NotBeNull();

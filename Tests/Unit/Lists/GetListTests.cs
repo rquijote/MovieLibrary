@@ -26,10 +26,10 @@ namespace Tests.Unit.Lists
                 ]
             };
             var listsClientMock = new Mock<IListsClient>();
-            listsClientMock.Setup(x => x.GetList())
+            listsClientMock.Setup(x => x.GetList(1))
                 .ReturnsAsync(expected);
 
-            var result = await listsClientMock.Object.GetList();
+            var result = await listsClientMock.Object.GetList(1);
 
             result.Should().NotBeNull();
             result.Name.Should().Be("The Marvel Universe");
@@ -55,10 +55,10 @@ namespace Tests.Unit.Lists
                 ]
             };
             var listsClientMock = new Mock<IListsClient>();
-            listsClientMock.Setup(x => x.GetList())
+            listsClientMock.Setup(x => x.GetList(2))
                 .ReturnsAsync(expected);
 
-            var result = await listsClientMock.Object.GetList();
+            var result = await listsClientMock.Object.GetList(2);
 
             result.Should().NotBeNull();
             result.Name.Should().Be("2012 Oscar Nominations for Best Picture - 84th Academy Awards");
@@ -83,10 +83,10 @@ namespace Tests.Unit.Lists
                 ]
             };
             var listsClientMock = new Mock<IListsClient>();
-            listsClientMock.Setup(x => x.GetList())
+            listsClientMock.Setup(x => x.GetList(3))
                 .ReturnsAsync(expected);
 
-            var result = await listsClientMock.Object.GetList();
+            var result = await listsClientMock.Object.GetList(3);
 
             result.Should().NotBeNull();
             result.Name.Should().Be("The DC Comics Universe");
@@ -97,10 +97,10 @@ namespace Tests.Unit.Lists
         public async Task GetList_WithInvalidListId_ThrowsException()
         {
             var listsClientMock = new Mock<IListsClient>();
-            listsClientMock.Setup(x => x.GetList())
+            listsClientMock.Setup(x => x.GetList(999999))
                 .ThrowsAsync(new KeyNotFoundException("List not found"));
 
-            var act = async () => await listsClientMock.Object.GetList();
+            var act = async () => await listsClientMock.Object.GetList(999999);
 
             await act.Should().ThrowAsync<KeyNotFoundException>()
                 .WithMessage("List not found");

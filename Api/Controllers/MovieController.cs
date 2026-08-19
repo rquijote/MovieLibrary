@@ -1,4 +1,5 @@
 using Application.Interfaces;
+using Application.Models.Dto.Responses;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers

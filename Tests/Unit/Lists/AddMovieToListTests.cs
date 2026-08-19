@@ -17,10 +17,10 @@ namespace Tests.Unit.Lists
                 StatusMessage = "Success." 
             };
             var listsClientMock = new Mock<IListsClient>();
-            listsClientMock.Setup(x => x.AddMovie())
+            listsClientMock.Setup(x => x.AddMovie(1, 634649))
                 .ReturnsAsync(expected);
 
-            var result = await listsClientMock.Object.AddMovie();
+            var result = await listsClientMock.Object.AddMovie(1, 634649);
 
             result.Success.Should().BeTrue();
             result.StatusCode.Should().Be(1);
@@ -37,10 +37,10 @@ namespace Tests.Unit.Lists
                 StatusMessage = "Success." 
             };
             var listsClientMock = new Mock<IListsClient>();
-            listsClientMock.Setup(x => x.AddMovie())
+            listsClientMock.Setup(x => x.AddMovie(1, 524434))
                 .ReturnsAsync(expected);
 
-            var result = await listsClientMock.Object.AddMovie();
+            var result = await listsClientMock.Object.AddMovie(1, 524434);
 
             result.Success.Should().BeTrue();
             result.StatusCode.Should().Be(1);
@@ -56,10 +56,10 @@ namespace Tests.Unit.Lists
                 StatusMessage = "The resource you requested could not be found." 
             };
             var listsClientMock = new Mock<IListsClient>();
-            listsClientMock.Setup(x => x.AddMovie())
+            listsClientMock.Setup(x => x.AddMovie(1, 999999))
                 .ReturnsAsync(expected);
 
-            var result = await listsClientMock.Object.AddMovie();
+            var result = await listsClientMock.Object.AddMovie(1, 999999);
 
             result.Success.Should().BeFalse();
             result.StatusCode.Should().Be(34);

@@ -7,7 +7,7 @@ namespace Api.Services
     public sealed class MovieClient(HttpClient http) : IMovieClient
     {
         private readonly HttpClient _http = http;
-        public async Task<MovieDto> GetMovieById(int id)
+        public async Task<object> GetMovieById(int id)
         {
             var response = await _http.GetAsync($"{id}");
 
@@ -16,8 +16,12 @@ namespace Api.Services
                 if (response.StatusCode == HttpStatusCode.NotFound)
                 {
                     var errorResponse = await response.Content.ReadFromJsonAsync<StatusDto>();
-                    throw new KeyNotFoundException(
-                        errorResponse?.StatusMessage ?? $"Movie with ID {id} not found.");
+                    return errorResponse ?? new StatusDto 
+                    { 
+                        Success = false, 
+                        StatusCode = 34, 
+                        StatusMessage = "The resource you requested could not be found." 
+                    };
                 }
             }
             response.EnsureSuccessStatusCode();
