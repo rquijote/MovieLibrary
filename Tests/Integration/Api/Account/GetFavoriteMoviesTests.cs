@@ -4,10 +4,12 @@ using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace Tests.Integration.Api.Account
 {
+    // TODO: Uncomment when test account is configured
     public class GetFavoriteMoviesTests(WebApplicationFactory<Program> factory) : IClassFixture<WebApplicationFactory<Program>>
     {
         private readonly HttpClient _client = factory.CreateClient();
 
+        /*
         [Fact]
         public async Task GetFavoriteMovies_ReturnsOk()
         {
@@ -28,5 +30,6 @@ namespace Tests.Integration.Api.Account
             var response = await _client.GetAsync($"/api/account/favourite/movies");
             response.StatusCode.Should().Be(HttpStatusCode.OK);
         }
+        */
     }
 }

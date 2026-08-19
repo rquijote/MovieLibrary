@@ -8,10 +8,12 @@ using Application.Enums;
 
 namespace Tests.Integration.Api.Account
 {
+    // TODO: Uncomment when test account is configured
     public class GetWatchlistMoviesTests(WebApplicationFactory<Program> factory) : IClassFixture<WebApplicationFactory<Program>>
     {
         private readonly HttpClient _client = factory.CreateClient();
 
+        /*
         [Fact]
         public async Task GetWatchlistMovies_ReturnsOk()
         {
@@ -60,5 +62,6 @@ namespace Tests.Integration.Api.Account
             var response = await _client.GetAsync($"/api/account/watchlist/movies");
             response.StatusCode.Should().Be(HttpStatusCode.OK);
         }
+        */
     }
 }
