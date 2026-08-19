@@ -18,7 +18,7 @@ namespace Api.Controllers
                 var result = await _tvShowClient.GetTvShowById(id);
                 return Ok(result);
             } 
-            catch (KeyNotFoundException ex)
+            catch (Exception ex)
             {
                 var statusDto = new StatusDto
                 {

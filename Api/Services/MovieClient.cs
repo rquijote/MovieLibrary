@@ -1,4 +1,5 @@
-﻿using Application.Interfaces;
+﻿using System.Net;
+using Application.Interfaces;
 using Application.Models.Dto.Responses;
 
 namespace Api.Services
@@ -10,6 +11,16 @@ namespace Api.Services
         {
             var response = await _http.GetAsync($"{id}");
 
+            if (!response.IsSuccessStatusCode)
+            {
+                if (response.StatusCode == HttpStatusCode.NotFound)
+                {
+                    var errorResponse = await response.Content.ReadFromJsonAsync<StatusDto>();
+                    throw new KeyNotFoundException(
+                        errorResponse?.StatusMessage ?? $"Movie with ID {id} not found.");
+                }
+            }
+            response.EnsureSuccessStatusCode();
             var result = await response.Content.ReadFromJsonAsync<MovieDto>();
             return result ?? throw new InvalidOperationException("Failed to deserialize movie response.");
         }
