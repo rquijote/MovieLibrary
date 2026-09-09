@@ -1,6 +1,9 @@
 <Solution>
   <Project Path="../Application/Application.csproj" />
-  <Project Path="../Blazor/Blazor.csproj" Id="347d1ba0-5c0c-4a6f-99d0-ad125de5fb19" />
+  <Project Path="../Frontend/Frontend.esproj">
+    <Build />
+    <Deploy />
+  </Project>
   <Project Path="../Tests/Tests.csproj" />
   <Project Path="Api.csproj" />
 </Solution>

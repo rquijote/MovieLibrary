@@ -211,3 +211,8 @@ FakesAssemblies/
 
 # .env file
 Api/.env
+
+# Node / React frontend
+node_modules/
+dist/
+Api/React/.env

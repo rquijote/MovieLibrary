@@ -18,6 +18,16 @@ builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173", "https://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 // Register TMDB API clients with configured HttpClient
 var tmdbBaseUrl = "https://api.themoviedb.org/3/";
 
@@ -134,6 +144,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowReactFrontend");
 
 app.UseAuthorization();
 
