@@ -13,6 +13,9 @@ namespace Application.Models.Dto.Responses
         [JsonPropertyName("genre_ids")]
         public List<int> GenreIds { get; init; } = [];
 
+        [JsonPropertyName("genres")]
+        public List<GenreDto> Genres { get; init; } = [];
+
         [JsonPropertyName("id")]
         public int Id { get; init; }
 
@@ -36,6 +39,9 @@ namespace Application.Models.Dto.Responses
 
         [JsonPropertyName("release_date")]
         public string ReleaseDate { get; init; } = string.Empty;
+
+        [JsonPropertyName("runtime")]
+        public int? Runtime { get; init; }
 
         [JsonPropertyName("softcore")]
         public bool Softcore { get; init; }
