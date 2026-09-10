@@ -33,16 +33,16 @@ namespace Api.Controllers
         }
 
         [HttpPost("{listId}/remove_item")]
-        public async Task<IActionResult> RemoveMovie(int listId, [FromBody] ListMediaItemDto request)
+        public async Task<IActionResult> RemoveMovie(int listId, [FromBody] int mediaId)
         {
-            var result = await _listsClient.RemoveMovie(listId, request.MediaId);
+            var result = await _listsClient.RemoveMovie(listId, mediaId);
             return Ok(result);
         }
 
         [HttpPost("{listId}/add_item")]
-        public async Task<IActionResult> AddMovie(int listId, [FromBody] ListMediaItemDto request)
+        public async Task<IActionResult> AddMovie(int listId, [FromBody] int mediaId)
         {
-            var result = await _listsClient.AddMovie(listId, request.MediaId);
+            var result = await _listsClient.AddMovie(listId, mediaId);
             return Ok(result);
         }
     }
