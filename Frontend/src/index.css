@@ -185,6 +185,27 @@ p {
   border-radius: 0.5rem;
 }
 
+.media-actions {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.rating-control {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.rating-control input {
+  max-width: 7rem;
+  border: 1px solid #334155;
+  border-radius: 0.5rem;
+  background: #111827;
+  color: #e5e7eb;
+  padding: 0.4rem 0.6rem;
+}
+
 @media (max-width: 880px) {
   .top-row .container {
     flex-wrap: wrap;

@@ -11,6 +11,11 @@ export type MediaCategory =
   | 'airing-today'
   | 'on-the-air';
 
+export interface GenreDto {
+  id: number;
+  name: string;
+}
+
 export interface MovieDto {
   id: number;
   title: string;
@@ -19,6 +24,8 @@ export interface MovieDto {
   poster_path: string | null;
   backdrop_path: string | null;
   release_date: string;
+  runtime?: number;
+  genres?: GenreDto[];
   original_language: string;
   vote_average: number;
   vote_count: number;
@@ -35,6 +42,8 @@ export interface TvShowDto {
   poster_path: string | null;
   backdrop_path: string | null;
   first_air_date: string;
+  episode_run_time?: number[];
+  genres?: GenreDto[];
   original_language: string;
   vote_average: number;
   vote_count: number;

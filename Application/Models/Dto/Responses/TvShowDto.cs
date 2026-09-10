@@ -37,6 +37,12 @@ namespace Application.Models.Dto.Responses
         [JsonPropertyName("first_air_date")]
         public string FirstAirDate { get; init; } = string.Empty;
 
+        [JsonPropertyName("episode_run_time")]
+        public List<int> EpisodeRunTime { get; init; } = [];
+
+        [JsonPropertyName("genres")]
+        public List<GenreDto> Genres { get; init; } = [];
+
         [JsonPropertyName("name")]
         public required string Name { get; init; }
 
