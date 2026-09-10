@@ -1,5 +1,8 @@
 @page "/tv/{id:int}"
+@rendermode InteractiveServer
 @inject IHttpClientFactory httpClientFactory
+@using Application.Enums
+@using Application.Models.Dto.Requests
 @using Application.Models.Dto.Responses
 
 @if (tvShow != null)
@@ -24,10 +27,32 @@
 				}
 
 				<p><strong>First Air Date:</strong> @tvShow.FirstAirDate</p>
+				@if (tvShow.EpisodeRunTime.Count > 0)
+				{
+					<p><strong>Runtime:</strong> @tvShow.EpisodeRunTime[0] min</p>
+				}
 				<p><strong>Rating:</strong> @tvShow.VoteAverage.ToString("F1") / 10 (@tvShow.VoteCount votes)</p>
 				<p><strong>Popularity:</strong> @tvShow.Popularity.ToString("F1")</p>
 				<p><strong>Original Language:</strong> @tvShow.OriginalLanguage.ToUpper()</p>
 				<p><strong>ID:</strong> @tvShow.Id</p>
+
+				<div>
+					<button @onclick="AddToWatchlist">Add to Watchlist</button>
+					<button @onclick="RemoveFromWatchlist">Remove from Watchlist</button>
+				</div>
+				<div>
+					<button @onclick="AddToFavorites">Add to Favorites</button>
+					<button @onclick="RemoveFromFavorites">Remove from Favorites</button>
+				</div>
+				<div>
+					<input type="number" min="0.5" max="5" step="0.5" @bind="ratingOutOfFive" />
+					<button @onclick="RateTvShow">Rate (x2 sent to API)</button>
+					<button @onclick="DeleteRating">Remove Rating</button>
+				</div>
+				@if (!string.IsNullOrEmpty(actionStatus))
+				{
+					<p>@actionStatus</p>
+				}
 
 				@if (tvShow.OriginCountry.Count > 0)
 				{
@@ -44,7 +69,14 @@
 			</div>
 		}
 
-		@if (tvShow.GenreIds.Count > 0)
+		@if (tvShow.Genres.Count > 0)
+		{
+			<div class="tv-genres">
+				<h3>Genres</h3>
+				<p>@string.Join(", ", tvShow.Genres.Select(g => g.Name))</p>
+			</div>
+		}
+		else if (tvShow.GenreIds.Count > 0)
 		{
 			<div class="tv-genres">
 				<h3>Genre IDs</h3>
@@ -76,8 +108,10 @@ else
 
 	private TvShowDto? tvShow;
 	private bool isLoading = true;
+	private double ratingOutOfFive = 2.5;
+	private string? actionStatus;
 
-	protected override async Task OnInitializedAsync()
+	protected override async Task OnParametersSetAsync()
 	{
 		await LoadTvShowDetails();
 	}
@@ -85,6 +119,7 @@ else
 	private async Task LoadTvShowDetails()
 	{
 		isLoading = true;
+		actionStatus = null;
 		var client = httpClientFactory.CreateClient("MovieLibraryApi");
 
 		try
@@ -99,6 +134,45 @@ else
 		{
 			isLoading = false;
 		}
+	}
+
+	private async Task AddToWatchlist() =>
+		await UpdateStatus(async client => await client.PostAsJsonAsync("/api/account/watchlist",
+			new AddMediaWatchlistDto { Media = MediaType.tv, MediaId = Id, AddToList = true }));
+
+	private async Task RemoveFromWatchlist() =>
+		await UpdateStatus(async client => await client.PostAsJsonAsync("/api/account/watchlist",
+			new AddMediaWatchlistDto { Media = MediaType.tv, MediaId = Id, AddToList = false }));
+
+	private async Task AddToFavorites() =>
+		await UpdateStatus(async client => await client.PostAsJsonAsync("/api/account/favorite",
+			new AddMediaFavoriteDto { Media = MediaType.tv, MediaId = Id, AddToList = true }));
+
+	private async Task RemoveFromFavorites() =>
+		await UpdateStatus(async client => await client.PostAsJsonAsync("/api/account/favorite",
+			new AddMediaFavoriteDto { Media = MediaType.tv, MediaId = Id, AddToList = false }));
+
+	private async Task RateTvShow()
+	{
+		if (ratingOutOfFive is < 0.5 or > 5)
+		{
+			actionStatus = "Rating must be between 0.5 and 5.";
+			return;
+		}
+
+		var tmdbRating = ratingOutOfFive * 2;
+		await UpdateStatus(async client => await client.PostAsync($"/api/tvshow/{Id}/rating?rating={tmdbRating}", null));
+	}
+
+	private async Task DeleteRating() =>
+		await UpdateStatus(async client => await client.DeleteAsync($"/api/tvshow/{Id}/rating"));
+
+	private async Task UpdateStatus(Func<HttpClient, Task<HttpResponseMessage>> request)
+	{
+		var client = httpClientFactory.CreateClient("MovieLibraryApi");
+		var response = await request(client);
+		var status = await response.Content.ReadFromJsonAsync<StatusDto>();
+		actionStatus = status?.StatusMessage ?? response.ReasonPhrase ?? "Request completed.";
 	}
 
 	private string GetImageUrl(string? imagePath)

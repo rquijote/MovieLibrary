@@ -1,5 +1,8 @@
 @page "/movie/{id:int}"
+@rendermode InteractiveServer
 @inject IHttpClientFactory httpClientFactory
+@using Application.Enums
+@using Application.Models.Dto.Requests
 @using Application.Models.Dto.Responses
 
 @if (movie != null)
@@ -31,11 +34,37 @@
 				}
 
 				<p><strong>Release Date:</strong> @movie.ReleaseDate</p>
+				@if (movie.Runtime.HasValue)
+				{
+					<p><strong>Runtime:</strong> @movie.Runtime min</p>
+				}
 				<p><strong>Rating:</strong> @movie.VoteAverage.ToString("F1") / 10 (@movie.VoteCount votes)</p>
 				<p><strong>Popularity:</strong> @movie.Popularity.ToString("F1")</p>
 				<p><strong>Original Language:</strong> @movie.OriginalLanguage.ToUpper()</p>
 				<p><strong>ID:</strong> @movie.Id</p>
-				<button>Add to List</button>
+
+				<div>
+					<button @onclick="AddToWatchlist">Add to Watchlist</button>
+					<button @onclick="RemoveFromWatchlist">Remove from Watchlist</button>
+				</div>
+				<div>
+					<button @onclick="AddToFavorites">Add to Favorites</button>
+					<button @onclick="RemoveFromFavorites">Remove from Favorites</button>
+				</div>
+				<div>
+					<input type="number" min="1" @bind="listId" />
+					<button @onclick="AddToList">Add to List</button>
+					<button @onclick="RemoveFromList">Remove from List</button>
+				</div>
+				<div>
+					<input type="number" min="0.5" max="5" step="0.5" @bind="ratingOutOfFive" />
+					<button @onclick="RateMovie">Rate (x2 sent to API)</button>
+					<button @onclick="DeleteRating">Remove Rating</button>
+				</div>
+				@if (!string.IsNullOrEmpty(actionStatus))
+				{
+					<p>@actionStatus</p>
+				}
 
 				@if (movie.Video)
 				{
@@ -52,7 +81,14 @@
 			</div>
 		}
 
-		@if (movie.GenreIds.Count > 0)
+		@if (movie.Genres.Count > 0)
+		{
+			<div class="movie-genres">
+				<h3>Genres</h3>
+				<p>@string.Join(", ", movie.Genres.Select(g => g.Name))</p>
+			</div>
+		}
+		else if (movie.GenreIds.Count > 0)
 		{
 			<div class="movie-genres">
 				<h3>Genre IDs</h3>
@@ -76,8 +112,11 @@ else
 
 	private MovieDto? movie;
 	private bool isLoading = true;
+	private int listId;
+	private double ratingOutOfFive = 2.5;
+	private string? actionStatus;
 
-	protected override async Task OnInitializedAsync()
+	protected override async Task OnParametersSetAsync()
 	{
 		await LoadMovieDetails();
 	}
@@ -85,6 +124,7 @@ else
 	private async Task LoadMovieDetails()
 	{
 		isLoading = true;
+		actionStatus = null;
 		var client = httpClientFactory.CreateClient("MovieLibraryApi");
 
 		try
@@ -99,6 +139,69 @@ else
 		{
 			isLoading = false;
 		}
+	}
+
+	private async Task AddToWatchlist() =>
+		await UpdateStatus(async client => await client.PostAsJsonAsync("/api/account/watchlist",
+			new AddMediaWatchlistDto { Media = MediaType.movie, MediaId = Id, AddToList = true }));
+
+	private async Task RemoveFromWatchlist() =>
+		await UpdateStatus(async client => await client.PostAsJsonAsync("/api/account/watchlist",
+			new AddMediaWatchlistDto { Media = MediaType.movie, MediaId = Id, AddToList = false }));
+
+	private async Task AddToFavorites() =>
+		await UpdateStatus(async client => await client.PostAsJsonAsync("/api/account/favorite",
+			new AddMediaFavoriteDto { Media = MediaType.movie, MediaId = Id, AddToList = true }));
+
+	private async Task RemoveFromFavorites() =>
+		await UpdateStatus(async client => await client.PostAsJsonAsync("/api/account/favorite",
+			new AddMediaFavoriteDto { Media = MediaType.movie, MediaId = Id, AddToList = false }));
+
+	private async Task AddToList()
+	{
+		if (listId <= 0)
+		{
+			actionStatus = "Please enter a valid list ID.";
+			return;
+		}
+
+		await UpdateStatus(async client => await client.PostAsJsonAsync($"/api/lists/{listId}/add_item",
+			new ListMediaItemDto { MediaId = Id }));
+	}
+
+	private async Task RemoveFromList()
+	{
+		if (listId <= 0)
+		{
+			actionStatus = "Please enter a valid list ID.";
+			return;
+		}
+
+		await UpdateStatus(async client => await client.PostAsJsonAsync($"/api/lists/{listId}/remove_item",
+			new ListMediaItemDto { MediaId = Id }));
+	}
+
+	private async Task RateMovie()
+	{
+		if (ratingOutOfFive is < 0.5 or > 5)
+		{
+			actionStatus = "Rating must be between 0.5 and 5.";
+			return;
+		}
+
+		var tmdbRating = ratingOutOfFive * 2;
+		await UpdateStatus(async client => await client.PostAsync($"/api/movie/{Id}/rating?rating={tmdbRating}", null));
+	}
+
+	private async Task DeleteRating() =>
+		await UpdateStatus(async client => await client.DeleteAsync($"/api/movie/{Id}/rating"));
+
+	private async Task UpdateStatus(Func<HttpClient, Task<HttpResponseMessage>> request)
+	{
+		var client = httpClientFactory.CreateClient("MovieLibraryApi");
+		var response = await request(client);
+		var status = await response.Content.ReadFromJsonAsync<StatusDto>();
+		actionStatus = status?.StatusMessage ?? response.ReasonPhrase ?? "Request completed.";
 	}
 
 	private string GetImageUrl(string? imagePath)
