@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { MediaActionsPanel } from '../components/MediaActionsPanel';
 import { apiGet } from '../lib/api';
-import { getImageUrl } from '../lib/media';
+import { getImageUrl, handleMediaImageError } from '../lib/media';
 import type { MovieDto } from '../types/media';
 
 export function MovieDetailsPage() {
@@ -43,7 +43,12 @@ export function MovieDetailsPage() {
   return (
     <div className="details-view">
       <div className="details-header">
-        <img src={getImageUrl(movie.poster_path ?? movie.backdrop_path)} alt={movie.title} className="details-poster" />
+        <img
+          src={getImageUrl(movie.poster_path ?? movie.backdrop_path)}
+          alt={movie.title}
+          className="details-poster"
+          onError={handleMediaImageError}
+        />
 
         <div>
           <h1>{movie.title}</h1>
@@ -99,7 +104,12 @@ export function MovieDetailsPage() {
       {movie.backdrop_path ? (
         <section>
           <h3>Backdrop Image</h3>
-          <img src={getImageUrl(movie.backdrop_path)} alt={`${movie.title} backdrop`} className="details-backdrop" />
+          <img
+            src={getImageUrl(movie.backdrop_path)}
+            alt={`${movie.title} backdrop`}
+            className="details-backdrop"
+            onError={handleMediaImageError}
+          />
         </section>
       ) : null}
     </div>

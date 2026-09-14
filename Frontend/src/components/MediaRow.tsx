@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { getImageUrl, getMediaTitle } from '../lib/media';
+import { getImageUrl, getMediaTitle, handleMediaImageError } from '../lib/media';
 import type { MediaCategory, MediaItem, MediaType } from '../types/media';
 
 interface MediaRowProps {
@@ -26,7 +26,7 @@ export function MediaRow({ title, items, mediaType, category }: MediaRowProps) {
           const route = mediaType === 'movies' ? `/movie/${item.id}` : `/tv/${item.id}`;
           return (
             <button key={`${mediaType}-${item.id}`} type="button" className="media-row-item" onClick={() => navigate(route)}>
-              <img src={getImageUrl(item.poster_path, 'w185')} alt={getMediaTitle(item)} />
+              <img src={getImageUrl(item.poster_path, 'w185')} alt={getMediaTitle(item)} onError={handleMediaImageError} />
             </button>
           );
         })}

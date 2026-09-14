@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { getImageUrl, getMediaDate, getMediaTitle } from '../lib/media';
+import { getImageUrl, getMediaDate, getMediaTitle, handleMediaImageError } from '../lib/media';
 import type { MediaItem, MediaType } from '../types/media';
 
 interface MediaGridProps {
@@ -19,7 +19,7 @@ export function MediaGrid({ items, mediaType }: MediaGridProps) {
           className="media-grid-item"
           onClick={() => navigate(mediaType === 'movies' ? `/movie/${item.id}` : `/tv/${item.id}`)}
         >
-          <img src={getImageUrl(item.poster_path)} alt={getMediaTitle(item)} />
+          <img src={getImageUrl(item.poster_path)} alt={getMediaTitle(item)} onError={handleMediaImageError} />
           <h4>{getMediaTitle(item)}</h4>
           <p>{getMediaDate(item)}</p>
         </button>

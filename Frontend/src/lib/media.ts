@@ -1,11 +1,20 @@
+import type { SyntheticEvent } from 'react';
 import type { MediaCategory, MediaItem, MediaType } from '../types/media';
+
+const mediaPlaceholderImage =
+  'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="500" height="750" viewBox="0 0 500 750"><rect width="500" height="750" fill="%23334155"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%23e5e7eb" font-family="Arial, sans-serif" font-size="32">No Image</text></svg>';
 
 export function getImageUrl(imagePath: string | null | undefined, width = 'w500'): string {
   if (!imagePath) {
-    return 'https://via.placeholder.com/500x750?text=No+Image';
+    return mediaPlaceholderImage;
   }
 
   return `https://image.tmdb.org/t/p/${width}${imagePath}`;
+}
+
+export function handleMediaImageError(event: SyntheticEvent<HTMLImageElement>) {
+  event.currentTarget.onerror = null;
+  event.currentTarget.src = mediaPlaceholderImage;
 }
 
 export function getMediaTitle(item: MediaItem): string {
@@ -21,7 +30,7 @@ export const expandedListEndpoints: Record<MediaType, Partial<Record<MediaCatego
     popular: '/api/MovieLists/popular',
     'top-rated': '/api/MovieLists/top-rated',
     'now-playing': '/api/MovieLists/now-playing',
-    upcoming: '/api/MovieLists/upcoming',
+    upcoming: '/api/Discover/movies',
     trending: '/api/Trending/movies?timeWindow=day',
     watchlist: '/api/Account/watchlist/movies',
     favorite: '/api/Account/favourite/movies',

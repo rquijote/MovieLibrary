@@ -47,7 +47,23 @@ export function ExpandedMediaListPage() {
       return null;
     }
 
-    return expandedListEndpoints[parsedMediaType][parsedCategory] ?? null;
+    const baseEndpoint = expandedListEndpoints[parsedMediaType][parsedCategory];
+    if (!baseEndpoint) {
+      return null;
+    }
+
+    if (parsedCategory !== 'upcoming') {
+      return baseEndpoint;
+    }
+
+    const today = new Date();
+    const nextMonth = new Date(today);
+    nextMonth.setMonth(nextMonth.getMonth() + 1);
+    const formatDate = (date: Date) => date.toISOString().split('T')[0];
+
+    return parsedMediaType === 'movies'
+      ? `${baseEndpoint}?PrimaryReleaseDateGte=${formatDate(today)}&PrimaryReleaseDateLte=${formatDate(nextMonth)}`
+      : `${baseEndpoint}?FirstAirDateGte=${formatDate(today)}&FirstAirDateLte=${formatDate(nextMonth)}`;
   }, [parsedCategory, parsedMediaType]);
 
   useEffect(() => {

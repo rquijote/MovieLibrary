@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { MediaActionsPanel } from '../components/MediaActionsPanel';
 import { apiGet } from '../lib/api';
-import { getImageUrl } from '../lib/media';
+import { getImageUrl, handleMediaImageError } from '../lib/media';
 import type { TvShowDto } from '../types/media';
 
 export function TvShowDetailsPage() {
@@ -43,7 +43,12 @@ export function TvShowDetailsPage() {
   return (
     <div className="details-view">
       <div className="details-header">
-        <img src={getImageUrl(tvShow.poster_path ?? tvShow.backdrop_path)} alt={tvShow.name} className="details-poster" />
+        <img
+          src={getImageUrl(tvShow.poster_path ?? tvShow.backdrop_path)}
+          alt={tvShow.name}
+          className="details-poster"
+          onError={handleMediaImageError}
+        />
 
         <div>
           <h1>{tvShow.name}</h1>
@@ -107,7 +112,12 @@ export function TvShowDetailsPage() {
       {tvShow.backdrop_path ? (
         <section>
           <h3>Backdrop Image</h3>
-          <img src={getImageUrl(tvShow.backdrop_path)} alt={`${tvShow.name} backdrop`} className="details-backdrop" />
+          <img
+            src={getImageUrl(tvShow.backdrop_path)}
+            alt={`${tvShow.name} backdrop`}
+            className="details-backdrop"
+            onError={handleMediaImageError}
+          />
         </section>
       ) : null}
     </div>
