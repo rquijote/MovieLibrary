@@ -64,5 +64,12 @@ namespace Api.Services
             var listResult = await response.Content.ReadFromJsonAsync<TvShowListResponseDto>();
             return listResult ?? new TvShowListResponseDto();
         }
+
+        public async Task<AccountListsResponseDto> GetListsAsync(int page)
+        {
+            var response = await _http.GetAsync($"lists?page={page}");
+            var listResult = await response.Content.ReadFromJsonAsync<AccountListsResponseDto>();
+            return listResult ?? new AccountListsResponseDto();
+        }
     }
 }

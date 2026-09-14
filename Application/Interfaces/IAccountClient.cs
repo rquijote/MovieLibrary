@@ -14,5 +14,8 @@ namespace Application.Interfaces
         Task<StatusDto> AddToFavoritesAsync(AddMediaFavoriteDto request);
         Task<MovieListResponseDto> GetFavoriteMoviesAsync(int page);
         Task<TvShowListResponseDto> GetFavoriteTVShowsAsync(int page);
+
+        // Account Lists
+        Task<AccountListsResponseDto> GetListsAsync(int page);
     }
 }

@@ -58,6 +58,20 @@ export interface StatusDto {
   status_message?: string;
 }
 
+export interface AccountListSummary {
+  id: number;
+  name: string;
+  description: string;
+  item_count: number;
+}
+
+export interface AccountListsResponse {
+  page: number;
+  results: AccountListSummary[];
+  total_pages: number;
+  total_results: number;
+}
+
 export interface MediaListResponse<TItem> {
   page: number;
   results: TItem[];

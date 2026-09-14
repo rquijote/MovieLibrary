@@ -52,5 +52,12 @@ namespace Api.Controllers
             var result = await _accountClient.GetWatchlistTVShowsAsync(page);
             return Ok(result);
         }
+
+        [HttpGet("lists")]
+        public async Task<IActionResult> GetLists([FromQuery] int page = 1)
+        {
+            var result = await _accountClient.GetListsAsync(page);
+            return Ok(result);
+        }
     }
 }

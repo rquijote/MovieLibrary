@@ -24,9 +24,17 @@ export function MediaRow({ title, items, mediaType, category }: MediaRowProps) {
       <div className="media-row">
         {items.map((item) => {
           const route = mediaType === 'movies' ? `/movie/${item.id}` : `/tv/${item.id}`;
+          const itemTitle = getMediaTitle(item);
+
           return (
-            <button key={`${mediaType}-${item.id}`} type="button" className="media-row-item" onClick={() => navigate(route)}>
-              <img src={getImageUrl(item.poster_path, 'w185')} alt={getMediaTitle(item)} onError={handleMediaImageError} />
+            <button
+              key={`${mediaType}-${item.id}`}
+              type="button"
+              className="media-row-item"
+              onClick={() => navigate(route)}
+            >
+              <img src={getImageUrl(item.poster_path, 'w185')} alt={itemTitle} onError={handleMediaImageError} />
+              <span className="media-row-item-title">{itemTitle}</span>
             </button>
           );
         })}

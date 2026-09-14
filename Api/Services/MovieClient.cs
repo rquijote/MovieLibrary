@@ -7,7 +7,8 @@ namespace Api.Services
     public sealed class MovieClient(HttpClient http) : IMovieClient
     {
         private readonly HttpClient _http = http;
-        public async Task<object> GetMovieById(int id)
+
+        public async Task<MovieDto> GetMovieById(int id)
         {
             var response = await _http.GetAsync($"{id}");
 
@@ -16,14 +17,11 @@ namespace Api.Services
                 if (response.StatusCode == HttpStatusCode.NotFound)
                 {
                     var errorResponse = await response.Content.ReadFromJsonAsync<StatusDto>();
-                    return errorResponse ?? new StatusDto 
-                    { 
-                        Success = false, 
-                        StatusCode = 34, 
-                        StatusMessage = "The resource you requested could not be found." 
-                    };
+                    throw new KeyNotFoundException(
+                        errorResponse?.StatusMessage ?? $"Movie with ID {id} not found.");
                 }
             }
+
             response.EnsureSuccessStatusCode();
             var result = await response.Content.ReadFromJsonAsync<MovieDto>();
             return result ?? throw new InvalidOperationException("Failed to deserialize movie response.");

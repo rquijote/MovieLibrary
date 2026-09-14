@@ -38,7 +38,7 @@ export function MovieDetailsPage() {
 
   if (!movie) {
     return <p>Movie not found.</p>;
-  }
+    }
 
   return (
     <div className="details-view">

@@ -13,8 +13,22 @@ namespace Api.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetMovieById(int id)
         {
-            var result = await _movieClient.GetMovieById(id);
-            return Ok(result);
+            try
+            {
+                var result = await _movieClient.GetMovieById(id);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                var statusDto = new StatusDto
+                {
+                    Success = false,
+                    StatusCode = 34,
+                    StatusMessage = ex.Message
+                };
+
+                return NotFound(statusDto);
+            }
         }
 
         [HttpPost("{id}/rating")]
