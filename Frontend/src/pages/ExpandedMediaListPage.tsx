@@ -26,8 +26,9 @@ const validCategories: MediaCategory[] = [
 
 export function ExpandedMediaListPage() {
   const { mediaType, category } = useParams();
-  const [page, setPage] = useState(1);
   const [items, setItems] = useState<MediaItem[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,17 +47,15 @@ export function ExpandedMediaListPage() {
       return null;
     }
 
-    const baseEndpoint = expandedListEndpoints[parsedMediaType][parsedCategory];
-    if (!baseEndpoint) {
-      return null;
-    }
-
-    return buildPagedEndpoint(baseEndpoint, page);
-  }, [parsedCategory, parsedMediaType, page]);
+    return expandedListEndpoints[parsedMediaType][parsedCategory] ?? null;
+  }, [parsedCategory, parsedMediaType]);
 
   useEffect(() => {
     const load = async () => {
       if (!endpoint || !parsedMediaType) {
+        setItems([]);
+        setTotalPages(1);
+        setIsLoading(false);
         return;
       }
 
@@ -64,12 +63,16 @@ export function ExpandedMediaListPage() {
         setIsLoading(true);
         setError(null);
 
+        const pagedEndpoint = buildPagedEndpoint(endpoint, currentPage);
+
         if (parsedMediaType === 'movies') {
-          const response = await apiGet<MovieListResponse>(endpoint);
+          const response = await apiGet<MovieListResponse>(pagedEndpoint);
           setItems(response.results);
+          setTotalPages(Math.max(response.total_pages ?? 1, 1));
         } else {
-          const response = await apiGet<TvShowListResponse>(endpoint);
+          const response = await apiGet<TvShowListResponse>(pagedEndpoint);
           setItems(response.results);
+          setTotalPages(Math.max(response.total_pages ?? 1, 1));
         }
       } catch (loadError) {
         setError(loadError instanceof Error ? loadError.message : 'Failed to load expanded media list.');
@@ -79,33 +82,35 @@ export function ExpandedMediaListPage() {
     };
 
     void load();
-  }, [endpoint, parsedMediaType]);
+  }, [currentPage, endpoint, parsedMediaType]);
 
   if (!parsedMediaType || !parsedCategory || !endpoint) {
     return <p>Route not found.</p>;
   }
 
+  if (error) {
+    return <p>{error}</p>;
+  }
+
+  if (isLoading) {
+    return <p>Loading...</p>;
+  }
+
   return (
     <>
-      <h1>Expanded Media List</h1>
-      <p>Media Type: {parsedMediaType}</p>
-      <p>Category: {parsedCategory}</p>
-      <p>Endpoint: {endpoint}</p>
-
       <div className="pagination-controls">
-        {page > 1 ? (
-          <button type="button" onClick={() => setPage((current) => current - 1)}>
-            ← Previous
-          </button>
-        ) : null}
-        <span>Page {page}</span>
-        <button type="button" onClick={() => setPage((current) => current + 1)}>
+        <button type="button" onClick={() => setCurrentPage((page) => page - 1)} disabled={currentPage === 1}>
+          ← Previous
+        </button>
+        <span>
+          Page {currentPage} of {totalPages}
+        </span>
+        <button type="button" onClick={() => setCurrentPage((page) => page + 1)} disabled={currentPage >= totalPages}>
           Next →
         </button>
       </div>
 
-      {error ? <p>{error}</p> : null}
-      {isLoading ? <p>Loading...</p> : <MediaGrid items={items} mediaType={parsedMediaType} />}
+      <MediaGrid items={items} mediaType={parsedMediaType} />
     </>
   );
 }

@@ -27,6 +27,7 @@ export const expandedListEndpoints: Record<MediaType, Partial<Record<MediaCatego
     favorite: '/api/Account/favourite/movies',
   },
   tv: {
+    upcoming: '/api/Discover/tv',
     popular: '/api/TvShowLists/popular',
     'top-rated': '/api/TvShowLists/top-rated',
     'airing-today': '/api/TvShowLists/airing-today',

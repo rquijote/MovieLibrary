@@ -27,10 +27,10 @@ namespace Api.Services
                 parameters.Add($"sort_by={HttpUtility.UrlEncode(request.SortBy)}");
 
             if (!string.IsNullOrWhiteSpace(request.PrimaryReleaseDateGte))
-                parameters.Add($"primary_release_date.gte={request.PrimaryReleaseDateGte}");
+                parameters.Add($"primary_release_date.gte={request.PrimaryReleaseDateGte}"); // Greater than equals
 
             if (!string.IsNullOrWhiteSpace(request.PrimaryReleaseDateLte))
-                parameters.Add($"primary_release_date.lte={request.PrimaryReleaseDateLte}");
+                parameters.Add($"primary_release_date.lte={request.PrimaryReleaseDateLte}"); // Less than equals
 
             if (!string.IsNullOrWhiteSpace(request.WithOriginalLanguage))
                 parameters.Add($"with_original_language={request.WithOriginalLanguage}");

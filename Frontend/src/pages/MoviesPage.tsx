@@ -9,13 +9,17 @@ export function MoviesPage() {
   const [upcoming, setUpcoming] = useState<MovieListResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const load = async () => {
-      try {
+    useEffect(() => {
+      const today = new Date();
+      const nextMonth = new Date(today);
+      nextMonth.setMonth(nextMonth.getMonth() + 1);
+      const formatDate = (d: Date) => d.toISOString().split('T')[0]
+      const load = async () => {
+        try {
         const [popularData, topRatedData, upcomingData] = await Promise.all([
           apiGet<MovieListResponse>('/api/MovieLists/popular'),
           apiGet<MovieListResponse>('/api/MovieLists/top-rated'),
-          apiGet<MovieListResponse>('/api/MovieLists/upcoming'),
+          apiGet<MovieListResponse>(`/api/Discover/movies?PrimaryReleaseDateGte=${formatDate(today)}&PrimaryReleaseDateLte=${formatDate(nextMonth)}`),
         ]);
 
         setPopular(popularData);
