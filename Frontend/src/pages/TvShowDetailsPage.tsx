@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { MediaActionsPanel } from '../components/MediaActionsPanel';
 import { apiGet } from '../lib/api';
 import { getImageUrl } from '../lib/media';
 import type { TvShowDto } from '../types/media';
@@ -55,6 +56,12 @@ export function TvShowDetailsPage() {
             <strong>First Air Date:</strong> {tvShow.first_air_date}
           </p>
           <p>
+            <strong>Episode Runtime:</strong>{' '}
+            {tvShow.episode_run_time && tvShow.episode_run_time.length > 0
+              ? `${tvShow.episode_run_time.join(', ')} minutes`
+              : 'Unavailable'}
+          </p>
+          <p>
             <strong>Rating:</strong> {tvShow.vote_average.toFixed(1)} / 10 ({tvShow.vote_count} votes)
           </p>
           <p>
@@ -71,6 +78,8 @@ export function TvShowDetailsPage() {
               <strong>Origin Country:</strong> {tvShow.origin_country.join(', ')}
             </p>
           ) : null}
+
+          <MediaActionsPanel mediaId={tvShow.id} mediaType="tv" />
         </div>
       </div>
 
@@ -78,6 +87,13 @@ export function TvShowDetailsPage() {
         <section>
           <h2>Overview</h2>
           <p>{tvShow.overview}</p>
+        </section>
+      ) : null}
+
+      {tvShow.genres && tvShow.genres.length > 0 ? (
+        <section>
+          <h3>Genres</h3>
+          <p>{tvShow.genres.map((genre) => genre.name).join(', ')}</p>
         </section>
       ) : null}
 

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { MediaActionsPanel } from '../components/MediaActionsPanel';
 import { apiGet } from '../lib/api';
 import { getImageUrl } from '../lib/media';
 import type { MovieDto } from '../types/media';
@@ -55,6 +56,9 @@ export function MovieDetailsPage() {
             <strong>Release Date:</strong> {movie.release_date}
           </p>
           <p>
+            <strong>Runtime:</strong> {movie.runtime ? `${movie.runtime} minutes` : 'Unavailable'}
+          </p>
+          <p>
             <strong>Rating:</strong> {movie.vote_average.toFixed(1)} / 10 ({movie.vote_count} votes)
           </p>
           <p>
@@ -66,6 +70,8 @@ export function MovieDetailsPage() {
           <p>
             <strong>ID:</strong> {movie.id}
           </p>
+
+          <MediaActionsPanel mediaId={movie.id} mediaType="movie" />
         </div>
       </div>
 
@@ -73,6 +79,13 @@ export function MovieDetailsPage() {
         <section>
           <h2>Overview</h2>
           <p>{movie.overview}</p>
+        </section>
+      ) : null}
+
+      {movie.genres && movie.genres.length > 0 ? (
+        <section>
+          <h3>Genres</h3>
+          <p>{movie.genres.map((genre) => genre.name).join(', ')}</p>
         </section>
       ) : null}
 

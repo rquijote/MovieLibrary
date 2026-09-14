@@ -25,6 +25,8 @@ export interface MovieDto {
   popularity: number;
   video: boolean;
   genre_ids: number[];
+  genres?: GenreDto[];
+  runtime?: number;
 }
 
 export interface TvShowDto {
@@ -41,6 +43,19 @@ export interface TvShowDto {
   popularity: number;
   origin_country: string[];
   genre_ids: number[];
+  genres?: GenreDto[];
+  episode_run_time?: number[];
+}
+
+export interface GenreDto {
+  id: number;
+  name: string;
+}
+
+export interface StatusDto {
+  success: boolean;
+  status_code: number;
+  status_message?: string;
 }
 
 export interface MediaListResponse<TItem> {

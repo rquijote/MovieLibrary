@@ -25,7 +25,10 @@ export function Layout() {
               Lists
             </NavLink>
           </nav>
-          <p className="profile-placeholder">Profile Picture Here</p>
+          <div className="profile-placeholder" aria-label="Anonymous profile placeholder" title="Anonymous profile">
+            <span className="profile-placeholder-head" />
+            <span className="profile-placeholder-body" />
+          </div>
         </div>
       </header>
 
