@@ -123,13 +123,13 @@ builder.Services.AddHttpClient<IDiscoverTVShowsClient, DiscoverTVShowsClient>((s
     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", bearerTokenValue);
 });
 
-// ListsClient - for discovering TV shows with advanced filters
+// ListsClient - for TMDB v4 list operations
 builder.Services.AddHttpClient<IListsClient, ListsClient>((serviceProvider, client) =>
 {
     var config = serviceProvider.GetRequiredService<IConfiguration>();
     var bearerTokenValue = config["BEARER_TOKEN"] ?? "";
 
-    client.BaseAddress = new Uri($"{tmdbBaseUrl}list");
+    client.BaseAddress = new Uri("https://api.themoviedb.org/4/list/");
     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", bearerTokenValue);
 });
 

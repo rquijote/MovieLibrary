@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
-import type { MouseEvent } from 'react';
-import { apiDelete, apiGet, apiPost } from '../lib/api';
-import type { AccountListSummary, AccountListsResponse, StatusDto } from '../types/media';
+import type { FormEvent, MouseEvent } from 'react';
+import { apiDelete, apiGet, apiPost, apiPut } from '../lib/api';
+import type { AccountListSummary, AccountListsResponse, ListDetailsResponse, StatusDto } from '../types/media';
 
 interface MediaActionsPanelProps {
   mediaId: number;
@@ -16,6 +16,14 @@ export function MediaActionsPanel({ mediaId, mediaType }: MediaActionsPanelProps
   const [isListPickerOpen, setIsListPickerOpen] = useState(false);
   const [isListsLoading, setIsListsLoading] = useState(false);
   const [accountLists, setAccountLists] = useState<AccountListSummary[]>([]);
+  const [newListName, setNewListName] = useState('');
+  const [newListDescription, setNewListDescription] = useState('');
+  const [openCrudMenuListId, setOpenCrudMenuListId] = useState<number | null>(null);
+  const [editingListId, setEditingListId] = useState<number | null>(null);
+  const [editingName, setEditingName] = useState('');
+  const [editingDescription, setEditingDescription] = useState('');
+  const [expandedDetailsListId, setExpandedDetailsListId] = useState<number | null>(null);
+  const [detailsByListId, setDetailsByListId] = useState<Record<number, ListDetailsResponse>>({});
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -122,10 +130,12 @@ export function MediaActionsPanel({ mediaId, mediaType }: MediaActionsPanelProps
     }
   };
 
-  const openListPicker = async () => {
-    setIsListPickerOpen(true);
+  const loadAccountLists = async (force: boolean) => {
+    if (isListsLoading) {
+      return;
+    }
 
-    if (accountLists.length > 0 || isListsLoading) {
+    if (!force && accountLists.length > 0) {
       return;
     }
 
@@ -140,6 +150,106 @@ export function MediaActionsPanel({ mediaId, mediaType }: MediaActionsPanelProps
     } finally {
       setIsListsLoading(false);
     }
+  };
+
+  const handleCreateList = async (event: FormEvent) => {
+    event.preventDefault();
+
+    const trimmedName = newListName.trim();
+    if (!trimmedName) {
+      setErrorMessage('List name is required.');
+      return;
+    }
+
+    try {
+      const result = await apiPost<StatusDto>('/api/Lists', {
+        name: trimmedName,
+        description: newListDescription.trim() || null,
+        language: 'en',
+      });
+
+      setStatusMessage(result.status_message ?? 'List created.');
+      setErrorMessage(null);
+      setNewListName('');
+      setNewListDescription('');
+      await loadAccountLists(true);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Failed to create list.');
+    }
+  };
+
+  const beginEditList = (list: AccountListSummary) => {
+    setOpenCrudMenuListId(null);
+    setEditingListId(list.id);
+    setEditingName(list.name);
+    setEditingDescription(list.description ?? '');
+  };
+
+  const handleUpdateList = async (listId: number) => {
+    const trimmedName = editingName.trim();
+    if (!trimmedName) {
+      setErrorMessage('List name is required.');
+      return;
+    }
+
+    try {
+      const result = await apiPut<StatusDto>(`/api/Lists/${listId}`, {
+        name: trimmedName,
+        description: editingDescription.trim() || null,
+      });
+
+      setStatusMessage(result.status_message ?? 'List updated.');
+      setErrorMessage(null);
+      setEditingListId(null);
+      await loadAccountLists(true);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Failed to update list.');
+    }
+  };
+
+  const handleDeleteList = async (listId: number) => {
+    try {
+      const result = await apiDelete<StatusDto>(`/api/Lists/${listId}`);
+      setStatusMessage(result.status_message ?? 'List deleted.');
+      setErrorMessage(null);
+      setOpenCrudMenuListId(null);
+      if (expandedDetailsListId === listId) {
+        setExpandedDetailsListId(null);
+      }
+
+      await loadAccountLists(true);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Failed to delete list.');
+    }
+  };
+
+  const handleReadListDetails = async (listId: number) => {
+    if (expandedDetailsListId === listId) {
+      setExpandedDetailsListId(null);
+      setOpenCrudMenuListId(null);
+      return;
+    }
+
+    try {
+      if (!detailsByListId[listId]) {
+        const details = await apiGet<ListDetailsResponse>(`/api/Lists/${listId}/details`);
+        setDetailsByListId((current) => ({
+          ...current,
+          [listId]: details,
+        }));
+      }
+
+      setExpandedDetailsListId(listId);
+      setOpenCrudMenuListId(null);
+      setErrorMessage(null);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Failed to load list details.');
+    }
+  };
+
+  const openListPicker = async () => {
+    setIsListPickerOpen(true);
+    await loadAccountLists(false);
   };
 
   return (
@@ -252,6 +362,23 @@ export function MediaActionsPanel({ mediaId, mediaType }: MediaActionsPanelProps
               </button>
             </div>
 
+            <form className="list-create-form" onSubmit={(event) => void handleCreateList(event)}>
+              <h4>Create new list</h4>
+              <input
+                type="text"
+                placeholder="List name"
+                value={newListName}
+                onChange={(event) => setNewListName(event.target.value)}
+              />
+              <input
+                type="text"
+                placeholder="Description (optional)"
+                value={newListDescription}
+                onChange={(event) => setNewListDescription(event.target.value)}
+              />
+              <button type="submit">Create</button>
+            </form>
+
             <div className="list-picker-item favorite-list-option">
               <div>
                 <strong>Favorites</strong>
@@ -291,7 +418,55 @@ export function MediaActionsPanel({ mediaId, mediaType }: MediaActionsPanelProps
                       <button type="button" onClick={() => void handleList(list.id, 'remove_item')}>
                         Remove
                       </button>
+                      <button
+                        type="button"
+                        className="list-more-button"
+                        aria-label={`More actions for ${list.name}`}
+                        onClick={() => setOpenCrudMenuListId((current) => (current === list.id ? null : list.id))}
+                      >
+                        ⋯
+                      </button>
                     </div>
+
+                    {openCrudMenuListId === list.id ? (
+                      <div className="list-crud-menu">
+                        <button type="button" onClick={() => void handleReadListDetails(list.id)}>
+                          Details
+                        </button>
+                        <button type="button" onClick={() => beginEditList(list)}>
+                          Edit
+                        </button>
+                        <button type="button" onClick={() => void handleDeleteList(list.id)}>
+                          Delete
+                        </button>
+                      </div>
+                    ) : null}
+
+                    {editingListId === list.id ? (
+                      <div className="list-edit-form">
+                        <input type="text" value={editingName} onChange={(event) => setEditingName(event.target.value)} />
+                        <input
+                          type="text"
+                          value={editingDescription}
+                          onChange={(event) => setEditingDescription(event.target.value)}
+                        />
+                        <div className="list-edit-actions">
+                          <button type="button" onClick={() => void handleUpdateList(list.id)}>
+                            Save
+                          </button>
+                          <button type="button" onClick={() => setEditingListId(null)}>
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ) : null}
+
+                    {expandedDetailsListId === list.id && detailsByListId[list.id] ? (
+                      <div className="list-details-panel">
+                        <p>{detailsByListId[list.id].description || 'No description.'}</p>
+                        <p>{detailsByListId[list.id].item_count} items</p>
+                      </div>
+                    ) : null}
                   </div>
                 ))
               : null}

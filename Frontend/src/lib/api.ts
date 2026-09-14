@@ -26,6 +26,22 @@ export async function apiPost<TResponse>(path: string, body: unknown): Promise<T
   return (await response.json()) as TResponse;
 }
 
+export async function apiPut<TResponse>(path: string, body: unknown): Promise<TResponse> {
+  const response = await fetch(
+    `${apiBaseUrl}${path}`,
+    buildJsonRequest({
+      method: 'PUT',
+      body: JSON.stringify(body),
+    }),
+  );
+
+  if (!response.ok) {
+    throw new Error(`Request failed (${response.status}) for ${path}`);
+  }
+
+  return (await response.json()) as TResponse;
+}
+
 export async function apiDelete<TResponse>(path: string): Promise<TResponse> {
   const response = await fetch(
     `${apiBaseUrl}${path}`,

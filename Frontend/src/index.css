@@ -386,11 +386,36 @@ p {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 0.75rem;
   border: 1px solid #1f2937;
   border-radius: 0.45rem;
   padding: 0.55rem;
   margin-bottom: 0.5rem;
+}
+
+.list-create-form {
+  display: grid;
+  gap: 0.5rem;
+  border: 1px solid #1f2937;
+  border-radius: 0.45rem;
+  padding: 0.65rem;
+  margin-bottom: 0.75rem;
+}
+
+.list-create-form h4 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.list-create-form input,
+.list-edit-form input {
+  width: 100%;
+  background: #111827;
+  color: #e5e7eb;
+  border: 1px solid #334155;
+  border-radius: 0.35rem;
+  padding: 0.35rem 0.45rem;
 }
 
 .list-picker-item p {
@@ -405,7 +430,44 @@ p {
 
 .list-picker-actions {
   display: inline-flex;
+  align-items: center;
   gap: 0.4rem;
+}
+
+.list-more-button {
+  min-width: 2.15rem;
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 0.35rem 0.5rem;
+}
+
+.list-crud-menu {
+  width: 100%;
+  display: inline-flex;
+  gap: 0.35rem;
+}
+
+.list-edit-form {
+  width: 100%;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.list-edit-actions {
+  display: inline-flex;
+  gap: 0.35rem;
+}
+
+.list-details-panel {
+  width: 100%;
+  padding: 0.45rem;
+  border: 1px solid #334155;
+  border-radius: 0.35rem;
+  background: #0f172a;
+}
+
+.list-details-panel p {
+  margin: 0.2rem 0;
 }
 
 .action-status {

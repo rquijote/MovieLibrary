@@ -72,6 +72,13 @@ export interface AccountListsResponse {
   total_results: number;
 }
 
+export interface ListDetailsResponse {
+  id: number;
+  name: string;
+  description: string;
+  item_count: number;
+}
+
 export interface MediaListResponse<TItem> {
   page: number;
   results: TItem[];
