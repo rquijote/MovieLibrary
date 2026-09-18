@@ -86,6 +86,17 @@ export interface MediaListResponse<TItem> {
   total_results: number;
 }
 
+export interface AccountStatesRated {
+    value: number;
+}
+
+export interface AccountStatesResponse {
+    id: number;
+    favorite: boolean;
+    rated: AccountStatesRated | null;
+    watchlist: boolean;
+}
+
 export type MovieListResponse = MediaListResponse<MovieDto>;
 export type TvShowListResponse = MediaListResponse<TvShowDto>;
 export type MediaItem = MovieDto | TvShowDto;

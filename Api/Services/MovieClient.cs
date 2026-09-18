@@ -31,7 +31,7 @@ namespace Api.Services
         {
             var response = await _http.GetAsync($"{id}/account_states");
 
-            if (!response.IsSuccessStatusCode && response.StatusCode == HttpStatusCode.NotFound)
+            if (!response.IsSuccessStatusCode || response.StatusCode == HttpStatusCode.NotFound)
             {
                 var errorResponse = await response.Content.ReadFromJsonAsync<StatusDto>();
                 throw new KeyNotFoundException(

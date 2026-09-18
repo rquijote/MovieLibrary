@@ -1,7 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { FormEvent, MouseEvent } from 'react';
 import { apiDelete, apiGet, apiPost, apiPut } from '../lib/api';
-import type { AccountListSummary, AccountListsResponse, ListDetailsResponse, StatusDto } from '../types/media';
+import type { AccountListSummary, AccountListsResponse, AccountStatesResponse, ListDetailsResponse, StatusDto } from '../types/media';
 
 interface MediaActionsPanelProps {
   mediaId: number;
@@ -13,6 +13,8 @@ export function MediaActionsPanel({ mediaId, mediaType }: MediaActionsPanelProps
   const [hoverRatingOutOf5, setHoverRatingOutOf5] = useState<number | null>(null);
   const [isWatchlisted, setIsWatchlisted] = useState(false);
   const [isWatchlistHovered, setIsWatchlistHovered] = useState(false);
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [isFavoriteHovered, setIsFavoriteHovered] = useState(false);
   const [isListPickerOpen, setIsListPickerOpen] = useState(false);
   const [isListsLoading, setIsListsLoading] = useState(false);
   const [accountLists, setAccountLists] = useState<AccountListSummary[]>([]);
@@ -28,6 +30,37 @@ export function MediaActionsPanel({ mediaId, mediaType }: MediaActionsPanelProps
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const ratingEndpointPrefix = useMemo(() => (mediaType === 'movie' ? 'Movie' : 'TvShow'), [mediaType]);
+
+  useEffect(() => {
+    let isDisposed = false;
+
+    const loadAccountState = async () => {
+      try {
+        const accountState = await apiGet<AccountStatesResponse>(`/api/${ratingEndpointPrefix}/${mediaId}/account-states`);
+
+        if (isDisposed) {
+          return;
+        }
+
+        setIsWatchlisted(accountState.watchlist);
+        setIsFavorited(accountState.favorite);
+        setRatingOutOf5((accountState.rated?.value ?? 0) / 2);
+        setErrorMessage(null);
+      } catch (error) {
+        if (isDisposed) {
+          return;
+        }
+
+        setErrorMessage(error instanceof Error ? error.message : 'Loading initial account state failed.');
+      }
+    };
+
+    void loadAccountState();
+
+    return () => {
+      isDisposed = true;
+    };
+  }, [mediaId, ratingEndpointPrefix]);
 
   const handleWatchlistToggle = async () => {
     const nextState = !isWatchlisted;
@@ -53,6 +86,7 @@ export function MediaActionsPanel({ mediaId, mediaType }: MediaActionsPanelProps
         media_id: mediaId,
         favorite: add,
       });
+      setIsFavorited(add);
       setStatusMessage(result.status_message ?? (add ? 'Added to favorites.' : 'Removed from favorites.'));
       setErrorMessage(null);
     } catch (error) {
@@ -119,6 +153,7 @@ export function MediaActionsPanel({ mediaId, mediaType }: MediaActionsPanelProps
   const activeRatingOutOf5 = hoverRatingOutOf5 ?? ratingOutOf5;
   const isPreviewActive = hoverRatingOutOf5 !== null;
   const watchlistLabel = isWatchlisted && isWatchlistHovered ? 'Remove' : 'Watchlist';
+  const favoriteLabel = isFavorited && isFavoriteHovered ? 'Remove' : 'Favorite';
 
   const handleList = async (listId: number, action: 'add_item' | 'remove_item') => {
     try {
@@ -299,6 +334,28 @@ export function MediaActionsPanel({ mediaId, mediaType }: MediaActionsPanelProps
           </button>
           <span className="watchlist-hint">List</span>
         </div>
+        <div className="watchlist-control">
+          <button
+            type="button"
+            onClick={() => void handleFavorite(!isFavorited)}
+            className="toggle-action-button"
+            aria-label={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
+            onMouseEnter={() => setIsFavoriteHovered(true)}
+            onMouseLeave={() => setIsFavoriteHovered(false)}
+          >
+            <svg viewBox="0 0 24 24" className="watchlist-icon" aria-hidden="true">
+              <path
+                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                fill={isFavorited ? 'currentColor' : 'none'}
+                stroke={isFavorited ? 'none' : 'currentColor'}
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+          <span className="watchlist-hint">{favoriteLabel}</span>
+        </div>
       </div>
 
       <div className="action-group rating-group">
@@ -378,21 +435,6 @@ export function MediaActionsPanel({ mediaId, mediaType }: MediaActionsPanelProps
               />
               <button type="submit">Create</button>
             </form>
-
-            <div className="list-picker-item favorite-list-option">
-              <div>
-                <strong>Favorites</strong>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  void handleFavorite(true);
-                  setIsListPickerOpen(false);
-                }}
-              >
-                Add
-              </button>
-            </div>
 
             {isListsLoading ? <p>Loading lists...</p> : null}
 
