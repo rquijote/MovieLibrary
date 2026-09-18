@@ -216,3 +216,4 @@ Api/.env
 node_modules/
 dist/
 Api/React/.env
+.github/copilot-instructions.md

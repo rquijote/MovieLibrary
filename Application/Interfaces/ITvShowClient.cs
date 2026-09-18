@@ -7,5 +7,6 @@ namespace Application.Interfaces
         public Task<TvShowDto> GetTvShowById(int id);
         public Task<StatusDto> AddRatingTvShow(int id, double rating);
         public Task<StatusDto> DeleteRatingTvShow(int id);
+        public Task<AccountStatesDto> GetAccountStateTvShow(int id);
     }
 }

@@ -69,5 +69,25 @@ namespace Api.Controllers
                 return NotFound(statusDto);
             }
         }
+
+        [HttpGet("{id}/account-states")]
+        public async Task<IActionResult> GetAccountStateTvShow(int id)
+        {
+            try
+            {
+                var result = await _tvShowClient.GetAccountStateTvShow(id);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                var statusDto = new StatusDto
+                {
+                    Success = false,
+                    StatusCode = 34,
+                    StatusMessage = ex.Message
+                };
+                return NotFound(statusDto);
+            }
+        }
     }
 }

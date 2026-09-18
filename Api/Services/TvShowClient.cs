@@ -42,5 +42,21 @@ namespace Api.Services
             var result = await response.Content.ReadFromJsonAsync<StatusDto>();
             return result ?? throw new InvalidOperationException("Failed to deserialize status response.");
         }
+
+        public async Task<AccountStatesDto> GetAccountStateTvShow(int id)
+        {
+            var response = await _http.GetAsync($"{id}/account_states");
+
+            if (!response.IsSuccessStatusCode && response.StatusCode == HttpStatusCode.NotFound)
+            {
+                var errorResponse = await response.Content.ReadFromJsonAsync<StatusDto>();
+                throw new KeyNotFoundException(
+                    errorResponse?.StatusMessage ?? $"TV show account state with ID {id} not found.");
+            }
+
+            response.EnsureSuccessStatusCode();
+            var result = await response.Content.ReadFromJsonAsync<AccountStatesDto>();
+            return result ?? throw new InvalidOperationException("Failed to deserialize TV show account states response.");
+        }
     }
 }

@@ -44,5 +44,26 @@ namespace Api.Controllers
             var result = await _movieClient.DeleteRatingMovie(id);
             return Ok(result);
         }
+
+        [HttpGet("{id}/account-states")]
+        public async Task<IActionResult> GetAccountStateMovie(int id)
+        {
+            try
+            {
+                var result = await _movieClient.GetAccountStateMovie(id);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                var statusDto = new StatusDto
+                {
+                    Success = false,
+                    StatusCode = 34,
+                    StatusMessage = ex.Message
+                };
+
+                return NotFound(statusDto);
+            }
+        }
     }
 }

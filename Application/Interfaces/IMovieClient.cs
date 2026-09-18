@@ -7,5 +7,6 @@ namespace Application.Interfaces
         public Task<MovieDto> GetMovieById(int id);
         public Task<StatusDto> AddRatingMovie(int id, double rating);
         public Task<StatusDto> DeleteRatingMovie(int id);
+        public Task<AccountStatesDto> GetAccountStateMovie(int id);
     }
 }
