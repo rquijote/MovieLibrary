@@ -61,12 +61,6 @@ export function TvShowDetailsPage() {
             <strong>First Air Date:</strong> {tvShow.first_air_date}
           </p>
           <p>
-            <strong>Episode Runtime:</strong>{' '}
-            {tvShow.episode_run_time && tvShow.episode_run_time.length > 0
-              ? `${tvShow.episode_run_time.join(', ')} minutes`
-              : 'Unavailable'}
-          </p>
-          <p>
             <strong>Rating:</strong> {tvShow.vote_average.toFixed(1)} / 10 ({tvShow.vote_count} votes)
           </p>
           <p>

@@ -44,7 +44,6 @@ export interface TvShowDto {
   origin_country: string[];
   genre_ids: number[];
   genres?: GenreDto[];
-  episode_run_time?: number[];
 }
 
 export interface GenreDto {
