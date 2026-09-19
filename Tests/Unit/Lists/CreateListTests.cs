@@ -17,12 +17,11 @@ namespace Tests.Unit.Lists
                 Description = "A collection of Marvel superhero movies",
                 Language = "en"
             };
-            var expected = new ListStatusDto 
+            var expected = new StatusDto 
             { 
                 Success = true, 
                 StatusCode = 1, 
-                StatusMessage = "Success.",
-                ListId = 12345
+                StatusMessage = "Success."
             };
             var listsClientMock = new Mock<IListsClient>();
             listsClientMock.Setup(x => x.CreateList(It.IsAny<CreateListDto>()))
@@ -32,7 +31,6 @@ namespace Tests.Unit.Lists
 
             result.Success.Should().BeTrue();
             result.StatusCode.Should().Be(1);
-            result.ListId.Should().Be(12345);
         }
 
         [Fact]
@@ -44,12 +42,11 @@ namespace Tests.Unit.Lists
                 Description = "High-octane action packed films",
                 Language = "en"
             };
-            var expected = new ListStatusDto 
+            var expected = new StatusDto 
             { 
                 Success = true, 
                 StatusCode = 1, 
-                StatusMessage = "Success.",
-                ListId = 67890
+                StatusMessage = "Success."
             };
             var listsClientMock = new Mock<IListsClient>();
             listsClientMock.Setup(x => x.CreateList(It.IsAny<CreateListDto>()))
@@ -59,7 +56,6 @@ namespace Tests.Unit.Lists
 
             result.Success.Should().BeTrue();
             result.StatusCode.Should().Be(1);
-            result.ListId.Should().Be(67890);
         }
     }
 }

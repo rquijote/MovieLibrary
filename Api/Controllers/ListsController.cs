@@ -41,7 +41,7 @@ namespace Api.Controllers
         }
 
         [HttpPost("{listId}/items")]
-        public async Task<IActionResult> AddItems(int listId, [FromBody] V4ListItemsRequestDto request)
+        public async Task<IActionResult> AddItems(int listId, [FromBody] ListItemsRequestDto request)
         {
             var result = await _listsClient.AddItems(listId, request);
             return Ok(result);
@@ -62,7 +62,7 @@ namespace Api.Controllers
         }
 
         [HttpDelete("{listId}/items")]
-        public async Task<IActionResult> RemoveItems(int listId, [FromBody] V4ListItemsRequestDto request)
+        public async Task<IActionResult> RemoveItems(int listId, [FromBody] ListItemsRequestDto request)
         {
             var result = await _listsClient.RemoveItems(listId, request);
             return Ok(result);
@@ -76,7 +76,7 @@ namespace Api.Controllers
         }
 
         [HttpPut("{listId}/items")]
-        public async Task<IActionResult> UpdateItems(int listId, [FromBody] V4ListItemsRequestDto request)
+        public async Task<IActionResult> UpdateItems(int listId, [FromBody] ListItemsRequestDto request)
         {
             var result = await _listsClient.UpdateItems(listId, request);
             return Ok(result);

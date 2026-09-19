@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace Application.Models.Dto.Requests
 {
-    public sealed record V4ListItemDto
+    public sealed record ListItemDto
     {
         [JsonPropertyName("media_type")]
         public MediaType MediaType { get; init; }
@@ -15,10 +15,10 @@ namespace Application.Models.Dto.Requests
         public string? Comment { get; init; }
     }
 
-    public sealed record V4ListItemsRequestDto
+    public sealed record ListItemsRequestDto
     {
         [JsonPropertyName("items")]
-        public List<V4ListItemDto> Items { get; init; } = [];
+        public List<ListItemDto> Items { get; init; } = [];
     }
 
     public sealed record UpdateListDto

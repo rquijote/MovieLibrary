@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace Application.Models.Dto.Responses
 {
-    public sealed record V4ListDetailsDto
+    public sealed record ListDetailsSummaryDto
     {
         [JsonPropertyName("id")]
         public int Id { get; init; }
@@ -27,7 +27,7 @@ namespace Application.Models.Dto.Responses
         public List<JsonElement> Results { get; init; } = [];
     }
 
-    public sealed record V4ListItemStatusDto
+    public sealed record ListItemStatusDto
     {
         [JsonPropertyName("id")]
         public int Id { get; init; }
