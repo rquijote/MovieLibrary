@@ -5,9 +5,10 @@ import type { MediaItem, MediaType } from '../types/media';
 interface MediaGridProps {
   items: MediaItem[];
   mediaType: MediaType;
+  showYearOnly?: boolean;
 }
 
-export function MediaGrid({ items, mediaType }: MediaGridProps) {
+export function MediaGrid({ items, mediaType, showYearOnly = false }: MediaGridProps) {
   const navigate = useNavigate();
 
   return (
@@ -21,7 +22,7 @@ export function MediaGrid({ items, mediaType }: MediaGridProps) {
         >
           <img src={getImageUrl(item.poster_path)} alt={getMediaTitle(item)} onError={handleMediaImageError} />
           <h4>{getMediaTitle(item)}</h4>
-          <p>{getMediaDate(item)}</p>
+          <p>{showYearOnly ? getMediaDate(item).slice(0, 4) : getMediaDate(item)}</p>
         </button>
       ))}
     </div>

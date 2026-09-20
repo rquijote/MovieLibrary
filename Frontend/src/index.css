@@ -77,7 +77,8 @@ button {
 }
 
 .search-input-wrap {
-  position: relative;
+  display: flex;
+  gap: 0.4rem;
 }
 
 .search-toggle {
@@ -101,13 +102,27 @@ button {
 }
 
 .search input {
-  width: 18rem;
+  width: 14rem;
   border: 1px solid #cbd5e1;
   border-radius: 0.5rem;
   background: #ffffff;
   color: #0f172a;
   padding: 0.6rem 0.8rem;
   font: inherit;
+}
+
+.search-submit {
+  border: 1px solid #cbd5e1;
+  border-radius: 0.5rem;
+  background: #f8fbff;
+  color: #0f172a;
+  padding: 0.6rem 0.75rem;
+  cursor: pointer;
+}
+
+.search-submit:hover {
+  border-color: #60a5fa;
+  background: #eff6ff;
 }
 
 .search input:focus {
@@ -215,7 +230,7 @@ button {
   color: #b91c1c;
 }
 
-.library-mini-header {
+.mini-header {
   display: inline-flex;
   gap: 0.5rem;
   border: 1px solid #dbe3ee;
@@ -225,7 +240,7 @@ button {
   margin: 0.35rem 0 1rem;
 }
 
-.library-tab-button {
+.mini-header-button {
   border: 0;
   border-radius: 999px;
   background: transparent;
@@ -234,11 +249,11 @@ button {
   cursor: pointer;
 }
 
-.library-tab-button:hover {
+.mini-header-button:hover {
   color: #1d4ed8;
 }
 
-.library-tab-button-active {
+.mini-header-button-active {
   background: #dbeafe;
   color: #1e3a8a;
 }
@@ -250,17 +265,34 @@ button {
 
 .account-list-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 0.85rem;
   margin-top: 1rem;
 }
 
 .account-list-card {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-align: left;
   border: 1px solid #dbe3ee;
+  color: #0f172a;
   border-radius: 0.65rem;
   background: #ffffff;
   padding: 0.85rem;
   box-shadow: 0 2px 8px rgb(148 163 184 / 12%);
+  cursor: pointer;
+}
+
+.account-list-card:hover,
+.account-list-card:focus-visible,
+.account-list-card-active {
+  border-color: #93c5fd;
+  background: #f8fbff;
+}
+
+.account-list-card-main {
+  min-width: 0;
 }
 
 .account-list-card h3 {
@@ -280,6 +312,51 @@ button {
 
 .muted {
   color: #64748b;
+}
+
+.library-lists-main {
+  display: grid;
+  gap: 1rem;
+}
+
+.library-list-details {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.create-list-button {
+  width: fit-content;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.5rem;
+  background: #f8fbff;
+  color: #0f172a;
+  padding: 0.45rem 0.85rem;
+  cursor: pointer;
+}
+
+.create-list-button:hover {
+  border-color: #60a5fa;
+  background: #eff6ff;
+}
+
+@media (max-width: 980px) {
+  .search input {
+    width: min(14rem, calc(100vw - 14rem));
+  }
+}
+
+.create-list-page {
+  max-width: 720px;
+}
+
+.list-create-form textarea {
+  min-height: 7rem;
+  resize: vertical;
+}
+
+.list-create-actions {
+  display: flex;
+  gap: 0.6rem;
 }
 
 .sr-only {

@@ -1,18 +1,24 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AccountListCards } from '../components/AccountListCards';
 import { MediaGrid } from '../components/MediaGrid';
+import { MiniHeaderTabs } from '../components/MiniHeaderTabs';
 import { apiGet } from '../lib/api';
-import type { AccountListsResponse, MovieListResponse, TvShowListResponse } from '../types/media';
+import type { AccountListsResponse, ListDetailsResponse, MovieListResponse, TvShowListResponse } from '../types/media';
 
 type LibraryTab = 'watchlist' | 'favourites' | 'lists';
 
 export function LibraryPage() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<LibraryTab>('watchlist');
   const [favoriteMovies, setFavoriteMovies] = useState<MovieListResponse | null>(null);
   const [favoriteTv, setFavoriteTv] = useState<TvShowListResponse | null>(null);
   const [watchlistMovies, setWatchlistMovies] = useState<MovieListResponse | null>(null);
   const [watchlistTv, setWatchlistTv] = useState<TvShowListResponse | null>(null);
   const [accountLists, setAccountLists] = useState<AccountListsResponse | null>(null);
+  const [selectedListId, setSelectedListId] = useState<number | null>(null);
+  const [selectedListDetails, setSelectedListDetails] = useState<ListDetailsResponse | null>(null);
+  const [isListDetailsLoading, setIsListDetailsLoading] = useState(false);
   const [isTabLoading, setIsTabLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -57,7 +63,8 @@ export function LibraryPage() {
       try {
         setIsTabLoading(true);
         const accountListsData = await apiGet<AccountListsResponse>('/api/Account/lists?page=1');
-        setAccountLists(accountListsData);
+        const sortedLists = [...accountListsData.results].sort((left, right) => right.id - left.id);
+        setAccountLists({ ...accountListsData, results: sortedLists });
         setError(null);
       } catch (loadError) {
         setError(loadError instanceof Error ? loadError.message : 'Failed to load custom lists data.');
@@ -85,6 +92,21 @@ export function LibraryPage() {
     void load();
   }, [activeTab, accountLists, favoriteMovies, favoriteTv, watchlistMovies, watchlistTv]);
 
+  const handleSelectList = async (listId: number) => {
+    try {
+      setSelectedListId(listId);
+      setIsListDetailsLoading(true);
+      const details = await apiGet<ListDetailsResponse>(`/api/Lists/${listId}/details`);
+      setSelectedListDetails(details);
+      setError(null);
+    } catch (loadError) {
+      setSelectedListDetails(null);
+      setError(loadError instanceof Error ? loadError.message : 'Failed to load selected list details.');
+    } finally {
+      setIsListDetailsLoading(false);
+    }
+  };
+
   if (error) {
     return <p>{error}</p>;
   }
@@ -93,24 +115,20 @@ export function LibraryPage() {
     return <p>Loading...</p>;
   }
 
-  const tabButtonClassName = (tab: LibraryTab) =>
-    tab === activeTab ? 'library-tab-button library-tab-button-active' : 'library-tab-button';
-
   return (
     <section>
       <h1>My Library</h1>
 
-      <div className="library-mini-header" role="tablist" aria-label="Library categories">
-        <button type="button" className={tabButtonClassName('watchlist')} onClick={() => setActiveTab('watchlist')}>
-          Watchlist
-        </button>
-        <button type="button" className={tabButtonClassName('favourites')} onClick={() => setActiveTab('favourites')}>
-          Favourites
-        </button>
-        <button type="button" className={tabButtonClassName('lists')} onClick={() => setActiveTab('lists')}>
-          Lists
-        </button>
-      </div>
+      <MiniHeaderTabs
+        value={activeTab}
+        ariaLabel="Library categories"
+        onChange={setActiveTab}
+        options={[
+          { value: 'watchlist', label: 'Watchlist' },
+          { value: 'favourites', label: 'Favourites' },
+          { value: 'lists', label: 'Lists' },
+        ]}
+      />
 
       {activeTab === 'watchlist' ? (
         <div className="library-tab-content">
@@ -132,7 +150,29 @@ export function LibraryPage() {
         </div>
       ) : null}
 
-      {activeTab === 'lists' ? <AccountListCards lists={accountLists?.results ?? []} /> : null}
+      {activeTab === 'lists' ? (
+        <div className="library-lists-main">
+          <button type="button" className="create-list-button" onClick={() => navigate('/library/create-list')}>
+            Create New List
+          </button>
+
+          <AccountListCards
+            lists={accountLists?.results ?? []}
+            selectedListId={selectedListId}
+            onSelectList={(listId) => void handleSelectList(listId)}
+          />
+
+          {isListDetailsLoading ? <p>Loading selected list...</p> : null}
+
+          {!isListDetailsLoading && selectedListDetails ? (
+            <div className="library-list-details">
+              <h2>{selectedListDetails.name}</h2>
+              <p className="muted">{selectedListDetails.item_count} {selectedListDetails.item_count === 1 ? 'movie' : 'movies'}</p>
+              <MediaGrid items={selectedListDetails.items} mediaType="movies" />
+            </div>
+          ) : null}
+        </div>
+      ) : null}
     </section>
   );
 }
