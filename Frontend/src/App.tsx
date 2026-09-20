@@ -3,6 +3,7 @@ import { Layout } from './components/Layout';
 import { ExpandedMediaListPage } from './pages/ExpandedMediaListPage';
 import { CreateListPage } from './pages/CreateListPage';
 import { HomePage } from './pages/HomePage';
+import { LibraryListDetailsPage } from './pages/LibraryListDetailsPage';
 import { LibraryPage } from './pages/LibraryPage';
 import { MovieDetailsPage } from './pages/MovieDetailsPage';
 import { MoviesPage } from './pages/MoviesPage';
@@ -20,6 +21,8 @@ function App() {
         <Route path="/tvshows" element={<TvShowsPage />} />
         <Route path="/library" element={<LibraryPage />} />
         <Route path="/library/create-list" element={<CreateListPage />} />
+        <Route path="/library/lists/:listId" element={<LibraryListDetailsPage />} />
+        <Route path="/library/lists/:listId/edit" element={<CreateListPage />} />
         <Route path="/lists" element={<Navigate to="/library" replace />} />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/:mediaType/:category" element={<ExpandedMediaListRoute />} />

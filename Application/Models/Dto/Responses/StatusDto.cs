@@ -12,5 +12,8 @@ namespace Application.Models.Dto.Responses
 
         [JsonPropertyName("status_message")]
         public string? StatusMessage { get; init; }
+
+        [JsonPropertyName("list_id")]
+        public int? ListId { get; init; }
     }
 }

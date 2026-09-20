@@ -7,6 +7,7 @@ namespace Application.Interfaces
     public interface IListsClient
     {
         public Task<StatusDto> Create(CreateListDto request);
+        public Task<StatusDto> Update(int listId, CreateListDto request);
         public Task<StatusDto> Delete(int listId);
         public Task<ListDetailsDto> Details(int listId);
         public Task<StatusDto> RemoveMovie(int listId, int mediaId);

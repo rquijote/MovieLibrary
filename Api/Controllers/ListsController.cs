@@ -47,6 +47,13 @@ namespace Api.Controllers
             return Ok(result);
         }
 
+        [HttpPut("{listId}")]
+        public async Task<IActionResult> Update(int listId, [FromBody] CreateListDto request)
+        {
+            var result = await _listsClient.Update(listId, request);
+            return Ok(result);
+        }
+
         [HttpGet("{listId}/details")]
         public async Task<IActionResult> Details(int listId)
         {

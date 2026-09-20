@@ -24,6 +24,19 @@ namespace Api.Services
             return result ?? throw new InvalidOperationException("Failed to deserialize status response.");
         }
 
+        public async Task<StatusDto> Update(int listId, CreateListDto request)
+        {
+            var payload = new
+            {
+                name = request.Name,
+                description = request.Description,
+            };
+
+            var response = await _http.PutAsJsonAsync($"list/{listId}", payload);
+            var result = await response.Content.ReadFromJsonAsync<StatusDto>();
+            return result ?? throw new InvalidOperationException("Failed to deserialize status response.");
+        }
+
         public async Task<StatusDto> Delete(int listId)
         {
             var response = await _http.DeleteAsync($"list/{listId}");

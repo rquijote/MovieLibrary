@@ -1,17 +1,102 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { apiPost } from '../lib/api';
-import type { StatusDto } from '../types/media';
+import { useNavigate, useParams } from 'react-router-dom';
+import { apiGet, apiPost, apiPut } from '../lib/api';
+import { SelectedMoviesList } from '../components/SelectedMoviesList';
+import type { ListDetailsResponse, MovieDto, MovieListResponse, StatusDto } from '../types/media';
 
 export function CreateListPage() {
   const navigate = useNavigate();
+  const { listId } = useParams();
+  const editListId = listId ? Number(listId) : null;
+  const isEditMode = Number.isFinite(editListId) && editListId !== null;
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [movieSearchQuery, setMovieSearchQuery] = useState('');
+  const [movieSearchResults, setMovieSearchResults] = useState<MovieDto[]>([]);
+  const [isSearchLoading, setIsSearchLoading] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [selectedMovies, setSelectedMovies] = useState<MovieDto[]>([]);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoadingExistingList, setIsLoadingExistingList] = useState(false);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  useEffect(() => {
+    const loadEditData = async () => {
+      if (!isEditMode || !editListId) {
+        return;
+      }
+
+      try {
+        setIsLoadingExistingList(true);
+        const details = await apiGet<ListDetailsResponse>(`/api/Lists/${editListId}/details`);
+        setName(details.name);
+        setDescription(details.description ?? '');
+        setSelectedMovies(details.items);
+        setStatusMessage(null);
+      } catch (error) {
+        setStatusMessage(error instanceof Error ? error.message : 'Failed to load list for editing.');
+      } finally {
+        setIsLoadingExistingList(false);
+      }
+    };
+
+    void loadEditData();
+  }, [editListId, isEditMode]);
+
+  useEffect(() => {
+    const query = movieSearchQuery.trim();
+
+    if (query.length < 2) {
+      return;
+    }
+
+    let isCurrent = true;
+    const timeoutId = window.setTimeout(async () => {
+      try {
+        setIsSearchLoading(true);
+        const encodedQuery = encodeURIComponent(query);
+        const response = await apiGet<MovieListResponse>(`/api/Search/movies?query=${encodedQuery}`);
+
+        if (!isCurrent) {
+          return;
+        }
+
+        setMovieSearchResults(response.results);
+        setIsSearchOpen(true);
+      } catch {
+        if (!isCurrent) {
+          return;
+        }
+
+        setMovieSearchResults([]);
+        setIsSearchOpen(true);
+      } finally {
+        if (isCurrent) {
+          setIsSearchLoading(false);
+        }
+      }
+    }, 250);
+
+    return () => {
+      isCurrent = false;
+      window.clearTimeout(timeoutId);
+    };
+  }, [movieSearchQuery]);
+
+  useEffect(() => {
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!searchContainerRef.current?.contains(event.target as Node)) {
+        setIsSearchOpen(false);
+      }
+    };
+
+    document.addEventListener('pointerdown', handlePointerDown);
+    return () => document.removeEventListener('pointerdown', handlePointerDown);
+  }, []);
+
+  const handleSave = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const trimmedName = name.trim();
@@ -23,26 +108,95 @@ export function CreateListPage() {
 
     try {
       setIsSaving(true);
-      const result = await apiPost<StatusDto>('/api/Lists', {
+      const payload = {
         name: trimmedName,
         description: description.trim() || null,
         language: 'en',
-      });
+      };
 
-      setStatusMessage(result.status_message ?? 'List created.');
+      if (isEditMode && editListId) {
+        await apiPut<StatusDto>(`/api/Lists/${editListId}`, payload);
+        await apiPost<StatusDto>(`/api/Lists/${editListId}/clear`, null);
+
+        for (const movie of selectedMovies) {
+          await apiPost<StatusDto>(`/api/Lists/${editListId}/add_movie`, movie.id);
+        }
+
+        setStatusMessage('List updated.');
+        navigate(`/library/lists/${editListId}`);
+        return;
+      }
+
+      const result = await apiPost<StatusDto>('/api/Lists', payload);
+
+      const createdListId = result.list_id;
+
+      if (!createdListId) {
+        throw new Error('List created without an id. Please try again.');
+      }
+
+      for (const movie of selectedMovies) {
+        await apiPost<StatusDto>(`/api/Lists/${createdListId}/add_movie`, movie.id);
+      }
+
+      setStatusMessage(result.status_message ?? 'List and selected movies saved.');
       navigate('/library');
     } catch (error) {
-      setStatusMessage(error instanceof Error ? error.message : 'Failed to create list.');
+      setStatusMessage(error instanceof Error ? error.message : 'Failed to save list.');
     } finally {
       setIsSaving(false);
     }
   };
 
+  const handleRemoveSelectedMovie = (movieId: number) => {
+    setSelectedMovies((current) => current.filter((movie) => movie.id !== movieId));
+  };
+
+  const handleReorderSelectedMovies = (fromIndex: number, toIndex: number) => {
+    setSelectedMovies((current) => {
+      const next = [...current];
+      const [movedMovie] = next.splice(fromIndex, 1);
+
+      if (!movedMovie) {
+        return current;
+      }
+
+      next.splice(toIndex, 0, movedMovie);
+      return next;
+    });
+  };
+
+  const handleSelectMovie = (movie: MovieDto) => {
+    setSelectedMovies((current) => {
+      if (current.some((item) => item.id === movie.id)) {
+        return current;
+      }
+
+      return [...current, movie];
+    });
+
+    setMovieSearchQuery('');
+    setMovieSearchResults([]);
+    setIsSearchOpen(false);
+  };
+
+  const handleSearchQueryChange = (nextQuery: string) => {
+    setMovieSearchQuery(nextQuery);
+
+    if (nextQuery.trim().length < 2) {
+      setMovieSearchResults([]);
+      setIsSearchOpen(false);
+      setIsSearchLoading(false);
+    }
+  };
+
   return (
     <section className="create-list-page">
-      <h1>New List</h1>
+      <h1>{isEditMode ? 'Edit List' : 'New List'}</h1>
 
-      <form className="list-create-form" onSubmit={(event) => void handleSubmit(event)}>
+      {isLoadingExistingList ? <p>Loading list...</p> : null}
+
+      <form className="list-create-form" onSubmit={(event) => void handleSave(event)}>
         <input type="text" placeholder="List name" value={name} onChange={(event) => setName(event.target.value)} />
         <textarea
           placeholder="Description (optional)"
@@ -50,9 +204,64 @@ export function CreateListPage() {
           rows={5}
           onChange={(event) => setDescription(event.target.value)}
         />
+
+        <div className="create-list-movie-search" ref={searchContainerRef}>
+          <input
+            type="search"
+            placeholder="Search movies to add"
+            value={movieSearchQuery}
+            onFocus={() => {
+              if (movieSearchResults.length > 0) {
+                setIsSearchOpen(true);
+              }
+            }}
+            onChange={(event) => handleSearchQueryChange(event.target.value)}
+          />
+
+          {isSearchOpen ? (
+            <div className="create-list-movie-dropdown" role="listbox" aria-label="Movie search results">
+              {isSearchLoading ? <p className="create-list-movie-status">Searching...</p> : null}
+              {!isSearchLoading && movieSearchResults.length === 0 ? (
+                <p className="create-list-movie-status">No movies found.</p>
+              ) : null}
+              {!isSearchLoading
+                ? movieSearchResults.map((movie) => (
+                    <button
+                      key={movie.id}
+                      type="button"
+                      className="create-list-movie-option"
+                      onClick={() => handleSelectMovie(movie)}
+                    >
+                      <span>{movie.title}</span>
+                      <small>{movie.release_date ? movie.release_date.slice(0, 4) : 'N/A'}</small>
+                    </button>
+                  ))
+                : null}
+            </div>
+          ) : null}
+        </div>
+
+        <SelectedMoviesList
+          items={selectedMovies}
+          onRemove={handleRemoveSelectedMovie}
+          onReorder={handleReorderSelectedMovies}
+        />
+
         <div className="list-create-actions">
-          <button type="submit" disabled={isSaving}>{isSaving ? 'Creating...' : 'Create List'}</button>
-          <button type="button" onClick={() => navigate('/library')}>Cancel</button>
+          <button type="submit" disabled={isSaving || isLoadingExistingList}>{isSaving ? 'Saving...' : 'Save'}</button>
+          <button
+            type="button"
+            onClick={() => {
+              if (isEditMode && editListId) {
+                navigate(`/library/lists/${editListId}`);
+                return;
+              }
+
+              navigate('/library');
+            }}
+          >
+            Cancel
+          </button>
         </div>
       </form>
 
