@@ -155,6 +155,10 @@ export function CreateListPage() {
     }
   };
 
+  const handleRemoveSelectedMovie = (movieId: number) => {
+    setSelectedMovies((current) => current.filter((movie) => movie.id !== movieId));
+  };
+
   const handleSelectMovie = (movie: MovieDto) => {
     setSelectedMovies((current) => {
       if (current.some((item) => item.id === movie.id)) {
@@ -230,7 +234,7 @@ export function CreateListPage() {
           ) : null}
         </div>
 
-        <SelectedMoviesList items={selectedMovies} />
+        <SelectedMoviesList items={selectedMovies} onRemove={handleRemoveSelectedMovie} />
 
         <div className="list-create-actions">
           <button type="submit" className="view-more-btn" disabled={isSaving || isLoadingExistingList}>

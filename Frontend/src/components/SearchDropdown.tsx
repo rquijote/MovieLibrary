@@ -69,7 +69,16 @@ export function SearchDropdown() {
           }
         }}
       >
-        {isExpanded ? '✕' : '🔍'}
+        {isExpanded ? (
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+          </svg>
+        ) : (
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" strokeWidth="1.8" />
+            <path d="M16.25 16.25 21 21" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+          </svg>
+        )}
       </button>
 
       {isExpanded ? (
