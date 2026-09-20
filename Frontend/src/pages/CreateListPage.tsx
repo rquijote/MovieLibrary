@@ -116,9 +116,6 @@ export function CreateListPage() {
 
       if (isEditMode && editListId) {
         // v3 can't update the list; v4 I don't have write access.
-        const currentList = await apiGet<ListDetailsResponse>(`/api/Lists/${editListId}/details`);
-        const moviesToCarryOver = currentList.items;
-
         await apiDelete<StatusDto>(`/api/Lists/${editListId}`);
 
         const recreatedList = await apiPost<StatusDto>('/api/Lists', payload);
@@ -128,7 +125,7 @@ export function CreateListPage() {
           throw new Error('List recreated without an id. Please try again.');
         }
 
-        for (const movie of moviesToCarryOver) {
+        for (const movie of selectedMovies) {
           await apiPost<StatusDto>(`/api/Lists/${recreatedListId}/add_movie`, movie.id);
         }
 
