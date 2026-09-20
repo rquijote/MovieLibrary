@@ -1,11 +1,17 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { FormEvent, MouseEvent } from 'react';
-import { apiDelete, apiGet, apiPost, apiPut } from '../lib/api';
-import type { AccountListSummary, AccountListsResponse, AccountStatesResponse, ListDetailsResponse, StatusDto } from '../types/media';
+import { apiDelete, apiGet, apiPost } from '../lib/api';
+import type { AccountListSummary, AccountListsResponse, AccountStatesResponse, StatusDto } from '../types/media';
+import { CreateListForm } from './CreateListForm';
 
 interface MediaActionsPanelProps {
   mediaId: number;
   mediaType: 'movie' | 'tv';
+}
+
+interface ListItemStatusResponse {
+  id: number;
+  item_present: boolean;
 }
 
 export function MediaActionsPanel({ mediaId, mediaType }: MediaActionsPanelProps) {
@@ -18,14 +24,12 @@ export function MediaActionsPanel({ mediaId, mediaType }: MediaActionsPanelProps
   const [isListPickerOpen, setIsListPickerOpen] = useState(false);
   const [isListsLoading, setIsListsLoading] = useState(false);
   const [accountLists, setAccountLists] = useState<AccountListSummary[]>([]);
+  const [listItemPresenceById, setListItemPresenceById] = useState<Record<number, boolean>>({});
+  const [selectedListIds, setSelectedListIds] = useState<number[]>([]);
+  const [listSearchTerm, setListSearchTerm] = useState('');
+  const [isCreateListOpen, setIsCreateListOpen] = useState(false);
   const [newListName, setNewListName] = useState('');
   const [newListDescription, setNewListDescription] = useState('');
-  const [openCrudMenuListId, setOpenCrudMenuListId] = useState<number | null>(null);
-  const [editingListId, setEditingListId] = useState<number | null>(null);
-  const [editingName, setEditingName] = useState('');
-  const [editingDescription, setEditingDescription] = useState('');
-  const [expandedDetailsListId, setExpandedDetailsListId] = useState<number | null>(null);
-  const [detailsByListId, setDetailsByListId] = useState<Record<number, ListDetailsResponse>>({});
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -154,17 +158,66 @@ export function MediaActionsPanel({ mediaId, mediaType }: MediaActionsPanelProps
   const isPreviewActive = hoverRatingOutOf5 !== null;
   const watchlistLabel = isWatchlisted && isWatchlistHovered ? 'Remove' : 'Watchlist';
   const favoriteLabel = isFavorited && isFavoriteHovered ? 'Remove' : 'Favorite';
+  const filteredAccountLists = useMemo(() => {
+    const term = listSearchTerm.trim().toLowerCase();
+    if (!term) {
+      return accountLists;
+    }
 
-  const handleList = async (listId: number, action: 'add_item' | 'remove_item') => {
+    return accountLists.filter((list) => list.name.toLowerCase().includes(term));
+  }, [accountLists, listSearchTerm]);
+
+  const loadListItemPresence = async (lists: AccountListSummary[]) => {
+    if (lists.length === 0) {
+      setListItemPresenceById({});
+      return;
+    }
+
+    const statuses = await Promise.all(
+      lists.map(async (list) => {
+        try {
+          const itemStatus = await apiGet<ListItemStatusResponse>(
+            `/api/Lists/${list.id}/item_status?media_type=${mediaType}&media_id=${mediaId}`,
+          );
+
+          return [list.id, itemStatus.item_present] as const;
+        } catch {
+          return [list.id, false] as const;
+        }
+      }),
+    );
+
+    const nextPresence = Object.fromEntries(statuses);
+    setListItemPresenceById(nextPresence);
+    setSelectedListIds((current) => current.filter((id) => !nextPresence[id]));
+  };
+
+  const handleSaveSelectedLists = async () => {
+    if (selectedListIds.length === 0) {
+      setErrorMessage('Select at least one list.');
+      return;
+    }
+
     try {
-      const result = await apiPost<StatusDto>(`/api/Lists/${listId}/${action}`, mediaId);
-      setStatusMessage(result.status_message ?? (action === 'add_item' ? 'Added to list.' : 'Removed from list.'));
+      for (const listId of selectedListIds) {
+        await apiPost<StatusDto>(`/api/Lists/${listId}/add_item`, mediaId);
+      }
+
+      setStatusMessage(
+        selectedListIds.length === 1
+          ? 'Added to 1 list.'
+          : `Added to ${selectedListIds.length} lists.`,
+      );
       setErrorMessage(null);
+      setIsListPickerOpen(false);
+      setSelectedListIds([]);
+      await loadAccountLists(true);
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'List update failed.');
     }
   };
 
+  // force is used as a bool, to avoid GET lists. openListPicker() is false.
   const loadAccountLists = async (force: boolean) => {
     if (isListsLoading) {
       return;
@@ -176,9 +229,10 @@ export function MediaActionsPanel({ mediaId, mediaType }: MediaActionsPanelProps
 
     try {
       setIsListsLoading(true);
-      const result = await apiGet<AccountListsResponse>('/api/Account/lists?page=1');
+      const result = await apiGet<AccountListsResponse>('/api/Account/lists?page=1'); // TODO: Would be better if page=2 or page=3 as well.
       const sortedLists = [...result.results].sort((left, right) => right.id - left.id);
       setAccountLists(sortedLists);
+      await loadListItemPresence(sortedLists);
       setErrorMessage(null);
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'Failed to load account lists.');
@@ -213,78 +267,22 @@ export function MediaActionsPanel({ mediaId, mediaType }: MediaActionsPanelProps
     }
   };
 
-  const beginEditList = (list: AccountListSummary) => {
-    setOpenCrudMenuListId(null);
-    setEditingListId(list.id);
-    setEditingName(list.name);
-    setEditingDescription(list.description ?? '');
-  };
-
-  const handleUpdateList = async (listId: number) => {
-    const trimmedName = editingName.trim();
-    if (!trimmedName) {
-      setErrorMessage('List name is required.');
-      return;
-    }
-
-    try {
-      const result = await apiPut<StatusDto>(`/api/Lists/${listId}`, {
-        name: trimmedName,
-        description: editingDescription.trim() || null,
-      });
-
-      setStatusMessage(result.status_message ?? 'List updated.');
-      setErrorMessage(null);
-      setEditingListId(null);
-      await loadAccountLists(true);
-    } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Failed to update list.');
-    }
-  };
-
-  const handleDeleteList = async (listId: number) => {
-    try {
-      const result = await apiDelete<StatusDto>(`/api/Lists/${listId}`);
-      setStatusMessage(result.status_message ?? 'List deleted.');
-      setErrorMessage(null);
-      setOpenCrudMenuListId(null);
-      if (expandedDetailsListId === listId) {
-        setExpandedDetailsListId(null);
-      }
-
-      await loadAccountLists(true);
-    } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Failed to delete list.');
-    }
-  };
-
-  const handleReadListDetails = async (listId: number) => {
-    if (expandedDetailsListId === listId) {
-      setExpandedDetailsListId(null);
-      setOpenCrudMenuListId(null);
-      return;
-    }
-
-    try {
-      if (!detailsByListId[listId]) {
-        const details = await apiGet<ListDetailsResponse>(`/api/Lists/${listId}/details`);
-        setDetailsByListId((current) => ({
-          ...current,
-          [listId]: details,
-        }));
-      }
-
-      setExpandedDetailsListId(listId);
-      setOpenCrudMenuListId(null);
-      setErrorMessage(null);
-    } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Failed to load list details.');
-    }
-  };
-
   const openListPicker = async () => {
     setIsListPickerOpen(true);
+    setSelectedListIds([]);
+    setListSearchTerm('');
+    setIsCreateListOpen(false);
     await loadAccountLists(false);
+  };
+
+  const toggleListSelection = (listId: number) => {
+    if (listItemPresenceById[listId]) {
+      return;
+    }
+
+    setSelectedListIds((current) =>
+      current.includes(listId) ? current.filter((id) => id !== listId) : [...current, listId],
+    );
   };
 
   return (
@@ -419,99 +417,56 @@ export function MediaActionsPanel({ mediaId, mediaType }: MediaActionsPanelProps
               </button>
             </div>
 
-            <form className="list-create-form" onSubmit={(event) => void handleCreateList(event)}>
-              <h4>Create new list</h4>
+            <div className="list-picker-toolbar">
+              <button type="button" onClick={() => setIsCreateListOpen((current) => !current)}>
+                Create new list
+              </button>
               <input
                 type="text"
-                placeholder="List name"
-                value={newListName}
-                onChange={(event) => setNewListName(event.target.value)}
+                placeholder="Search lists"
+                value={listSearchTerm}
+                onChange={(event) => setListSearchTerm(event.target.value)}
               />
-              <input
-                type="text"
-                placeholder="Description (optional)"
-                value={newListDescription}
-                onChange={(event) => setNewListDescription(event.target.value)}
+            </div>
+
+            {isCreateListOpen ? (
+              <CreateListForm
+                newListName={newListName}
+                newListDescription={newListDescription}
+                onNewListNameChange={setNewListName}
+                onNewListDescriptionChange={setNewListDescription}
+                onSubmit={(event) => void handleCreateList(event)}
               />
-              <button type="submit">Create</button>
-            </form>
+            ) : null}
 
             {isListsLoading ? <p>Loading lists...</p> : null}
 
             {!isListsLoading && accountLists.length === 0 ? <p>No custom lists found.</p> : null}
+            {!isListsLoading && accountLists.length > 0 && filteredAccountLists.length === 0 ? <p>No matching lists found.</p> : null}
 
             {!isListsLoading
-              ? accountLists.map((list) => (
-                  <div key={list.id} className="list-picker-item">
-                    <div>
+              ? filteredAccountLists.map((list) => (
+                  <div
+                    key={list.id}
+                    className={`list-picker-item list-picker-selectable ${selectedListIds.includes(list.id) ? 'selected' : ''} ${listItemPresenceById[list.id] ? 'disabled' : ''}`}
+                    onClick={() => toggleListSelection(list.id)}
+                  >
+                    <div className="list-item-row">
                       <strong>{list.name}</strong>
-                      <p>{list.item_count} items</p>
+                      <div className="list-item-meta">
+                        <span>{list.item_count} {list.item_count === 1 ? 'item' : 'items'}</span>
+                        <span>{listItemPresenceById[list.id] || selectedListIds.includes(list.id) ? '✓' : ''}</span>
+                      </div>
                     </div>
-                    <div className="list-picker-actions">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          void handleList(list.id, 'add_item');
-                          setIsListPickerOpen(false);
-                        }}
-                      >
-                        Add
-                      </button>
-                      <button type="button" onClick={() => void handleList(list.id, 'remove_item')}>
-                        Remove
-                      </button>
-                      <button
-                        type="button"
-                        className="list-more-button"
-                        aria-label={`More actions for ${list.name}`}
-                        onClick={() => setOpenCrudMenuListId((current) => (current === list.id ? null : list.id))}
-                      >
-                        ⋯
-                      </button>
-                    </div>
-
-                    {openCrudMenuListId === list.id ? (
-                      <div className="list-crud-menu">
-                        <button type="button" onClick={() => void handleReadListDetails(list.id)}>
-                          Details
-                        </button>
-                        <button type="button" onClick={() => beginEditList(list)}>
-                          Edit
-                        </button>
-                        <button type="button" onClick={() => void handleDeleteList(list.id)}>
-                          Delete
-                        </button>
-                      </div>
-                    ) : null}
-
-                    {editingListId === list.id ? (
-                      <div className="list-edit-form">
-                        <input type="text" value={editingName} onChange={(event) => setEditingName(event.target.value)} />
-                        <input
-                          type="text"
-                          value={editingDescription}
-                          onChange={(event) => setEditingDescription(event.target.value)}
-                        />
-                        <div className="list-edit-actions">
-                          <button type="button" onClick={() => void handleUpdateList(list.id)}>
-                            Save
-                          </button>
-                          <button type="button" onClick={() => setEditingListId(null)}>
-                            Cancel
-                          </button>
-                        </div>
-                      </div>
-                    ) : null}
-
-                    {expandedDetailsListId === list.id && detailsByListId[list.id] ? (
-                      <div className="list-details-panel">
-                        <p>{detailsByListId[list.id].description || 'No description.'}</p>
-                        <p>{detailsByListId[list.id].item_count} items</p>
-                      </div>
-                    ) : null}
                   </div>
                 ))
               : null}
+
+            <div className="list-picker-save-actions">
+              <button type="button" disabled={selectedListIds.length === 0} onClick={() => void handleSaveSelectedLists()}>
+                Save
+              </button>
+            </div>
           </div>
         </div>
       ) : null}
