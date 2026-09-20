@@ -4,6 +4,142 @@
   padding: 0;
 }
 
+/* Dark theme */
+body {
+  background: linear-gradient(180deg, #090d16 0%, #0b1220 100%);
+  color: #e5e7eb;
+}
+
+.top-row {
+  border-bottom-color: #1f2937;
+  background: linear-gradient(180deg, #0b1220 0%, #0e1728 100%);
+  box-shadow: 0 1px 0 rgb(15 23 42 / 50%);
+}
+
+.brand {
+  color: #dbeafe;
+}
+
+.nav-link {
+  color: #94a3b8;
+}
+
+.nav-link-active,
+.nav-link:hover {
+  color: #bfdbfe;
+}
+
+.library-nav-dropdown:hover .library-nav-trigger,
+.library-nav-dropdown:focus-within .library-nav-trigger {
+  background: #1e293b;
+}
+
+.library-nav-menu,
+.search-dropdown,
+.create-list-movie-dropdown,
+.list-picker-modal,
+.delete-confirm-modal,
+.account-list-card,
+.library-list-command-center,
+.media-grid-item,
+.media-row-item,
+.selected-movie-row,
+.media-actions {
+  background: #111827;
+  border-color: #334155;
+  color: #e5e7eb;
+}
+
+.library-nav-menu .nav-link:hover,
+.library-nav-menu .nav-link:focus-visible,
+.search-result:hover,
+.search-result:focus-visible,
+.create-list-movie-option:hover {
+  background: #1f2937;
+}
+
+.search-toggle,
+.search input,
+.search-submit,
+.action-group input,
+.view-more-btn,
+.create-list-button,
+.delete-list-button,
+.list-create-actions button,
+.remove-selected-movie,
+.pagination-controls button,
+.delete-cancel-button {
+  background: #0f172a;
+  border-color: #334155;
+  color: #e5e7eb;
+}
+
+.search-toggle:hover,
+.search-toggle:focus-visible,
+.search-submit:hover,
+.view-more-btn:hover,
+.create-list-button:hover,
+.list-create-actions button:hover,
+.remove-selected-movie:hover,
+.pagination-controls button:hover,
+.delete-cancel-button:hover,
+.action-group button:hover {
+  background: #1e293b;
+  border-color: #475569;
+  color: #f8fafc;
+}
+
+.search input,
+.create-list-page .list-create-form input,
+.create-list-page .list-create-form textarea,
+.action-group input {
+  background: #0f172a;
+  color: #e5e7eb;
+  border-color: #334155;
+}
+
+.search input::placeholder,
+.create-list-page .list-create-form input::placeholder,
+.create-list-page .list-create-form textarea::placeholder {
+  color: #94a3b8;
+}
+
+.mini-header {
+  border-color: #334155;
+  background: #0f172a;
+}
+
+.mini-header-button {
+  color: #94a3b8;
+}
+
+.mini-header-button:hover {
+  color: #e2e8f0;
+}
+
+.mini-header-button-active {
+  background: #1e293b;
+  color: #e5e7eb;
+}
+
+.account-list-preview-placeholder {
+  background: #1f2937;
+  box-shadow: inset 0 0 0 1px rgb(71 85 105 / 65%);
+}
+
+.selected-movies-list {
+  background: #0f172a;
+  border-color: #334155;
+}
+
+.muted,
+.selected-movie-main p,
+.search-group-empty,
+.search-result small,
+.media-grid-item p {
+  color: #94a3b8;
+}
+
 body {
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
   background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
@@ -1284,4 +1420,165 @@ p {
     border-top: 1px solid #e2e8f0;
     border-left: 0;
   }
+}
+
+/* Dark theme overrides (keep at end so they win) */
+body {
+  background: linear-gradient(180deg, #090d16 0%, #0b1220 100%);
+  color: #e5e7eb;
+}
+
+.top-row {
+  border-bottom-color: #1f2937;
+  background: linear-gradient(180deg, #0b1220 0%, #0e1728 100%);
+  box-shadow: 0 1px 0 rgb(15 23 42 / 50%);
+}
+
+.brand {
+  color: #dbeafe;
+}
+
+.nav-link {
+  color: #94a3b8;
+}
+
+.nav-link-active,
+.nav-link:hover {
+  color: #bfdbfe;
+}
+
+.library-nav-menu,
+.search-dropdown,
+.create-list-movie-dropdown,
+.list-picker-modal,
+.delete-confirm-modal,
+.account-list-card,
+.library-list-command-center,
+.media-grid-item,
+.media-row-item,
+.selected-movie-row,
+.media-actions,
+.list-create-form,
+.list-details-panel {
+  background: #111827;
+  border-color: #334155;
+  color: #e5e7eb;
+}
+
+.search-toggle,
+.search input,
+.search-submit,
+.action-group input,
+.view-more-btn,
+.create-list-button,
+.delete-list-button,
+.list-create-actions button,
+.remove-selected-movie,
+.pagination-controls button,
+.delete-cancel-button,
+.create-list-page .list-create-form input,
+.create-list-page .list-create-form textarea,
+.list-picker-search input,
+.list-create-form input,
+.list-edit-form input {
+  background: #0f172a;
+  border-color: #334155;
+  color: #e5e7eb;
+}
+
+.search-toggle:hover,
+.search-toggle:focus-visible,
+.search-submit:hover,
+.view-more-btn:hover,
+.create-list-button:hover,
+.list-create-actions button:hover,
+.remove-selected-movie:hover,
+.pagination-controls button:hover,
+.delete-cancel-button:hover,
+.action-group button:hover,
+.create-list-movie-option:hover,
+.library-nav-menu .nav-link:hover,
+.library-nav-menu .nav-link:focus-visible,
+.search-result:hover,
+.search-result:focus-visible {
+  background: #1e293b;
+  border-color: #475569;
+  color: #f8fafc;
+}
+
+.library-nav-dropdown:hover .library-nav-trigger,
+.library-nav-dropdown:focus-within .library-nav-trigger {
+  background: #1e293b;
+  color: #e5e7eb;
+}
+
+.account-list-card:hover,
+.account-list-card:focus-visible,
+.account-list-card-active {
+  border-color: #475569;
+  background: #1e293b;
+  color: #e5e7eb;
+}
+
+.details-hero::after {
+  background: linear-gradient(to bottom, rgb(15 23 42 / 0%) 68%, #0b1220 100%);
+}
+
+.media-actions,
+.media-actions h3,
+.media-actions h4,
+.media-actions p,
+.media-actions label,
+.media-actions span,
+.media-actions strong {
+  color: #e5e7eb;
+}
+
+.action-status {
+  color: #86efac;
+}
+
+.action-error {
+  color: #fca5a5;
+}
+
+.selected-movies-list {
+  background: #0b1220;
+}
+
+.selected-movie-row {
+  background: #111827;
+  border-color: #334155;
+}
+
+.mini-header {
+  border-color: #334155;
+  background: #0f172a;
+}
+
+.mini-header-button {
+  color: #94a3b8;
+}
+
+.mini-header-button:hover,
+.mini-header-button:focus-visible {
+  background: #1e293b;
+  color: #f8fafc;
+}
+
+.mini-header-button-active {
+  background: #1e293b;
+  color: #e5e7eb;
+}
+
+.muted,
+.selected-movie-main p,
+.search-group-empty,
+.search-result small,
+.media-grid-item p,
+.list-picker-item p,
+.list-item-meta,
+.account-list-card p,
+.account-list-count {
+  color: #94a3b8;
 }
