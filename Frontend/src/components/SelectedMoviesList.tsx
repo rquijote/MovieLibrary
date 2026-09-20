@@ -3,10 +3,9 @@ import type { MovieDto } from '../types/media';
 
 interface SelectedMoviesListProps {
   items: MovieDto[];
-  onRemove: (movieId: number) => void;
 }
 
-export function SelectedMoviesList({ items, onRemove }: SelectedMoviesListProps) {
+export function SelectedMoviesList({ items }: SelectedMoviesListProps) {
   if (items.length === 0) {
     return <p className="muted">No movies selected yet.</p>;
   }
@@ -20,9 +19,6 @@ export function SelectedMoviesList({ items, onRemove }: SelectedMoviesListProps)
             <h3>{movie.title}</h3>
             <p>{movie.release_date ? movie.release_date.slice(0, 4) : 'N/A'}</p>
           </div>
-          <button type="button" className="remove-selected-movie" onClick={() => onRemove(movie.id)} aria-label={`Remove ${movie.title}`}>
-            🗑️
-          </button>
         </article>
       ))}
     </div>

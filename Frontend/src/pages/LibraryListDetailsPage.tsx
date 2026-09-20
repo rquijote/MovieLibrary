@@ -74,14 +74,14 @@ export function LibraryListDetailsPage() {
         <aside className="library-list-command-center">
           <button
             type="button"
-            className="create-list-button"
+            className="view-more-btn"
             onClick={() => navigate(`/library/lists/${list.id}/edit`)}
           >
             Edit this list
           </button>
           <button
             type="button"
-            className="delete-list-button"
+            className="view-more-btn view-more-btn-danger"
             disabled={isDeleting}
             onClick={() => setIsDeleteModalOpen(true)}
           >

@@ -422,27 +422,32 @@ button {
 
 .library-list-command-center {
   border: 1px solid #dbe3ee;
-  border-radius: 0.65rem;
-  background: #ffffff;
-  padding: 0.85rem;
+  border-radius: 0.75rem;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  padding: 1rem;
   box-shadow: 0 2px 8px rgb(148 163 184 / 12%);
   display: grid;
-  gap: 0.6rem;
+  gap: 0.7rem;
 }
 
 .delete-list-button {
   width: fit-content;
   border: 1px solid #fca5a5;
-  border-radius: 0.5rem;
-  background: #fef2f2;
+  border-radius: 0.6rem;
+  background: linear-gradient(180deg, #fff1f2 0%, #fee2e2 100%);
   color: #991b1b;
-  padding: 0.45rem 0.85rem;
+  padding: 0.55rem 1rem;
   cursor: pointer;
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgb(239 68 68 / 12%);
+  transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease, background 120ms ease;
 }
 
 .delete-list-button:hover {
   border-color: #f87171;
-  background: #fee2e2;
+  background: linear-gradient(180deg, #ffe4e6 0%, #fecaca 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgb(239 68 68 / 16%);
 }
 
 .delete-confirm-actions {
@@ -483,17 +488,42 @@ button {
 
 .create-list-button {
   width: fit-content;
+  border: 1px solid #93c5fd;
+  border-radius: 0.6rem;
+  background: linear-gradient(180deg, #eff6ff 0%, #dbeafe 100%);
+  color: #0f172a;
+  padding: 0.55rem 1rem;
+  cursor: pointer;
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgb(59 130 246 / 12%);
+  transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease, background 120ms ease;
+}
+
+.view-more-btn,
+.create-list-button,
+.delete-list-button {
   border: 1px solid #cbd5e1;
   border-radius: 0.5rem;
   background: #f8fbff;
   color: #0f172a;
-  padding: 0.45rem 0.85rem;
+  padding: 0.55rem 0.9rem;
   cursor: pointer;
 }
 
+.view-more-btn:hover,
 .create-list-button:hover {
   border-color: #60a5fa;
   background: #eff6ff;
+}
+
+.view-more-btn-danger {
+  border-color: #fca5a5;
+  color: #991b1b;
+}
+
+.view-more-btn-danger:hover {
+  border-color: #f87171;
+  background: #fee2e2;
 }
 
 @media (max-width: 980px) {
@@ -581,11 +611,20 @@ button {
 .list-create-actions {
   display: flex;
   gap: 0.6rem;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-start;
 }
 
 .selected-movies-list {
   display: grid;
   gap: 0.75rem;
+  max-height: 26rem;
+  overflow-y: auto;
+  padding: 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  background: #f8fafc;
 }
 
 .selected-movie-row {
@@ -597,12 +636,10 @@ button {
   border-radius: 0.6rem;
   background: #ffffff;
   padding: 0.65rem 0.85rem;
-  cursor: grab;
 }
 
-.selected-movie-row:active {
-  cursor: grabbing;
-}
+
+
 
 .selected-movie-row img {
   width: 72px;
@@ -611,11 +648,8 @@ button {
   border-radius: 0.25rem;
 }
 
-.drag-handle {
-  color: #94a3b8;
-  font-size: 1.2rem;
-  line-height: 1;
-}
+
+
 
 .selected-movie-main {
   min-width: 0;
@@ -632,17 +666,15 @@ button {
   font-size: 0.9rem;
 }
 
-.remove-selected-movie {
-  margin-left: auto;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-  font-size: 1.15rem;
-}
+
+
 
 .list-create-actions button {
   font-size: 0.98rem;
-  padding: 0.45rem 0.85rem;
+  padding: 0.55rem 1rem;
+  border-radius: 0.6rem;
+  font-weight: 600;
+  transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease, background 120ms ease;
 }
 
 .sr-only {
