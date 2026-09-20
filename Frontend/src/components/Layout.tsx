@@ -19,9 +19,20 @@ export function Layout() {
             <NavLink className={linkClassName} to="/tvshows">
               TV Shows
             </NavLink>
-            <NavLink className={linkClassName} to="/library">
-              Library
-            </NavLink>
+            <div className="library-nav-dropdown">
+              <span className="nav-link library-nav-trigger">Library</span>
+              <div className="library-nav-menu">
+                <NavLink className={linkClassName} to="/library?tab=lists">
+                  Lists
+                </NavLink>
+                <NavLink className={linkClassName} to="/library?tab=watchlist">
+                  Watchlist
+                </NavLink>
+                <NavLink className={linkClassName} to="/library?tab=favourites">
+                  Favourites
+                </NavLink>
+              </div>
+            </div>
             <SearchDropdown />
           </nav>
           <div className="profile-placeholder" aria-label="Anonymous profile placeholder" title="Anonymous profile">

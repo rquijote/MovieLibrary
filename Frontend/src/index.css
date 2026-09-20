@@ -69,6 +69,51 @@ button {
   color: #1d4ed8;
 }
 
+.library-nav-dropdown {
+  position: relative;
+}
+
+.library-nav-trigger {
+  cursor: default;
+  border-radius: 0.35rem;
+  padding: 0.3rem 0.45rem;
+}
+
+.library-nav-dropdown:hover .library-nav-trigger,
+.library-nav-dropdown:focus-within .library-nav-trigger {
+  background: #eff6ff;
+}
+
+.library-nav-menu {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  left: 0;
+  min-width: 160px;
+  display: none;
+  gap: 0.35rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.55rem;
+  background: #ffffff;
+  box-shadow: 0 12px 26px rgb(15 23 42 / 16%);
+  padding: 0.55rem;
+  z-index: 25;
+}
+
+.library-nav-dropdown:hover .library-nav-menu,
+.library-nav-dropdown:focus-within .library-nav-menu {
+  display: grid;
+}
+
+.library-nav-menu .nav-link {
+  padding: 0.3rem 0.45rem;
+  border-radius: 0.35rem;
+}
+
+.library-nav-menu .nav-link:hover,
+.library-nav-menu .nav-link:focus-visible {
+  background: #eff6ff;
+}
+
 .search {
   position: relative;
   display: flex;

@@ -137,16 +137,20 @@ export function LibraryPage() {
       ) : null}
 
       {activeTab === 'lists' ? (
-        <div className="library-lists-main">
-          <button type="button" className="create-list-button" onClick={() => navigate('/library/create-list')}>
-            Create New List
-          </button>
+        <div className="library-list-page-layout">
+          <div className="library-lists-main">
+            <AccountListCards
+              lists={accountLists?.results ?? []}
+              previewPostersByListId={listPreviewPostersById}
+              onSelectList={(listId) => navigate(`/library/lists/${listId}`)}
+            />
+          </div>
 
-          <AccountListCards
-            lists={accountLists?.results ?? []}
-            previewPostersByListId={listPreviewPostersById}
-            onSelectList={(listId) => navigate(`/library/lists/${listId}`)}
-          />
+          <aside className="library-list-command-center">
+            <button type="button" className="create-list-button" onClick={() => navigate('/library/create-list')}>
+              Create New List
+            </button>
+          </aside>
         </div>
       ) : null}
     </section>
