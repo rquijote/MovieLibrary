@@ -19,8 +19,8 @@ export function Layout() {
             <NavLink className={linkClassName} to="/tvshows">
               TV Shows
             </NavLink>
-            <NavLink className={linkClassName} to="/lists">
-              Lists
+            <NavLink className={linkClassName} to="/library">
+              Library
             </NavLink>
             <SearchDropdown />
           </nav>

@@ -2,7 +2,7 @@ import { Navigate, Route, Routes, useParams } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { ExpandedMediaListPage } from './pages/ExpandedMediaListPage';
 import { HomePage } from './pages/HomePage';
-import { ListsPage } from './pages/ListsPage';
+import { LibraryPage } from './pages/LibraryPage';
 import { MovieDetailsPage } from './pages/MovieDetailsPage';
 import { MoviesPage } from './pages/MoviesPage';
 import { NotFoundPage } from './pages/NotFoundPage';
@@ -16,7 +16,8 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/movies" element={<MoviesPage />} />
         <Route path="/tvshows" element={<TvShowsPage />} />
-        <Route path="/lists" element={<ListsPage />} />
+        <Route path="/library" element={<LibraryPage />} />
+        <Route path="/lists" element={<Navigate to="/library" replace />} />
         <Route path="/:mediaType/:category" element={<ExpandedMediaListRoute />} />
         <Route path="/movie/:id" element={<MovieDetailsPage />} />
         <Route path="/tv/:id" element={<TvShowDetailsPage />} />

@@ -215,6 +215,73 @@ button {
   color: #b91c1c;
 }
 
+.library-mini-header {
+  display: inline-flex;
+  gap: 0.5rem;
+  border: 1px solid #dbe3ee;
+  border-radius: 999px;
+  padding: 0.25rem;
+  background: #f8fbff;
+  margin: 0.35rem 0 1rem;
+}
+
+.library-tab-button {
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #475569;
+  padding: 0.4rem 0.85rem;
+  cursor: pointer;
+}
+
+.library-tab-button:hover {
+  color: #1d4ed8;
+}
+
+.library-tab-button-active {
+  background: #dbeafe;
+  color: #1e3a8a;
+}
+
+.library-tab-content {
+  display: grid;
+  gap: 1rem;
+}
+
+.account-list-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.85rem;
+  margin-top: 1rem;
+}
+
+.account-list-card {
+  border: 1px solid #dbe3ee;
+  border-radius: 0.65rem;
+  background: #ffffff;
+  padding: 0.85rem;
+  box-shadow: 0 2px 8px rgb(148 163 184 / 12%);
+}
+
+.account-list-card h3 {
+  margin: 0;
+}
+
+.account-list-card p {
+  margin: 0.45rem 0;
+  color: #475569;
+}
+
+.account-list-count {
+  font-size: 0.85rem;
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.muted {
+  color: #64748b;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
