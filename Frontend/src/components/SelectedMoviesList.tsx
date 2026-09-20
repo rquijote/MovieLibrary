@@ -30,6 +30,11 @@ export function SelectedMoviesList({ items, onRemove, onReorder }: SelectedMovie
           onDragStart={(event) => {
             event.dataTransfer.setData('text/plain', String(index));
             event.dataTransfer.effectAllowed = 'move';
+
+            const transparentDragImage = document.createElement('canvas');
+            transparentDragImage.width = 1;
+            transparentDragImage.height = 1;
+            event.dataTransfer.setDragImage(transparentDragImage, 0, 0);
           }}
           onDragOver={(event) => {
             event.preventDefault();

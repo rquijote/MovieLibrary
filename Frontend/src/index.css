@@ -293,6 +293,46 @@ button {
 
 .account-list-card-main {
   min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.account-list-card-text {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.account-list-previews {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.account-list-previews img {
+  width: 90px;
+  height: 135px;
+  border-radius: 0.2rem;
+  object-fit: cover;
+  box-shadow: 0 1px 4px rgb(15 23 42 / 25%);
+  margin-left: -20px;
+}
+
+.account-list-previews img:first-child {
+  margin-left: 0;
+}
+
+.account-list-preview-placeholder {
+  width: 90px;
+  height: 135px;
+  border-radius: 0.2rem;
+  background: #cbd5e1;
+  margin-left: -20px;
+  box-shadow: inset 0 0 0 1px rgb(148 163 184 / 45%);
+}
+
+.account-list-preview-placeholder:first-child {
+  margin-left: 0;
 }
 
 .account-list-card h3 {
@@ -305,7 +345,7 @@ button {
 }
 
 .account-list-count {
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   color: #0f172a;
   font-weight: 600;
 }

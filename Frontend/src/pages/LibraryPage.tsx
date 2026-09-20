@@ -4,7 +4,7 @@ import { AccountListCards } from '../components/AccountListCards';
 import { MediaGrid } from '../components/MediaGrid';
 import { MiniHeaderTabs } from '../components/MiniHeaderTabs';
 import { apiGet } from '../lib/api';
-import type { AccountListsResponse, MovieListResponse, TvShowListResponse } from '../types/media';
+import type { AccountListsResponse, ListDetailsResponse, MovieListResponse, TvShowListResponse } from '../types/media';
 
 type LibraryTab = 'watchlist' | 'favourites' | 'lists';
 
@@ -22,6 +22,7 @@ export function LibraryPage() {
   const [watchlistMovies, setWatchlistMovies] = useState<MovieListResponse | null>(null);
   const [watchlistTv, setWatchlistTv] = useState<TvShowListResponse | null>(null);
   const [accountLists, setAccountLists] = useState<AccountListsResponse | null>(null);
+  const [listPreviewPostersById, setListPreviewPostersById] = useState<Record<number, string[]>>({});
   const [isTabLoading, setIsTabLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -58,6 +59,23 @@ export function LibraryPage() {
         const accountListsData = await apiGet<AccountListsResponse>('/api/Account/lists?page=1');
         const sortedLists = [...accountListsData.results].sort((left, right) => right.id - left.id);
         setAccountLists({ ...accountListsData, results: sortedLists });
+
+        const detailsResults = await Promise.all(
+          sortedLists.map(async (list) => {
+            const details = await apiGet<ListDetailsResponse>(`/api/Lists/${list.id}/details`);
+            return {
+              listId: list.id,
+              posters: details.items
+                .slice(0, 4)
+                .map((movie) => movie.poster_path)
+                .filter((posterPath): posterPath is string => Boolean(posterPath)),
+            };
+          }),
+        );
+
+        setListPreviewPostersById(
+          Object.fromEntries(detailsResults.map((entry) => [entry.listId, entry.posters])) as Record<number, string[]>,
+        );
         setError(null);
       } catch (loadError) {
         setError(loadError instanceof Error ? loadError.message : 'Failed to load custom lists data.');
@@ -126,6 +144,7 @@ export function LibraryPage() {
 
           <AccountListCards
             lists={accountLists?.results ?? []}
+            previewPostersByListId={listPreviewPostersById}
             onSelectList={(listId) => navigate(`/library/lists/${listId}`)}
           />
         </div>
