@@ -42,6 +42,14 @@ export function MovieDetailsPage() {
 
   return (
     <div className="details-view">
+      {movie.backdrop_path ? (
+        <div
+          className="details-hero"
+          style={{ backgroundImage: `url(${getImageUrl(movie.backdrop_path, 'original')})` }}
+          aria-hidden="true"
+        />
+      ) : null}
+
       <div className="details-header">
         <img
           src={getImageUrl(movie.poster_path ?? movie.backdrop_path)}
@@ -98,18 +106,6 @@ export function MovieDetailsPage() {
         <section>
           <h3>Genre IDs</h3>
           <p>{movie.genre_ids.join(', ')}</p>
-        </section>
-      ) : null}
-
-      {movie.backdrop_path ? (
-        <section>
-          <h3>Backdrop Image</h3>
-          <img
-            src={getImageUrl(movie.backdrop_path)}
-            alt={`${movie.title} backdrop`}
-            className="details-backdrop"
-            onError={handleMediaImageError}
-          />
         </section>
       ) : null}
     </div>

@@ -902,6 +902,25 @@ p {
   gap: 1rem;
 }
 
+.details-hero {
+  position: relative;
+  width: 100%;
+  height: min(34vw, 360px);
+  border-radius: 0.75rem 0.75rem 0 0;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center 20%;
+  background-color: #0f172a;
+  overflow: hidden;
+}
+
+.details-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgb(15 23 42 / 0%) 72%, #f8fafc 100%);
+}
+
 .media-actions {
   margin-top: 1rem;
   padding: 1.35rem;
@@ -1227,11 +1246,6 @@ p {
   border-radius: 0.5rem;
 }
 
-.details-backdrop {
-  max-width: 900px;
-  border-radius: 0.5rem;
-}
-
 @media (max-width: 880px) {
   .top-row .container {
     flex-wrap: wrap;
@@ -1245,6 +1259,10 @@ p {
 
   .details-header {
     grid-template-columns: 1fr;
+  }
+
+  .details-hero {
+    height: min(48vw, 280px);
   }
 
   .search input {

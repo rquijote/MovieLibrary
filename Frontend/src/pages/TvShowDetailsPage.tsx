@@ -42,6 +42,14 @@ export function TvShowDetailsPage() {
 
   return (
     <div className="details-view">
+      {tvShow.backdrop_path ? (
+        <div
+          className="details-hero"
+          style={{ backgroundImage: `url(${getImageUrl(tvShow.backdrop_path, 'original')})` }}
+          aria-hidden="true"
+        />
+      ) : null}
+
       <div className="details-header">
         <img
           src={getImageUrl(tvShow.poster_path ?? tvShow.backdrop_path)}
@@ -100,18 +108,6 @@ export function TvShowDetailsPage() {
         <section>
           <h3>Genre IDs</h3>
           <p>{tvShow.genre_ids.join(', ')}</p>
-        </section>
-      ) : null}
-
-      {tvShow.backdrop_path ? (
-        <section>
-          <h3>Backdrop Image</h3>
-          <img
-            src={getImageUrl(tvShow.backdrop_path)}
-            alt={`${tvShow.name} backdrop`}
-            className="details-backdrop"
-            onError={handleMediaImageError}
-          />
         </section>
       ) : null}
     </div>
