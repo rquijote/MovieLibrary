@@ -8,7 +8,7 @@ interface MediaGridProps {
   showYearOnly?: boolean;
 }
 
-export function MediaGrid({ items, mediaType, showYearOnly = false }: MediaGridProps) {
+export function MediaGrid({ items, mediaType, showYearOnly = mediaType === 'movies' }: MediaGridProps) {
   const navigate = useNavigate();
 
   return (
@@ -20,9 +20,13 @@ export function MediaGrid({ items, mediaType, showYearOnly = false }: MediaGridP
           className="media-grid-item"
           onClick={() => navigate(mediaType === 'movies' ? `/movie/${item.id}` : `/tv/${item.id}`)}
         >
-          <img src={getImageUrl(item.poster_path)} alt={getMediaTitle(item)} onError={handleMediaImageError} />
-          <h4>{getMediaTitle(item)}</h4>
-          <p>{showYearOnly ? getMediaDate(item).slice(0, 4) : getMediaDate(item)}</p>
+          <div className="media-grid-image-wrap">
+            <img src={getImageUrl(item.poster_path)} alt={getMediaTitle(item)} onError={handleMediaImageError} />
+          </div>
+          <div className="media-grid-content">
+            <h4>{getMediaTitle(item)}</h4>
+            <p>{showYearOnly ? getMediaDate(item).slice(0, 4) : getMediaDate(item)}</p>
+          </div>
         </button>
       ))}
     </div>

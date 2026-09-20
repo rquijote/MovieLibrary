@@ -750,6 +750,11 @@ p {
   overflow: hidden;
 }
 
+.media-grid-item {
+  display: flex;
+  flex-direction: column;
+}
+
 .media-row-item {
   position: relative;
 }
@@ -761,6 +766,25 @@ p {
   width: 100%;
   display: block;
 }
+
+.media-grid-image-wrap {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+}
+
+.media-grid-image-wrap img {
+  height: 100%;
+  object-fit: cover;
+}
+
+.media-grid-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+
+
 
 .media-grid {
   margin-top: 1rem;

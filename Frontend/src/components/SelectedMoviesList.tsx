@@ -4,49 +4,17 @@ import type { MovieDto } from '../types/media';
 interface SelectedMoviesListProps {
   items: MovieDto[];
   onRemove: (movieId: number) => void;
-  onReorder: (fromIndex: number, toIndex: number) => void;
 }
 
-export function SelectedMoviesList({ items, onRemove, onReorder }: SelectedMoviesListProps) {
-  const handleDrop = (fromIndex: number, toIndex: number) => {
-    if (fromIndex === toIndex || fromIndex < 0 || toIndex < 0) {
-      return;
-    }
-
-    onReorder(fromIndex, toIndex);
-  };
-
+export function SelectedMoviesList({ items, onRemove }: SelectedMoviesListProps) {
   if (items.length === 0) {
     return <p className="muted">No movies selected yet.</p>;
   }
 
   return (
     <div className="selected-movies-list">
-      {items.map((movie, index) => (
-        <article
-          key={movie.id}
-          className="selected-movie-row"
-          draggable
-          onDragStart={(event) => {
-            event.dataTransfer.setData('text/plain', String(index));
-            event.dataTransfer.effectAllowed = 'move';
-
-            const transparentDragImage = document.createElement('canvas');
-            transparentDragImage.width = 1;
-            transparentDragImage.height = 1;
-            event.dataTransfer.setDragImage(transparentDragImage, 0, 0);
-          }}
-          onDragOver={(event) => {
-            event.preventDefault();
-            event.dataTransfer.dropEffect = 'move';
-          }}
-          onDrop={(event) => {
-            event.preventDefault();
-            const fromIndex = Number(event.dataTransfer.getData('text/plain'));
-            handleDrop(fromIndex, index);
-          }}
-        >
-          <span className="drag-handle" aria-hidden="true">⋮⋮</span>
+      {items.map((movie) => (
+        <article key={movie.id} className="selected-movie-row">
           <img src={getImageUrl(movie.poster_path, 'w92')} alt={movie.title} onError={handleMediaImageError} />
           <div className="selected-movie-main">
             <h3>{movie.title}</h3>

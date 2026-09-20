@@ -58,7 +58,7 @@ export function TvShowDetailsPage() {
             </p>
           ) : null}
           <p>
-            <strong>First Air Date:</strong> {tvShow.first_air_date}
+            <strong>First Air Year:</strong> {tvShow.first_air_date ? tvShow.first_air_date.slice(0, 4) : 'N/A'}
           </p>
           <p>
             <strong>Rating:</strong> {tvShow.vote_average.toFixed(1)} / 10 ({tvShow.vote_count} votes)

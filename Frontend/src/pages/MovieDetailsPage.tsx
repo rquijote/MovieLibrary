@@ -58,7 +58,7 @@ export function MovieDetailsPage() {
             </p>
           ) : null}
           <p>
-            <strong>Release Date:</strong> {movie.release_date}
+            <strong>Release Year:</strong> {movie.release_date ? movie.release_date.slice(0, 4) : 'N/A'}
           </p>
           <p>
             <strong>Runtime:</strong> {movie.runtime ? `${movie.runtime} minutes` : 'Unavailable'}

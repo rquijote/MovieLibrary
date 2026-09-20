@@ -125,7 +125,7 @@ export function CreateListPage() {
           throw new Error('List recreated without an id. Please try again.');
         }
 
-        for (const movie of selectedMovies) {
+        for (const movie of [...selectedMovies].reverse()) {
           await apiPost<StatusDto>(`/api/Lists/${recreatedListId}/add_movie`, movie.id);
         }
 
@@ -159,19 +159,6 @@ export function CreateListPage() {
     setSelectedMovies((current) => current.filter((movie) => movie.id !== movieId));
   };
 
-  const handleReorderSelectedMovies = (fromIndex: number, toIndex: number) => {
-    setSelectedMovies((current) => {
-      const next = [...current];
-      const [movedMovie] = next.splice(fromIndex, 1);
-
-      if (!movedMovie) {
-        return current;
-      }
-
-      next.splice(toIndex, 0, movedMovie);
-      return next;
-    });
-  };
 
   const handleSelectMovie = (movie: MovieDto) => {
     setSelectedMovies((current) => {
@@ -248,11 +235,7 @@ export function CreateListPage() {
           ) : null}
         </div>
 
-        <SelectedMoviesList
-          items={selectedMovies}
-          onRemove={handleRemoveSelectedMovie}
-          onReorder={handleReorderSelectedMovies}
-        />
+        <SelectedMoviesList items={selectedMovies} onRemove={handleRemoveSelectedMovie} />
 
         <div className="list-create-actions">
           <button type="submit" disabled={isSaving || isLoadingExistingList}>{isSaving ? 'Saving...' : 'Save'}</button>
