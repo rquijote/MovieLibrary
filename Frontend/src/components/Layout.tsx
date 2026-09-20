@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom';
+import { SearchDropdown } from './SearchDropdown';
 
 const linkClassName = ({ isActive }: { isActive: boolean }) =>
   isActive ? 'nav-link nav-link-active' : 'nav-link';
@@ -25,6 +26,7 @@ export function Layout() {
               Lists
             </NavLink>
           </nav>
+          <SearchDropdown />
           <div className="profile-placeholder" aria-label="Anonymous profile placeholder" title="Anonymous profile">
             <span className="profile-placeholder-head" />
             <span className="profile-placeholder-body" />
