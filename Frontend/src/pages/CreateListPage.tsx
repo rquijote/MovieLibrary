@@ -123,7 +123,7 @@ export function CreateListPage() {
         }
 
         setStatusMessage('List updated.');
-        navigate(`/library/lists/${editListId}`);
+        navigate('/library?tab=lists');
         return;
       }
 
@@ -140,7 +140,7 @@ export function CreateListPage() {
       }
 
       setStatusMessage(result.status_message ?? 'List and selected movies saved.');
-      navigate('/library');
+      navigate('/library?tab=lists');
     } catch (error) {
       setStatusMessage(error instanceof Error ? error.message : 'Failed to save list.');
     } finally {

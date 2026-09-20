@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AccountListCards } from '../components/AccountListCards';
 import { MediaGrid } from '../components/MediaGrid';
 import { MiniHeaderTabs } from '../components/MiniHeaderTabs';
@@ -10,7 +10,13 @@ type LibraryTab = 'watchlist' | 'favourites' | 'lists';
 
 export function LibraryPage() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<LibraryTab>('watchlist');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialTab = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState<LibraryTab>(
+    initialTab === 'lists' || initialTab === 'favourites' || initialTab === 'watchlist'
+      ? initialTab
+      : 'lists',
+  );
   const [favoriteMovies, setFavoriteMovies] = useState<MovieListResponse | null>(null);
   const [favoriteTv, setFavoriteTv] = useState<TvShowListResponse | null>(null);
   const [watchlistMovies, setWatchlistMovies] = useState<MovieListResponse | null>(null);
@@ -20,42 +26,32 @@ export function LibraryPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const loadWatchlist = async () => {
+    const preloadWatchlistAndFavourites = async () => {
       try {
         setIsTabLoading(true);
-        const [watchlistMoviesData, watchlistTvData] = await Promise.all([
+        const [watchlistMoviesData, watchlistTvData, favoriteMoviesData, favoriteTvData] = await Promise.all([
           apiGet<MovieListResponse>('/api/Account/watchlist/movies'),
           apiGet<TvShowListResponse>('/api/Account/watchlist/tv'),
-        ]);
-
-        setWatchlistMovies(watchlistMoviesData);
-        setWatchlistTv(watchlistTvData);
-        setError(null);
-      } catch (loadError) {
-        setError(loadError instanceof Error ? loadError.message : 'Failed to load watchlist data.');
-      } finally {
-        setIsTabLoading(false);
-      }
-    };
-
-    const loadFavourites = async () => {
-      try {
-        setIsTabLoading(true);
-        const [favoriteMoviesData, favoriteTvData] = await Promise.all([
           apiGet<MovieListResponse>('/api/Account/favourite/movies'),
           apiGet<TvShowListResponse>('/api/Account/favourite/tv'),
         ]);
 
+        setWatchlistMovies(watchlistMoviesData);
+        setWatchlistTv(watchlistTvData);
         setFavoriteMovies(favoriteMoviesData);
         setFavoriteTv(favoriteTvData);
         setError(null);
       } catch (loadError) {
-        setError(loadError instanceof Error ? loadError.message : 'Failed to load favourites data.');
+        setError(loadError instanceof Error ? loadError.message : 'Failed to preload library data.');
       } finally {
         setIsTabLoading(false);
       }
     };
 
+    void preloadWatchlistAndFavourites();
+  }, []);
+
+  useEffect(() => {
     const loadLists = async () => {
       try {
         setIsTabLoading(true);
@@ -70,24 +66,14 @@ export function LibraryPage() {
       }
     };
 
-    const load = async () => {
-      if (activeTab === 'watchlist' && (!watchlistMovies || !watchlistTv)) {
-        await loadWatchlist();
-        return;
-      }
+    if (activeTab === 'lists' && !accountLists) {
+      void loadLists();
+    }
+  }, [activeTab, accountLists]);
 
-      if (activeTab === 'favourites' && (!favoriteMovies || !favoriteTv)) {
-        await loadFavourites();
-        return;
-      }
-
-      if (activeTab === 'lists' && !accountLists) {
-        await loadLists();
-      }
-    };
-
-    void load();
-  }, [activeTab, accountLists, favoriteMovies, favoriteTv, watchlistMovies, watchlistTv]);
+  useEffect(() => {
+    setSearchParams({ tab: activeTab }, { replace: true });
+  }, [activeTab, setSearchParams]);
 
   if (error) {
     return <p>{error}</p>;
@@ -106,9 +92,9 @@ export function LibraryPage() {
         ariaLabel="Library categories"
         onChange={setActiveTab}
         options={[
+          { value: 'lists', label: 'Lists' },
           { value: 'watchlist', label: 'Watchlist' },
           { value: 'favourites', label: 'Favourites' },
-          { value: 'lists', label: 'Lists' },
         ]}
       />
 
