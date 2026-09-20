@@ -13,9 +13,6 @@ export function Layout() {
             Movie Library
           </NavLink>
           <nav className="nav-menu">
-            <NavLink className={linkClassName} to="/" end>
-              Home
-            </NavLink>
             <NavLink className={linkClassName} to="/movies">
               Movies
             </NavLink>
@@ -25,8 +22,8 @@ export function Layout() {
             <NavLink className={linkClassName} to="/lists">
               Lists
             </NavLink>
+            <SearchDropdown />
           </nav>
-          <SearchDropdown />
           <div className="profile-placeholder" aria-label="Anonymous profile placeholder" title="Anonymous profile">
             <span className="profile-placeholder-head" />
             <span className="profile-placeholder-body" />

@@ -11,16 +11,24 @@ export function SearchDropdown() {
   const [query, setQuery] = useState('');
   const [movies, setMovies] = useState<MovieDto[]>([]);
   const [tvShows, setTvShows] = useState<TvShowDto[]>([]);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const trimmedQuery = query.trim();
 
   useEffect(() => {
     const handlePointerDown = (event: PointerEvent) => {
       if (!containerRef.current?.contains(event.target as Node)) {
+        setIsExpanded(false);
         setIsOpen(false);
+        setQuery('');
+        setMovies([]);
+        setTvShows([]);
+        setHasError(false);
+        setIsLoading(false);
       }
     };
 
@@ -66,6 +74,12 @@ export function SearchDropdown() {
     };
   }, [trimmedQuery]);
 
+  useEffect(() => {
+    if (isExpanded) {
+      inputRef.current?.focus();
+    }
+  }, [isExpanded]);
+
   const updateQuery = (nextQuery: string) => {
     setQuery(nextQuery);
     setMovies([]);
@@ -82,45 +96,62 @@ export function SearchDropdown() {
   };
 
   const closeSearch = () => {
+    setIsExpanded(false);
     setIsOpen(false);
     setQuery('');
+    setMovies([]);
+    setTvShows([]);
+    setHasError(false);
+    setIsLoading(false);
   };
 
   const hasResults = movies.length > 0 || tvShows.length > 0;
 
   return (
     <div
-      className="search"
+      className={`search${isExpanded ? ' search-open' : ''}`}
       ref={containerRef}
       onKeyDown={(event) => {
         if (event.key === 'Escape') {
-          setIsOpen(false);
+          closeSearch();
         }
       }}
     >
-      <label className="sr-only" htmlFor="site-search">
-        Search movies and TV shows
-      </label>
-      <div className="search-input-wrap">
-        <span className="search-icon" aria-hidden="true">
-          &#128269;
-        </span>
-        <input
-          id="site-search"
-          type="search"
-          value={query}
-          placeholder="Search movies and TV shows"
-          autoComplete="off"
-          aria-expanded={isOpen}
-          aria-controls="search-results"
-          onChange={(event) => updateQuery(event.target.value)}
-          onFocus={() => {
-            if (trimmedQuery) {
-              setIsOpen(true);
-            }
-          }}
-        />
-      </div>
+      <button
+        type="button"
+        className="search-toggle"
+        aria-label={isExpanded ? 'Close search' : 'Open search'}
+        onClick={() => {
+          if (isExpanded) {
+            closeSearch();
+          } else {
+            setIsExpanded(true);
+          }
+        }}
+      >
+        {isExpanded ? '✕' : '🔍'}
+      </button>
+
+      {isExpanded ? (
+        <>
+          <label className="sr-only" htmlFor="site-search">
+            Search movies and TV shows
+          </label>
+          <div className="search-input-wrap">
+            <input
+              ref={inputRef}
+              id="site-search"
+              type="search"
+              value={query}
+              placeholder="Search movies and TV shows"
+              autoComplete="off"
+              aria-expanded={isOpen}
+              aria-controls="search-results"
+              onChange={(event) => updateQuery(event.target.value)}
+            />
+          </div>
+        </>
+      ) : null}
 
       {isOpen ? (
         <div id="search-results" className="search-dropdown" aria-live="polite">

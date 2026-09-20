@@ -7,6 +7,7 @@ import { CreateListForm } from './CreateListForm';
 interface MediaActionsPanelProps {
   mediaId: number;
   mediaType: 'movie' | 'tv';
+  showListActions?: boolean;
 }
 
 interface ListItemStatusResponse {
@@ -14,7 +15,7 @@ interface ListItemStatusResponse {
   item_present: boolean;
 }
 
-export function MediaActionsPanel({ mediaId, mediaType }: MediaActionsPanelProps) {
+export function MediaActionsPanel({ mediaId, mediaType, showListActions = true }: MediaActionsPanelProps) {
   const [ratingOutOf5, setRatingOutOf5] = useState(0);
   const [hoverRatingOutOf5, setHoverRatingOutOf5] = useState<number | null>(null);
   const [isWatchlisted, setIsWatchlisted] = useState(false);
@@ -321,16 +322,20 @@ export function MediaActionsPanel({ mediaId, mediaType }: MediaActionsPanelProps
           <span className="watchlist-hint">{watchlistLabel}</span>
         </div>
         <div className="watchlist-control">
-          <button type="button" onClick={() => void openListPicker()} className="toggle-action-button" aria-label="Add to list">
-            <svg viewBox="0 0 24 24" className="list-icon" aria-hidden="true">
-              <path d="M5 7h11" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-              <path d="M5 12h11" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-              <path d="M5 17h7" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-              <path d="M19 15v6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-              <path d="M16 18h6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-            </svg>
-          </button>
-          <span className="watchlist-hint">List</span>
+          {showListActions ? (
+            <>
+              <button type="button" onClick={() => void openListPicker()} className="toggle-action-button" aria-label="Add to list">
+                <svg viewBox="0 0 24 24" className="list-icon" aria-hidden="true">
+                  <path d="M5 7h11" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                  <path d="M5 12h11" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                  <path d="M5 17h7" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                  <path d="M19 15v6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                  <path d="M16 18h6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                </svg>
+              </button>
+              <span className="watchlist-hint">List</span>
+            </>
+          ) : null}
         </div>
         <div className="watchlist-control">
           <button
@@ -407,7 +412,7 @@ export function MediaActionsPanel({ mediaId, mediaType }: MediaActionsPanelProps
         </div>
       </div>
 
-      {isListPickerOpen ? (
+      {showListActions && isListPickerOpen ? (
         <div className="list-picker-overlay" role="presentation" onClick={() => setIsListPickerOpen(false)}>
           <div className="list-picker-modal" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
             <div className="list-picker-header">

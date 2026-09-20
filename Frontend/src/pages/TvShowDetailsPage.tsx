@@ -78,7 +78,7 @@ export function TvShowDetailsPage() {
             </p>
           ) : null}
 
-          <MediaActionsPanel mediaId={tvShow.id} mediaType="tv" />
+          <MediaActionsPanel mediaId={tvShow.id} mediaType="tv" showListActions={false} />
         </div>
       </div>
 
