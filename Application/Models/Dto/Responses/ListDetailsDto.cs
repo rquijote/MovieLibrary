@@ -14,7 +14,7 @@ namespace Application.Models.Dto.Responses
         public int FavoriteCount { get; init; }
 
         [JsonPropertyName("id")]
-        public string Id { get; init; } = string.Empty;
+        public int Id { get; init; }
 
         [JsonPropertyName("items")]
         public List<MovieDto> Items { get; init; } = [];

@@ -76,6 +76,7 @@ export interface ListDetailsResponse {
   name: string;
   description: string;
   item_count: number;
+  items: MovieDto[];
 }
 
 export interface MediaListResponse<TItem> {

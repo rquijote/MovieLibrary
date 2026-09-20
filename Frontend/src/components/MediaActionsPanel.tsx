@@ -200,7 +200,7 @@ export function MediaActionsPanel({ mediaId, mediaType }: MediaActionsPanelProps
 
     try {
       for (const listId of selectedListIds) {
-        await apiPost<StatusDto>(`/api/Lists/${listId}/add_item`, mediaId);
+        await apiPost<StatusDto>(`/api/Lists/${listId}/add_movie`, mediaId);
       }
 
       setStatusMessage(
