@@ -90,8 +90,15 @@ export function LibraryPage() {
   }, [activeTab, accountLists]);
 
   useEffect(() => {
+    const nextTab = searchParams.get('tab');
+
+    if (nextTab === 'lists' || nextTab === 'favourites' || nextTab === 'watchlist') {
+      setActiveTab((currentTab) => (currentTab === nextTab ? currentTab : nextTab));
+      return;
+    }
+
     setSearchParams({ tab: activeTab }, { replace: true });
-  }, [activeTab, setSearchParams]);
+  }, [activeTab, searchParams, setSearchParams]);
 
   if (error) {
     return <p>{error}</p>;
@@ -108,7 +115,10 @@ export function LibraryPage() {
       <MiniHeaderTabs
         value={activeTab}
         ariaLabel="Library categories"
-        onChange={setActiveTab}
+        onChange={(nextTab) => {
+          setActiveTab(nextTab);
+          setSearchParams({ tab: nextTab }, { replace: true });
+        }}
         options={[
           { value: 'lists', label: 'Lists' },
           { value: 'watchlist', label: 'Watchlist' },
@@ -122,7 +132,7 @@ export function LibraryPage() {
           <MediaGrid items={watchlistMovies?.results ?? []} mediaType="movies" />
 
           <h2>Watchlist TV Shows</h2>
-          <MediaGrid items={watchlistTv?.results ?? []} mediaType="tv" />
+          <MediaGrid items={watchlistTv?.results ?? []} mediaType="tv" showYearOnly />
         </div>
       ) : null}
 
@@ -132,7 +142,7 @@ export function LibraryPage() {
           <MediaGrid items={favoriteMovies?.results ?? []} mediaType="movies" />
 
           <h2>Favourite TV Shows</h2>
-          <MediaGrid items={favoriteTv?.results ?? []} mediaType="tv" />
+          <MediaGrid items={favoriteTv?.results ?? []} mediaType="tv" showYearOnly />
         </div>
       ) : null}
 

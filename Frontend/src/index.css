@@ -192,6 +192,7 @@ button {
   border-radius: 0.75rem;
   background: #ffffff;
   box-shadow: 0 16px 40px rgb(15 23 42 / 20%);
+  z-index: 30;
 }
 
 .search-groups {
