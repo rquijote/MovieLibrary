@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { apiGet, apiPost, apiPut } from '../lib/api';
+import { apiDelete, apiGet, apiPost } from '../lib/api';
 import { SelectedMoviesList } from '../components/SelectedMoviesList';
 import type { ListDetailsResponse, MovieDto, MovieListResponse, StatusDto } from '../types/media';
 
@@ -115,11 +115,21 @@ export function CreateListPage() {
       };
 
       if (isEditMode && editListId) {
-        await apiPut<StatusDto>(`/api/Lists/${editListId}`, payload);
-        await apiPost<StatusDto>(`/api/Lists/${editListId}/clear`, null);
+        // v3 can't update the list; v4 I don't have write access.
+        const currentList = await apiGet<ListDetailsResponse>(`/api/Lists/${editListId}/details`);
+        const moviesToCarryOver = currentList.items;
 
-        for (const movie of selectedMovies) {
-          await apiPost<StatusDto>(`/api/Lists/${editListId}/add_movie`, movie.id);
+        await apiDelete<StatusDto>(`/api/Lists/${editListId}`);
+
+        const recreatedList = await apiPost<StatusDto>('/api/Lists', payload);
+        const recreatedListId = recreatedList.list_id;
+
+        if (!recreatedListId) {
+          throw new Error('List recreated without an id. Please try again.');
+        }
+
+        for (const movie of moviesToCarryOver) {
+          await apiPost<StatusDto>(`/api/Lists/${recreatedListId}/add_movie`, movie.id);
         }
 
         setStatusMessage('List updated.');
