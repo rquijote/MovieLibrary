@@ -10,14 +10,14 @@ namespace Api.Services
 
         public async Task<MovieListResponseDto> SearchMoviesAsync([FromQuery] string query)
         {
-            var response = await _http.GetAsync($"movie?query={query}");
+            var response = await _http.GetAsync($"movie?query={Uri.EscapeDataString(query)}");
             var result = await response.Content.ReadFromJsonAsync<MovieListResponseDto>();
             return result ?? new MovieListResponseDto();
         }
 
         public async Task<TvShowListResponseDto> SearchTVShowsAsync(string query)
         {
-            var response = await _http.GetAsync($"tv?query={query}");
+            var response = await _http.GetAsync($"tv?query={Uri.EscapeDataString(query)}");
             var result = await response.Content.ReadFromJsonAsync<TvShowListResponseDto>();
             return result ?? new TvShowListResponseDto();
         }
