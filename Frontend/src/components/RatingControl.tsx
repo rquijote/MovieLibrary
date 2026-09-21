@@ -1,22 +1,109 @@
+import { useEffect, useMemo, useState } from 'react';
 import type { MouseEvent } from 'react';
+import { apiDelete, apiGet, apiPost } from '../lib/api';
+import type { AccountStatesResponse, StatusDto } from '../types/media';
 
 interface RatingControlProps {
-  activeRatingOutOf5: number;
-  isPreviewActive: boolean;
-  onRatingHover: (event: MouseEvent<HTMLButtonElement>, starIndex: number) => void;
-  onRatingClick: (event: MouseEvent<HTMLButtonElement>, starIndex: number) => Promise<void>;
-  onClearHover: () => void;
-  getStarState: (starIndex: number, currentRatingOutOf5: number) => 'full' | 'half' | 'empty';
+  mediaId: number;
+  mediaType: 'movie' | 'tv';
+  onNotify: (kind: 'success' | 'error', message: string) => void;
 }
 
 export function RatingControl({
-  activeRatingOutOf5,
-  isPreviewActive,
-  onRatingHover,
-  onRatingClick,
-  onClearHover,
-  getStarState,
+  mediaId,
+  mediaType,
+  onNotify,
 }: RatingControlProps) {
+  const [ratingOutOf5, setRatingOutOf5] = useState(0);
+  const [hoverRatingOutOf5, setHoverRatingOutOf5] = useState<number | null>(null);
+
+  const ratingEndpointPrefix = useMemo(() => (mediaType === 'movie' ? 'Movie' : 'TvShow'), [mediaType]);
+
+  useEffect(() => {
+    let isDisposed = false;
+
+    const loadAccountState = async () => {
+      try {
+        const accountState = await apiGet<AccountStatesResponse>(`/api/${ratingEndpointPrefix}/${mediaId}/account-states`);
+
+        if (isDisposed) {
+          return;
+        }
+
+        setRatingOutOf5((accountState.rated?.value ?? 0) / 2);
+      } catch (error) {
+        if (isDisposed) {
+          return;
+        }
+
+        onNotify('error', error instanceof Error ? error.message : 'Loading rating state failed.');
+      }
+    };
+
+    void loadAccountState();
+
+    return () => {
+      isDisposed = true;
+    };
+  }, [mediaId, onNotify, ratingEndpointPrefix]);
+
+  const getPointerRating = (event: MouseEvent<HTMLButtonElement>, starIndex: number) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const isLeftHalf = event.clientX - rect.left < rect.width / 2;
+    return isLeftHalf ? starIndex - 0.5 : starIndex;
+  };
+
+  const getStarState = (starIndex: number, currentRating: number) => {
+    if (currentRating >= starIndex) {
+      return 'full';
+    }
+
+    if (currentRating === starIndex - 0.5) {
+      return 'half';
+    }
+
+    return 'empty';
+  };
+
+  const handleSetRating = async (nextRatingOutOf5: number) => {
+    try {
+      const result = await apiPost<StatusDto>(`/api/${ratingEndpointPrefix}/${mediaId}/rating?rating=${nextRatingOutOf5 * 2}`, null);
+      setRatingOutOf5(nextRatingOutOf5);
+      onNotify('success', result.status_message ?? `Rating updated to ${nextRatingOutOf5.toFixed(1)} / 5.`);
+    } catch (error) {
+      onNotify('error', error instanceof Error ? error.message : 'Rating update failed.');
+    }
+  };
+
+  const handleDeleteRating = async () => {
+    try {
+      const result = await apiDelete<StatusDto>(`/api/${ratingEndpointPrefix}/${mediaId}/rating`);
+      setRatingOutOf5(0);
+      onNotify('success', result.status_message ?? 'Rating removed.');
+    } catch (error) {
+      onNotify('error', error instanceof Error ? error.message : 'Deleting rating failed.');
+    }
+  };
+
+  const handleRatingClick = async (event: MouseEvent<HTMLButtonElement>, starIndex: number) => {
+    const selectedRating = getPointerRating(event, starIndex);
+    setHoverRatingOutOf5(null);
+
+    if (selectedRating === ratingOutOf5) {
+      await handleDeleteRating();
+      return;
+    }
+
+    await handleSetRating(selectedRating);
+  };
+
+  const handleRatingHover = (event: MouseEvent<HTMLButtonElement>, starIndex: number) => {
+    setHoverRatingOutOf5(getPointerRating(event, starIndex));
+  };
+
+  const activeRatingOutOf5 = hoverRatingOutOf5 ?? ratingOutOf5;
+  const isPreviewActive = hoverRatingOutOf5 !== null;
+
   return (
     <div className="action-group rating-group">
       <span className="watchlist-hint rate-label">Rate</span>
@@ -24,7 +111,7 @@ export function RatingControl({
         className="star-rating"
         role="group"
         aria-label="Rate this title out of 5 stars"
-        onMouseLeave={onClearHover}
+        onMouseLeave={() => setHoverRatingOutOf5(null)}
       >
         {Array.from({ length: 5 }, (_, idx) => {
           const starIndex = idx + 1;
@@ -38,8 +125,8 @@ export function RatingControl({
               key={starIndex}
               type="button"
               className={`star-button ${state}`}
-              onClick={(event) => void onRatingClick(event, starIndex)}
-              onMouseMove={(event) => onRatingHover(event, starIndex)}
+              onClick={(event) => void handleRatingClick(event, starIndex)}
+              onMouseMove={(event) => handleRatingHover(event, starIndex)}
               aria-label={`Set rating to ${starIndex - 0.5} or ${starIndex}`}
             >
               <svg viewBox="0 0 24 24" className="star-icon" aria-hidden="true">

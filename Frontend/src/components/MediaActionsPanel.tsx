@@ -1,7 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import type { FormEvent, MouseEvent } from 'react';
-import { apiDelete, apiGet, apiPost } from '../lib/api';
-import type { AccountListSummary, AccountListsResponse, AccountStatesResponse, StatusDto } from '../types/media';
+import { useEffect, useRef, useState } from 'react';
+import { apiGet, apiPost } from '../lib/api';
+import type { AccountStatesResponse, StatusDto } from '../types/media';
 import { ActionToast } from './ActionToast';
 import { ListPickerModal } from './ListPickerModal';
 import { RatingControl } from './RatingControl';
@@ -12,31 +11,15 @@ interface MediaActionsPanelProps {
   showListActions?: boolean;
 }
 
-interface ListItemStatusResponse {
-  id: number;
-  item_present: boolean;
-}
-
 export function MediaActionsPanel({ mediaId, mediaType, showListActions = true }: MediaActionsPanelProps) {
-  const [ratingOutOf5, setRatingOutOf5] = useState(0);
-  const [hoverRatingOutOf5, setHoverRatingOutOf5] = useState<number | null>(null);
   const [isWatchlisted, setIsWatchlisted] = useState(false);
   const [isWatchlistHovered, setIsWatchlistHovered] = useState(false);
   const [isFavorited, setIsFavorited] = useState(false);
   const [isFavoriteHovered, setIsFavoriteHovered] = useState(false);
   const [isListPickerOpen, setIsListPickerOpen] = useState(false);
-  const [isListsLoading, setIsListsLoading] = useState(false);
-  const [accountLists, setAccountLists] = useState<AccountListSummary[]>([]);
-  const [listItemPresenceById, setListItemPresenceById] = useState<Record<number, boolean>>({});
-  const [selectedListIds, setSelectedListIds] = useState<number[]>([]);
-  const [listSearchTerm, setListSearchTerm] = useState('');
-  const [isCreateListOpen, setIsCreateListOpen] = useState(false);
-  const [newListName, setNewListName] = useState('');
-  const [newListDescription, setNewListDescription] = useState('');
   const [toast, setToast] = useState<{ id: number; kind: 'success' | 'error'; message: string } | null>(null);
   const toastIdRef = useRef(0);
-
-  const ratingEndpointPrefix = useMemo(() => (mediaType === 'movie' ? 'Movie' : 'TvShow'), [mediaType]);
+  const ratingEndpointPrefix = mediaType === 'movie' ? 'Movie' : 'TvShow';
 
   const showToast = (kind: 'success' | 'error', message: string) => {
     toastIdRef.current += 1;
@@ -44,7 +27,7 @@ export function MediaActionsPanel({ mediaId, mediaType, showListActions = true }
   };
 
   useEffect(() => {
-    let isDisposed = false;
+      let isDisposed = false; // Flag in the initial effect load, to cancel state updates if user leaves the page. 
 
     // Loads information about media_id if any.
     const loadAccountState = async () => {
@@ -57,7 +40,6 @@ export function MediaActionsPanel({ mediaId, mediaType, showListActions = true }
 
         setIsWatchlisted(accountState.watchlist);
         setIsFavorited(accountState.favorite);
-        setRatingOutOf5((accountState.rated?.value ?? 0) / 2);
       } catch (error) {
         if (isDisposed) {
           return;
@@ -72,7 +54,7 @@ export function MediaActionsPanel({ mediaId, mediaType, showListActions = true }
     return () => {
       isDisposed = true;
     };
-  }, [mediaId, ratingEndpointPrefix]);
+  }, [mediaId, mediaType]);
 
   const handleWatchlistToggle = async () => {
     const nextState = !isWatchlisted;
@@ -107,187 +89,10 @@ export function MediaActionsPanel({ mediaId, mediaType, showListActions = true }
     }
   };
 
-  const handleSetRating = async (nextRatingOutOf5: number) => {
-    try {
-      const result = await apiPost<StatusDto>(`/api/${ratingEndpointPrefix}/${mediaId}/rating?rating=${nextRatingOutOf5 * 2}`, null);
-      setRatingOutOf5(nextRatingOutOf5);
-      showToast('success', result.status_message ?? `Rating updated to ${nextRatingOutOf5.toFixed(1)} / 5.`);
-    } catch (error) {
-      showToast('error', error instanceof Error ? error.message : 'Rating update failed.');
-    }
-  };
-
-  const handleDeleteRating = async () => {
-    try {
-      const result = await apiDelete<StatusDto>(`/api/${ratingEndpointPrefix}/${mediaId}/rating`);
-      setRatingOutOf5(0);
-      showToast('success', result.status_message ?? 'Rating removed.');
-    } catch (error) {
-      showToast('error', error instanceof Error ? error.message : 'Deleting rating failed.');
-    }
-  };
-
-  const getPointerRating = (event: MouseEvent<HTMLButtonElement>, starIndex: number) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    const isLeftHalf = event.clientX - rect.left < rect.width / 2;
-    return isLeftHalf ? starIndex - 0.5 : starIndex;
-  };
-
-  const handleRatingClick = async (event: MouseEvent<HTMLButtonElement>, starIndex: number) => {
-    const selectedRating = getPointerRating(event, starIndex);
-    setHoverRatingOutOf5(null);
-
-    if (selectedRating === ratingOutOf5) {
-      await handleDeleteRating();
-      return;
-    }
-
-    await handleSetRating(selectedRating);
-  };
-
-  const handleRatingHover = (event: MouseEvent<HTMLButtonElement>, starIndex: number) => {
-    setHoverRatingOutOf5(getPointerRating(event, starIndex));
-  };
-
-  const getStarState = (starIndex: number, currentRatingOutOf5: number) => {
-    if (currentRatingOutOf5 >= starIndex) {
-      return 'full';
-    }
-
-    if (currentRatingOutOf5 === starIndex - 0.5) {
-      return 'half';
-    }
-
-    return 'empty';
-  };
-
-  const activeRatingOutOf5 = hoverRatingOutOf5 ?? ratingOutOf5;
-  const isPreviewActive = hoverRatingOutOf5 !== null;
   const watchlistLabel = isWatchlisted && isWatchlistHovered ? 'Remove' : 'Watchlist';
   const favoriteLabel = isFavorited && isFavoriteHovered ? 'Remove' : 'Favorite';
-  const filteredAccountLists = useMemo(() => {
-    const term = listSearchTerm.trim().toLowerCase();
-    if (!term) {
-      return accountLists;
-    }
-
-    return accountLists.filter((list) => list.name.toLowerCase().includes(term));
-  }, [accountLists, listSearchTerm]);
-
-  const loadListItemPresence = async (lists: AccountListSummary[]) => {
-    if (lists.length === 0) {
-      setListItemPresenceById({});
-      return;
-    }
-
-    const statuses = await Promise.all(
-      lists.map(async (list) => {
-        try {
-          const itemStatus = await apiGet<ListItemStatusResponse>(
-            `/api/Lists/${list.id}/item_status?media_type=${mediaType}&media_id=${mediaId}`,
-          );
-
-          return [list.id, itemStatus.item_present] as const;
-        } catch {
-          return [list.id, false] as const;
-        }
-      }),
-    );
-
-    const nextPresence = Object.fromEntries(statuses);
-    setListItemPresenceById(nextPresence);
-    setSelectedListIds((current) => current.filter((id) => !nextPresence[id]));
-  };
-
-  const handleSaveSelectedLists = async () => {
-    if (selectedListIds.length === 0) {
-      showToast('error', 'Select at least one list.');
-      return;
-    }
-
-    try {
-      for (const listId of selectedListIds) {
-        await apiPost<StatusDto>(`/api/Lists/${listId}/add_movie`, mediaId);
-      }
-
-      showToast(
-        'success',
-        selectedListIds.length === 1
-          ? 'Added to 1 list.'
-          : `Added to ${selectedListIds.length} lists.`,
-      );
-      setIsListPickerOpen(false);
-      setSelectedListIds([]);
-      await loadAccountLists(true);
-    } catch (error) {
-      showToast('error', error instanceof Error ? error.message : 'List update failed.');
-    }
-  };
-
-  // force is used as a bool, to avoid GET lists. openListPicker() is false.
-  const loadAccountLists = async (force: boolean) => {
-    if (isListsLoading) {
-      return;
-    }
-
-    if (!force && accountLists.length > 0) {
-      return;
-    }
-
-    try {
-      setIsListsLoading(true);
-      const result = await apiGet<AccountListsResponse>('/api/Account/lists?page=1'); // TODO: Would be better if page=2 or page=3 as well.
-      const sortedLists = [...result.results].sort((left, right) => right.id - left.id);
-      setAccountLists(sortedLists);
-      await loadListItemPresence(sortedLists);
-    } catch (error) {
-      showToast('error', error instanceof Error ? error.message : 'Failed to load account lists.');
-    } finally {
-      setIsListsLoading(false);
-    }
-  };
-
-  const handleCreateList = async (event: FormEvent) => {
-    event.preventDefault();
-
-    const trimmedName = newListName.trim();
-    if (!trimmedName) {
-      showToast('error', 'List name is required.');
-      return;
-    }
-
-    try {
-      const result = await apiPost<StatusDto>('/api/Lists', {
-        name: trimmedName,
-        description: newListDescription.trim() || null,
-        language: 'en',
-      });
-
-      showToast('success', result.status_message ?? 'List created.');
-      setNewListName('');
-      setNewListDescription('');
-      await loadAccountLists(true);
-    } catch (error) {
-      showToast('error', error instanceof Error ? error.message : 'Failed to create list.');
-    }
-  };
-
-  const openListPicker = async () => {
+  const openListPicker = () => {
     setIsListPickerOpen(true);
-    setSelectedListIds([]);
-    setListSearchTerm('');
-    setIsCreateListOpen(false);
-    await loadAccountLists(false);
-  };
-
-  const toggleListSelection = (listId: number) => {
-    if (listItemPresenceById[listId]) {
-      return;
-    }
-
-    setSelectedListIds((current) =>
-      current.includes(listId) ? current.filter((id) => id !== listId) : [...current, listId],
-    );
   };
 
   return (
@@ -366,33 +171,17 @@ export function MediaActionsPanel({ mediaId, mediaType, showListActions = true }
       </div>
 
       <RatingControl
-        activeRatingOutOf5={activeRatingOutOf5}
-        isPreviewActive={isPreviewActive}
-        onRatingClick={handleRatingClick}
-        onRatingHover={handleRatingHover}
-        onClearHover={() => setHoverRatingOutOf5(null)}
-        getStarState={getStarState}
+        mediaId={mediaId}
+        mediaType={mediaType}
+        onNotify={showToast}
       />
 
       <ListPickerModal
         isOpen={showListActions && isListPickerOpen}
-        isListsLoading={isListsLoading}
-        accountLists={accountLists}
-        filteredAccountLists={filteredAccountLists}
-        listItemPresenceById={listItemPresenceById}
-        selectedListIds={selectedListIds}
-        isCreateListOpen={isCreateListOpen}
-        listSearchTerm={listSearchTerm}
-        newListName={newListName}
-        newListDescription={newListDescription}
+        mediaId={mediaId}
+        mediaType={mediaType}
+        onNotify={showToast}
         onClose={() => setIsListPickerOpen(false)}
-        onToggleCreateList={() => setIsCreateListOpen((current) => !current)}
-        onSearchChange={setListSearchTerm}
-        onNewListNameChange={setNewListName}
-        onNewListDescriptionChange={setNewListDescription}
-        onCreateListSubmit={handleCreateList}
-        onToggleListSelection={toggleListSelection}
-        onSave={handleSaveSelectedLists}
       />
 
       <ActionToast
