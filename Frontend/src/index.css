@@ -1094,6 +1094,23 @@ p {
   padding: 0.35rem 0.45rem;
 }
 
+.list-picker-header button,
+.list-picker-toolbar button,
+.list-picker-save-actions button {
+  border: 1px solid #cbd5e1;
+  border-radius: 0.4rem;
+  background: #ffffff;
+  color: #0f172a;
+  padding: 0.35rem 0.6rem;
+}
+
+.list-picker-header button:hover,
+.list-picker-toolbar button:hover,
+.list-picker-save-actions button:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
 .action-group button {
   border: 1px solid #cbd5e1;
   border-radius: 0.6rem;
@@ -1483,8 +1500,17 @@ body {
 .create-list-page .list-create-form input,
 .create-list-page .list-create-form textarea,
 .list-picker-search input,
+.list-picker-toolbar input,
 .list-create-form input,
 .list-edit-form input {
+  background: #0f172a;
+  border-color: #334155;
+  color: #e5e7eb;
+}
+
+.list-picker-header button,
+.list-picker-toolbar button,
+.list-picker-save-actions button {
   background: #0f172a;
   border-color: #334155;
   color: #e5e7eb;

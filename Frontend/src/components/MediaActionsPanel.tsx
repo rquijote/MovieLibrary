@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import type { FormEvent, MouseEvent } from 'react';
 import { apiDelete, apiGet, apiPost } from '../lib/api';
 import type { AccountListSummary, AccountListsResponse, AccountStatesResponse, StatusDto } from '../types/media';
-import { CreateListForm } from './CreateListForm';
+import { ListPickerModal } from './ListPickerModal';
+import { RatingControl } from './RatingControl';
 
 interface MediaActionsPanelProps {
   mediaId: number;
@@ -361,120 +362,35 @@ export function MediaActionsPanel({ mediaId, mediaType, showListActions = true }
         </div>
       </div>
 
-      <div className="action-group rating-group">
-        <span className="watchlist-hint rate-label">Rate</span>
-        <div
-          className="star-rating"
-          role="group"
-          aria-label="Rate this title out of 5 stars"
-          onMouseLeave={() => setHoverRatingOutOf5(null)}
-        >
-          {Array.from({ length: 5 }, (_, idx) => {
-            const starIndex = idx + 1;
-            const state = getStarState(starIndex, activeRatingOutOf5);
-            const fullColor = isPreviewActive ? '#9ca3af' : '#fbbf24';
-            const emptyColor = '#64748b';
-            const halfGradientId = `star-${isPreviewActive ? 'preview' : 'rated'}-half-${starIndex}`;
+      <RatingControl
+        activeRatingOutOf5={activeRatingOutOf5}
+        isPreviewActive={isPreviewActive}
+        onRatingClick={handleRatingClick}
+        onRatingHover={handleRatingHover}
+        onClearHover={() => setHoverRatingOutOf5(null)}
+        getStarState={getStarState}
+      />
 
-            return (
-              <button
-                key={starIndex}
-                type="button"
-                className={`star-button ${state}`}
-                onClick={(event) => void handleRatingClick(event, starIndex)}
-                onMouseMove={(event) => handleRatingHover(event, starIndex)}
-                aria-label={`Set rating to ${starIndex - 0.5} or ${starIndex}`}
-              >
-                <svg viewBox="0 0 24 24" className="star-icon" aria-hidden="true">
-                  {state === 'half' ? (
-                    <>
-                      <defs>
-                        <linearGradient id={halfGradientId}>
-                          <stop offset="50%" stopColor={fullColor} />
-                          <stop offset="50%" stopColor={emptyColor} />
-                        </linearGradient>
-                      </defs>
-                      <path
-                        d="M12 2.5l2.93 5.93 6.55.95-4.74 4.62 1.12 6.53L12 17.45l-5.86 3.08 1.12-6.53L2.52 9.38l6.55-.95L12 2.5z"
-                        fill={`url(#${halfGradientId})`}
-                      />
-                    </>
-                  ) : (
-                    <path
-                      d="M12 2.5l2.93 5.93 6.55.95-4.74 4.62 1.12 6.53L12 17.45l-5.86 3.08 1.12-6.53L2.52 9.38l6.55-.95L12 2.5z"
-                      fill={state === 'full' ? fullColor : emptyColor}
-                    />
-                  )}
-                </svg>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {showListActions && isListPickerOpen ? (
-        <div className="list-picker-overlay" role="presentation" onClick={() => setIsListPickerOpen(false)}>
-          <div className="list-picker-modal" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
-            <div className="list-picker-header">
-              <h3>Add to list</h3>
-              <button type="button" onClick={() => setIsListPickerOpen(false)}>
-                Close
-              </button>
-            </div>
-
-            <div className="list-picker-toolbar">
-              <button type="button" onClick={() => setIsCreateListOpen((current) => !current)}>
-                Create new list
-              </button>
-              <input
-                type="text"
-                placeholder="Search lists"
-                value={listSearchTerm}
-                onChange={(event) => setListSearchTerm(event.target.value)}
-              />
-            </div>
-
-            {isCreateListOpen ? (
-              <CreateListForm
-                newListName={newListName}
-                newListDescription={newListDescription}
-                onNewListNameChange={setNewListName}
-                onNewListDescriptionChange={setNewListDescription}
-                onSubmit={(event) => void handleCreateList(event)}
-              />
-            ) : null}
-
-            {isListsLoading ? <p>Loading lists...</p> : null}
-
-            {!isListsLoading && accountLists.length === 0 ? <p>No custom lists found.</p> : null}
-            {!isListsLoading && accountLists.length > 0 && filteredAccountLists.length === 0 ? <p>No matching lists found.</p> : null}
-
-            {!isListsLoading
-              ? filteredAccountLists.map((list) => (
-                  <div
-                    key={list.id}
-                    className={`list-picker-item list-picker-selectable ${selectedListIds.includes(list.id) ? 'selected' : ''} ${listItemPresenceById[list.id] ? 'disabled' : ''}`}
-                    onClick={() => toggleListSelection(list.id)}
-                  >
-                    <div className="list-item-row">
-                      <strong>{list.name}</strong>
-                      <div className="list-item-meta">
-                        <span>{list.item_count} {list.item_count === 1 ? 'item' : 'items'}</span>
-                        <span>{listItemPresenceById[list.id] || selectedListIds.includes(list.id) ? '✓' : ''}</span>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              : null}
-
-            <div className="list-picker-save-actions">
-              <button type="button" disabled={selectedListIds.length === 0} onClick={() => void handleSaveSelectedLists()}>
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <ListPickerModal
+        isOpen={showListActions && isListPickerOpen}
+        isListsLoading={isListsLoading}
+        accountLists={accountLists}
+        filteredAccountLists={filteredAccountLists}
+        listItemPresenceById={listItemPresenceById}
+        selectedListIds={selectedListIds}
+        isCreateListOpen={isCreateListOpen}
+        listSearchTerm={listSearchTerm}
+        newListName={newListName}
+        newListDescription={newListDescription}
+        onClose={() => setIsListPickerOpen(false)}
+        onToggleCreateList={() => setIsCreateListOpen((current) => !current)}
+        onSearchChange={setListSearchTerm}
+        onNewListNameChange={setNewListName}
+        onNewListDescriptionChange={setNewListDescription}
+        onCreateListSubmit={handleCreateList}
+        onToggleListSelection={toggleListSelection}
+        onSave={handleSaveSelectedLists}
+      />
 
       {statusMessage ? <p className="action-status">{statusMessage}</p> : null}
       {errorMessage ? <p className="action-error">{errorMessage}</p> : null}
