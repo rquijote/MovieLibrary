@@ -32,9 +32,20 @@ export function ExpandedMediaListPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const normalizedMediaType = useMemo(() => {
+    if (mediaType === 'tvshows') {
+      return 'tv';
+    }
+
+    return mediaType;
+  }, [mediaType]);
+
   const parsedMediaType = useMemo(
-    () => (validMediaTypes.includes(mediaType as MediaType) ? (mediaType as MediaType) : null),
-    [mediaType],
+    () =>
+      validMediaTypes.includes(normalizedMediaType as MediaType)
+        ? (normalizedMediaType as MediaType)
+        : null,
+    [normalizedMediaType],
   );
 
   const parsedCategory = useMemo(
@@ -126,7 +137,7 @@ export function ExpandedMediaListPage() {
         </button>
       </div>
 
-      <MediaGrid items={items} mediaType={parsedMediaType} />
+      <MediaGrid items={items} mediaType={parsedMediaType} showYearOnly />
     </>
   );
 }

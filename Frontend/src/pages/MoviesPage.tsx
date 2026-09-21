@@ -1,9 +1,17 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { MediaRow } from '../components/MediaRow';
+import { MiniHeaderTabs } from '../components/MiniHeaderTabs';
 import { apiGet } from '../lib/api';
 import type { MovieListResponse } from '../types/media';
 
+type MoviesTab = 'popular' | 'top-rated' | 'upcoming';
+
 export function MoviesPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab');
+  const activeTab: MoviesTab =
+    tabParam === 'popular' || tabParam === 'top-rated' || tabParam === 'upcoming' ? tabParam : 'popular';
   const [popular, setPopular] = useState<MovieListResponse | null>(null);
   const [topRated, setTopRated] = useState<MovieListResponse | null>(null);
   const [upcoming, setUpcoming] = useState<MovieListResponse | null>(null);
@@ -33,6 +41,12 @@ export function MoviesPage() {
     void load();
   }, []);
 
+  useEffect(() => {
+    if (!tabParam) {
+      setSearchParams({ tab: activeTab }, { replace: true });
+    }
+  }, [activeTab, setSearchParams, tabParam]);
+
   if (error) {
     return <p>{error}</p>;
   }
@@ -44,9 +58,26 @@ export function MoviesPage() {
   return (
     <>
       <h1>Movies</h1>
-      <MediaRow title="Popular" mediaType="movies" category="popular" items={popular.results} />
-      <MediaRow title="Top Rated" mediaType="movies" category="top-rated" items={topRated.results} />
-      <MediaRow title="Upcoming" mediaType="movies" category="upcoming" items={upcoming.results} />
+      <MiniHeaderTabs
+        value={activeTab}
+        ariaLabel="Movie categories"
+        onChange={(nextTab) => setSearchParams({ tab: nextTab }, { replace: true })}
+        options={[
+          { value: 'popular', label: 'Popular' },
+          { value: 'top-rated', label: 'Top Rated' },
+          { value: 'upcoming', label: 'Upcoming' },
+        ]}
+      />
+
+      {activeTab === 'popular' ? (
+        <MediaRow title="Popular" mediaType="movies" category="popular" items={popular.results} />
+      ) : null}
+      {activeTab === 'top-rated' ? (
+        <MediaRow title="Top Rated" mediaType="movies" category="top-rated" items={topRated.results} />
+      ) : null}
+      {activeTab === 'upcoming' ? (
+        <MediaRow title="Upcoming" mediaType="movies" category="upcoming" items={upcoming.results} />
+      ) : null}
     </>
   );
 }

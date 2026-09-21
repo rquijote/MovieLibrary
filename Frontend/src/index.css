@@ -210,7 +210,7 @@ button {
 }
 
 .library-nav-trigger {
-  cursor: default;
+  cursor: pointer;
   border-radius: 0.35rem;
   padding: 0.3rem 0.45rem;
 }
@@ -237,6 +237,10 @@ button {
 
 .library-nav-dropdown:hover .library-nav-menu,
 .library-nav-dropdown:focus-within .library-nav-menu {
+  display: grid;
+}
+
+.library-nav-dropdown-open .library-nav-menu {
   display: grid;
 }
 

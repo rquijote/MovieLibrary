@@ -11,12 +11,13 @@ interface MediaRowProps {
 
 export function MediaRow({ title, items, mediaType, category }: MediaRowProps) {
   const navigate = useNavigate();
+  const expandedRoute = mediaType === 'tv' ? `/tvshows/${category}` : `/${mediaType}/${category}`;
 
   return (
     <section className="media-row-container">
       <div className="media-row-header">
         <h3>{title}</h3>
-        <button className="view-more-btn" type="button" onClick={() => navigate(`/${mediaType}/${category}`)}>
+        <button className="view-more-btn" type="button" onClick={() => navigate(expandedRoute)}>
           View More
         </button>
       </div>

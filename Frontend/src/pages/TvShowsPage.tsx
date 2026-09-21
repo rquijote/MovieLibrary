@@ -1,9 +1,19 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { MediaRow } from '../components/MediaRow';
+import { MiniHeaderTabs } from '../components/MiniHeaderTabs';
 import { apiGet } from '../lib/api';
 import type { TvShowListResponse } from '../types/media';
 
+type TvShowsTab = 'upcoming' | 'on-the-air' | 'popular' | 'top-rated';
+
 export function TvShowsPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab');
+  const activeTab: TvShowsTab =
+    tabParam === 'upcoming' || tabParam === 'on-the-air' || tabParam === 'popular' || tabParam === 'top-rated'
+      ? tabParam
+      : 'upcoming';
   const [upcoming, setUpcoming] = useState<TvShowListResponse | null>(null);
   const [onTheAir, setOnTheAir] = useState<TvShowListResponse | null>(null);
   const [popular, setPopular] = useState<TvShowListResponse | null>(null);
@@ -40,6 +50,12 @@ export function TvShowsPage() {
     void load();
   }, []);
 
+  useEffect(() => {
+    if (!tabParam) {
+      setSearchParams({ tab: activeTab }, { replace: true });
+    }
+  }, [activeTab, setSearchParams, tabParam]);
+
   if (error) {
     return <p>{error}</p>;
   }
@@ -51,10 +67,30 @@ export function TvShowsPage() {
   return (
     <>
       <h1>TV Shows</h1>
-      <MediaRow title="Upcoming" mediaType="tv" category="upcoming" items={upcoming.results} />
-      <MediaRow title="On The Air" mediaType="tv" category="on-the-air" items={onTheAir.results} />
-      <MediaRow title="Popular" mediaType="tv" category="popular" items={popular.results} />
-      <MediaRow title="Top Rated" mediaType="tv" category="top-rated" items={topRated.results} />
+      <MiniHeaderTabs
+        value={activeTab}
+        ariaLabel="TV show categories"
+        onChange={(nextTab) => setSearchParams({ tab: nextTab }, { replace: true })}
+        options={[
+          { value: 'upcoming', label: 'Upcoming' },
+          { value: 'on-the-air', label: 'On The Air' },
+          { value: 'popular', label: 'Popular' },
+          { value: 'top-rated', label: 'Top Rated' },
+        ]}
+      />
+
+      {activeTab === 'upcoming' ? (
+        <MediaRow title="Upcoming" mediaType="tv" category="upcoming" items={upcoming.results} />
+      ) : null}
+      {activeTab === 'on-the-air' ? (
+        <MediaRow title="On The Air" mediaType="tv" category="on-the-air" items={onTheAir.results} />
+      ) : null}
+      {activeTab === 'popular' ? (
+        <MediaRow title="Popular" mediaType="tv" category="popular" items={popular.results} />
+      ) : null}
+      {activeTab === 'top-rated' ? (
+        <MediaRow title="Top Rated" mediaType="tv" category="top-rated" items={topRated.results} />
+      ) : null}
     </>
   );
 }
