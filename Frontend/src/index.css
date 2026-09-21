@@ -1514,6 +1514,18 @@ body {
   background: #0f172a;
   border-color: #334155;
   color: #e5e7eb;
+  cursor: pointer;
+}
+
+.list-picker-header button:hover,
+.list-picker-toolbar button:hover,
+.list-picker-save-actions button:hover,
+.list-picker-header button:focus-visible,
+.list-picker-toolbar button:focus-visible,
+.list-picker-save-actions button:focus-visible {
+  background: #1e293b;
+  border-color: #475569;
+  color: #f8fafc;
 }
 
 .list-picker-item {
