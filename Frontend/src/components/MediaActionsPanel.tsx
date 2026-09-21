@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent, MouseEvent } from 'react';
 import { apiDelete, apiGet, apiPost } from '../lib/api';
 import type { AccountListSummary, AccountListsResponse, AccountStatesResponse, StatusDto } from '../types/media';
+import { ActionToast } from './ActionToast';
 import { ListPickerModal } from './ListPickerModal';
 import { RatingControl } from './RatingControl';
 
@@ -32,14 +33,20 @@ export function MediaActionsPanel({ mediaId, mediaType, showListActions = true }
   const [isCreateListOpen, setIsCreateListOpen] = useState(false);
   const [newListName, setNewListName] = useState('');
   const [newListDescription, setNewListDescription] = useState('');
-  const [statusMessage, setStatusMessage] = useState<string | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ id: number; kind: 'success' | 'error'; message: string } | null>(null);
+  const toastIdRef = useRef(0);
 
   const ratingEndpointPrefix = useMemo(() => (mediaType === 'movie' ? 'Movie' : 'TvShow'), [mediaType]);
+
+  const showToast = (kind: 'success' | 'error', message: string) => {
+    toastIdRef.current += 1;
+    setToast({ id: toastIdRef.current, kind, message });
+  };
 
   useEffect(() => {
     let isDisposed = false;
 
+    // Loads information about media_id if any.
     const loadAccountState = async () => {
       try {
         const accountState = await apiGet<AccountStatesResponse>(`/api/${ratingEndpointPrefix}/${mediaId}/account-states`);
@@ -51,13 +58,12 @@ export function MediaActionsPanel({ mediaId, mediaType, showListActions = true }
         setIsWatchlisted(accountState.watchlist);
         setIsFavorited(accountState.favorite);
         setRatingOutOf5((accountState.rated?.value ?? 0) / 2);
-        setErrorMessage(null);
       } catch (error) {
         if (isDisposed) {
           return;
         }
 
-        setErrorMessage(error instanceof Error ? error.message : 'Loading initial account state failed.');
+        showToast('error', error instanceof Error ? error.message : 'Loading initial account state failed.');
       }
     };
 
@@ -78,10 +84,12 @@ export function MediaActionsPanel({ mediaId, mediaType, showListActions = true }
         watchlist: nextState,
       });
       setIsWatchlisted(nextState);
-      setStatusMessage(result.success ? null : (result.status_message ?? 'Watchlist update failed.'));
-      setErrorMessage(null);
+      showToast(
+        result.success ? 'success' : 'error',
+        result.status_message ?? (result.success ? 'Watchlist updated.' : 'Watchlist update failed.'),
+      );
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Watchlist update failed.');
+      showToast('error', error instanceof Error ? error.message : 'Watchlist update failed.');
     }
   };
 
@@ -93,10 +101,9 @@ export function MediaActionsPanel({ mediaId, mediaType, showListActions = true }
         favorite: add,
       });
       setIsFavorited(add);
-      setStatusMessage(result.status_message ?? (add ? 'Added to favorites.' : 'Removed from favorites.'));
-      setErrorMessage(null);
+      showToast('success', result.status_message ?? (add ? 'Added to favorites.' : 'Removed from favorites.'));
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Favorites update failed.');
+      showToast('error', error instanceof Error ? error.message : 'Favorites update failed.');
     }
   };
 
@@ -104,10 +111,9 @@ export function MediaActionsPanel({ mediaId, mediaType, showListActions = true }
     try {
       const result = await apiPost<StatusDto>(`/api/${ratingEndpointPrefix}/${mediaId}/rating?rating=${nextRatingOutOf5 * 2}`, null);
       setRatingOutOf5(nextRatingOutOf5);
-      setStatusMessage(result.status_message ?? `Rating updated to ${nextRatingOutOf5.toFixed(1)} / 5.`);
-      setErrorMessage(null);
+      showToast('success', result.status_message ?? `Rating updated to ${nextRatingOutOf5.toFixed(1)} / 5.`);
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Rating update failed.');
+      showToast('error', error instanceof Error ? error.message : 'Rating update failed.');
     }
   };
 
@@ -115,10 +121,9 @@ export function MediaActionsPanel({ mediaId, mediaType, showListActions = true }
     try {
       const result = await apiDelete<StatusDto>(`/api/${ratingEndpointPrefix}/${mediaId}/rating`);
       setRatingOutOf5(0);
-      setStatusMessage(result.status_message ?? 'Rating removed.');
-      setErrorMessage(null);
+      showToast('success', result.status_message ?? 'Rating removed.');
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Deleting rating failed.');
+      showToast('error', error instanceof Error ? error.message : 'Deleting rating failed.');
     }
   };
 
@@ -196,7 +201,7 @@ export function MediaActionsPanel({ mediaId, mediaType, showListActions = true }
 
   const handleSaveSelectedLists = async () => {
     if (selectedListIds.length === 0) {
-      setErrorMessage('Select at least one list.');
+      showToast('error', 'Select at least one list.');
       return;
     }
 
@@ -205,17 +210,17 @@ export function MediaActionsPanel({ mediaId, mediaType, showListActions = true }
         await apiPost<StatusDto>(`/api/Lists/${listId}/add_movie`, mediaId);
       }
 
-      setStatusMessage(
+      showToast(
+        'success',
         selectedListIds.length === 1
           ? 'Added to 1 list.'
           : `Added to ${selectedListIds.length} lists.`,
       );
-      setErrorMessage(null);
       setIsListPickerOpen(false);
       setSelectedListIds([]);
       await loadAccountLists(true);
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'List update failed.');
+      showToast('error', error instanceof Error ? error.message : 'List update failed.');
     }
   };
 
@@ -235,9 +240,8 @@ export function MediaActionsPanel({ mediaId, mediaType, showListActions = true }
       const sortedLists = [...result.results].sort((left, right) => right.id - left.id);
       setAccountLists(sortedLists);
       await loadListItemPresence(sortedLists);
-      setErrorMessage(null);
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Failed to load account lists.');
+      showToast('error', error instanceof Error ? error.message : 'Failed to load account lists.');
     } finally {
       setIsListsLoading(false);
     }
@@ -248,7 +252,7 @@ export function MediaActionsPanel({ mediaId, mediaType, showListActions = true }
 
     const trimmedName = newListName.trim();
     if (!trimmedName) {
-      setErrorMessage('List name is required.');
+      showToast('error', 'List name is required.');
       return;
     }
 
@@ -259,13 +263,12 @@ export function MediaActionsPanel({ mediaId, mediaType, showListActions = true }
         language: 'en',
       });
 
-      setStatusMessage(result.status_message ?? 'List created.');
-      setErrorMessage(null);
+      showToast('success', result.status_message ?? 'List created.');
       setNewListName('');
       setNewListDescription('');
       await loadAccountLists(true);
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Failed to create list.');
+      showToast('error', error instanceof Error ? error.message : 'Failed to create list.');
     }
   };
 
@@ -392,8 +395,10 @@ export function MediaActionsPanel({ mediaId, mediaType, showListActions = true }
         onSave={handleSaveSelectedLists}
       />
 
-      {statusMessage ? <p className="action-status">{statusMessage}</p> : null}
-      {errorMessage ? <p className="action-error">{errorMessage}</p> : null}
+      <ActionToast
+        toast={toast}
+        onDismiss={(toastId) => setToast((currentToast) => (currentToast?.id === toastId ? null : currentToast))}
+      />
     </section>
   );
 }

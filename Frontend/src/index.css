@@ -1572,6 +1572,68 @@ body {
   color: #fca5a5;
 }
 
+.action-toast-container {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 120;
+  pointer-events: none;
+}
+
+.action-toast {
+  min-width: 280px;
+  max-width: min(420px, 90vw);
+  border-radius: 0.6rem;
+  border: 1px solid;
+  overflow: hidden;
+  box-shadow: 0 12px 30px rgb(2 6 23 / 35%);
+  pointer-events: auto;
+}
+
+.action-toast p {
+  margin: 0;
+  padding: 0.7rem 0.85rem;
+  font-size: 0.92rem;
+  color: inherit;
+}
+
+.action-toast-success {
+  background: #052e2b;
+  border-color: #0f766e;
+  color: #ccfbf1;
+}
+
+.action-toast-error {
+  background: #3f0f18;
+  border-color: #991b1b;
+  color: #fee2e2;
+}
+
+.action-toast-progress {
+  height: 4px;
+  width: 100%;
+  transform-origin: left;
+  animation: action-toast-countdown 4s linear forwards;
+}
+
+.action-toast-success .action-toast-progress {
+  background: #34d399;
+}
+
+.action-toast-error .action-toast-progress {
+  background: #f87171;
+}
+
+@keyframes action-toast-countdown {
+  from {
+    transform: scaleX(1);
+  }
+
+  to {
+    transform: scaleX(0);
+  }
+}
+
 .selected-movies-list {
   background: #0b1220;
 }
