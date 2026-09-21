@@ -20,8 +20,8 @@ export function ActionToast({ toast, durationMs = 4000, onDismiss }: ActionToast
       <div className={toast.kind === 'error' ? 'action-toast action-toast-error' : 'action-toast action-toast-success'}>
         <p>{toast.message}</p>
         <div
-          className="action-toast-progress"
-          style={{ animationDuration: `${durationMs}ms` }}
+          className="action-toast-progress" // This class defines the animation counting down. It is full width initially, but scales x from 1 to 0.
+          style={{ animationDuration: `${durationMs}ms` }} 
           onAnimationEnd={() => onDismiss(toast.id)}
         />
       </div>

@@ -26,8 +26,8 @@ export function ListPickerModal({
 }: ListPickerModalProps) {
   const [isListsLoading, setIsListsLoading] = useState(false);
   const [accountLists, setAccountLists] = useState<AccountListSummary[]>([]);
-  const [listItemPresenceById, setListItemPresenceById] = useState<Record<number, boolean>>({});
-  const [selectedListIds, setSelectedListIds] = useState<number[]>([]);
+  const [listItemPresenceById, setListItemPresenceById] = useState<Record<number, boolean>>({}); // Identifies that the item is already in a list, and will be unclickable.
+  const [selectedListIds, setSelectedListIds] = useState<number[]>([]); // The selected lists within a given toggle.
   const [hasLoadedLists, setHasLoadedLists] = useState(false);
   const [listSearchTerm, setListSearchTerm] = useState('');
   const [isCreateListOpen, setIsCreateListOpen] = useState(false);
@@ -49,6 +49,7 @@ export function ListPickerModal({
       return;
     }
 
+    // Loads all lists and identifies if media is already inside these lists. 
     const statuses = await Promise.all(
       lists.map(async (list) => {
         try {
@@ -58,13 +59,15 @@ export function ListPickerModal({
 
           return [list.id, itemStatus.item_present] as const;
         } catch {
+          // Treat per-list failures as "not present" so one bad request doesn't block the whole picker.
           return [list.id, false] as const;
         }
       }),
     );
 
-    const nextPresence = Object.fromEntries(statuses);
+    const nextPresence = Object.fromEntries(statuses); // Key = list id, value = bool if item already exists in list.
     setListItemPresenceById(nextPresence);
+    // If refresh shows a list already contains this media item, drop it from pending manual selections.
     setSelectedListIds((current) => current.filter((id) => !nextPresence[id]));
   };
 
@@ -73,6 +76,7 @@ export function ListPickerModal({
       return;
     }
 
+    // Cache after first successful load; force=true is used after create/save refreshes.
     if (!force && hasLoadedLists) {
       return;
     }
@@ -112,6 +116,7 @@ export function ListPickerModal({
     }
   };
 
+  // Can save to multiple lists by toggling them.
   const handleSaveSelectedLists = async () => {
     if (selectedListIds.length === 0) {
       onNotify('error', 'Select at least one list.');
@@ -129,6 +134,7 @@ export function ListPickerModal({
       );
 
       setSelectedListIds([]);
+      // Refresh cache after save so list counts/presence are up to date.
       await loadAccountLists(true);
       handleClose();
     } catch (error) {
@@ -147,6 +153,7 @@ export function ListPickerModal({
   };
 
   const handleClose = () => {
+    // Reset transient modal UI state so each open starts clean.
     setSelectedListIds([]);
     setListSearchTerm('');
     setIsCreateListOpen(false);
@@ -163,6 +170,7 @@ export function ListPickerModal({
   };
 
   const handleModalMount = (node: HTMLDivElement | null) => {
+    // Runs once when modal DOM mounts; kicks off initial load without effect-based state sync.
     if (!node || isListsLoading || hasLoadedLists) {
       return;
     }
