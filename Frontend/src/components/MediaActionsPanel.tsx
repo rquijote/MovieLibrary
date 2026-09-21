@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { apiGet, apiPost } from '../lib/api';
-import type { AccountStatesResponse, StatusDto } from '../types/media';
+import type { FormEvent } from 'react';
+import { apiDelete, apiGet, apiPost } from '../lib/api';
+import type { AccountListSummary, AccountListsResponse, AccountStatesResponse, StatusDto } from '../types/media';
 import { ActionToast } from './ActionToast';
 import { ListPickerModal } from './ListPickerModal';
 import { RatingControl } from './RatingControl';
@@ -11,12 +12,24 @@ interface MediaActionsPanelProps {
   showListActions?: boolean;
 }
 
+interface ListItemStatusResponse {
+  id: number;
+  item_present: boolean;
+}
+
 export function MediaActionsPanel({ mediaId, mediaType, showListActions = true }: MediaActionsPanelProps) {
+  const [ratingOutOf5, setRatingOutOf5] = useState(0);
   const [isWatchlisted, setIsWatchlisted] = useState(false);
   const [isWatchlistHovered, setIsWatchlistHovered] = useState(false);
   const [isFavorited, setIsFavorited] = useState(false);
   const [isFavoriteHovered, setIsFavoriteHovered] = useState(false);
   const [isListPickerOpen, setIsListPickerOpen] = useState(false);
+  const [isListsLoading, setIsListsLoading] = useState(false);
+  const [accountLists, setAccountLists] = useState<AccountListSummary[]>([]);
+  const [listItemPresenceById, setListItemPresenceById] = useState<Record<number, boolean>>({});
+  const [selectedListIds, setSelectedListIds] = useState<number[]>([]);
+  const [newListName, setNewListName] = useState('');
+  const [newListDescription, setNewListDescription] = useState('');
   const [toast, setToast] = useState<{ id: number; kind: 'success' | 'error'; message: string } | null>(null);
   const toastIdRef = useRef(0);
   const ratingEndpointPrefix = mediaType === 'movie' ? 'Movie' : 'TvShow';
@@ -27,9 +40,8 @@ export function MediaActionsPanel({ mediaId, mediaType, showListActions = true }
   };
 
   useEffect(() => {
-      let isDisposed = false; // Flag in the initial effect load, to cancel state updates if user leaves the page. 
+    let isDisposed = false;
 
-    // Loads information about media_id if any.
     const loadAccountState = async () => {
       try {
         const accountState = await apiGet<AccountStatesResponse>(`/api/${ratingEndpointPrefix}/${mediaId}/account-states`);
@@ -40,6 +52,7 @@ export function MediaActionsPanel({ mediaId, mediaType, showListActions = true }
 
         setIsWatchlisted(accountState.watchlist);
         setIsFavorited(accountState.favorite);
+        setRatingOutOf5((accountState.rated?.value ?? 0) / 2);
       } catch (error) {
         if (isDisposed) {
           return;
@@ -54,7 +67,103 @@ export function MediaActionsPanel({ mediaId, mediaType, showListActions = true }
     return () => {
       isDisposed = true;
     };
-  }, [mediaId, mediaType]);
+  }, [mediaId, mediaType, ratingEndpointPrefix]);
+
+  const loadListItemPresence = async (lists: AccountListSummary[]) => {
+    if (lists.length === 0) {
+      setListItemPresenceById({});
+      return;
+    }
+
+    const statuses = await Promise.all(
+      lists.map(async (list) => {
+        try {
+          const itemStatus = await apiGet<ListItemStatusResponse>(
+            `/api/Lists/${list.id}/item_status?media_type=${mediaType}&media_id=${mediaId}`,
+          );
+
+          return [list.id, itemStatus.item_present] as const;
+        } catch {
+          return [list.id, false] as const;
+        }
+      }),
+    );
+
+    const nextPresence = Object.fromEntries(statuses);
+    setListItemPresenceById(nextPresence);
+    setSelectedListIds((current) => current.filter((id) => !nextPresence[id]));
+  };
+
+  const loadAccountLists = async (force: boolean) => {
+    if (isListsLoading) {
+      return;
+    }
+
+    if (!force && accountLists.length > 0) {
+      return;
+    }
+
+    try {
+      setIsListsLoading(true);
+      const result = await apiGet<AccountListsResponse>('/api/Account/lists?page=1');
+      const sortedLists = [...result.results].sort((left, right) => right.id - left.id);
+      setAccountLists(sortedLists);
+      await loadListItemPresence(sortedLists);
+    } catch (error) {
+      showToast('error', error instanceof Error ? error.message : 'Failed to load account lists.');
+    } finally {
+      setIsListsLoading(false);
+    }
+  };
+
+  const handleCreateList = async (event: FormEvent) => {
+    event.preventDefault();
+
+    const trimmedName = newListName.trim();
+    if (!trimmedName) {
+      showToast('error', 'List name is required.');
+      return;
+    }
+
+    try {
+      const result = await apiPost<StatusDto>('/api/Lists', {
+        name: trimmedName,
+        description: newListDescription.trim() || null,
+        language: 'en',
+      });
+
+      showToast('success', result.status_message ?? 'List created.');
+      setNewListName('');
+      setNewListDescription('');
+      await loadAccountLists(true);
+    } catch (error) {
+      showToast('error', error instanceof Error ? error.message : 'Failed to create list.');
+    }
+  };
+
+  const handleSaveSelectedLists = async () => {
+    if (selectedListIds.length === 0) {
+      showToast('error', 'Select at least one list.');
+      return;
+    }
+
+    try {
+      for (const listId of selectedListIds) {
+        await apiPost<StatusDto>(`/api/Lists/${listId}/add_movie`, mediaId);
+      }
+
+      showToast(
+        'success',
+        selectedListIds.length === 1 ? 'Added to 1 list.' : `Added to ${selectedListIds.length} lists.`,
+      );
+
+      setSelectedListIds([]);
+      setIsListPickerOpen(false);
+      await loadAccountLists(true);
+    } catch (error) {
+      showToast('error', error instanceof Error ? error.message : 'List update failed.');
+    }
+  };
 
   const handleWatchlistToggle = async () => {
     const nextState = !isWatchlisted;
@@ -93,6 +202,7 @@ export function MediaActionsPanel({ mediaId, mediaType, showListActions = true }
   const favoriteLabel = isFavorited && isFavoriteHovered ? 'Remove' : 'Favorite';
   const openListPicker = () => {
     setIsListPickerOpen(true);
+    void loadAccountLists(false);
   };
 
   return (
@@ -171,16 +281,43 @@ export function MediaActionsPanel({ mediaId, mediaType, showListActions = true }
       </div>
 
       <RatingControl
-        mediaId={mediaId}
-        mediaType={mediaType}
-        onNotify={showToast}
+        ratingOutOf5={ratingOutOf5}
+        onSetRating={async (nextRatingOutOf5) => {
+          try {
+            const result = await apiPost<StatusDto>(
+              `/api/${ratingEndpointPrefix}/${mediaId}/rating?rating=${nextRatingOutOf5 * 2}`,
+              null,
+            );
+            setRatingOutOf5(nextRatingOutOf5);
+            showToast('success', result.status_message ?? `Rating updated to ${nextRatingOutOf5.toFixed(1)} / 5.`);
+          } catch (error) {
+            showToast('error', error instanceof Error ? error.message : 'Rating update failed.');
+          }
+        }}
+        onDeleteRating={async () => {
+          try {
+            const result = await apiDelete<StatusDto>(`/api/${ratingEndpointPrefix}/${mediaId}/rating`);
+            setRatingOutOf5(0);
+            showToast('success', result.status_message ?? 'Rating removed.');
+          } catch (error) {
+            showToast('error', error instanceof Error ? error.message : 'Deleting rating failed.');
+          }
+        }}
       />
 
       <ListPickerModal
         isOpen={showListActions && isListPickerOpen}
-        mediaId={mediaId}
-        mediaType={mediaType}
-        onNotify={showToast}
+        isListsLoading={isListsLoading}
+        accountLists={accountLists}
+        listItemPresenceById={listItemPresenceById}
+        selectedListIds={selectedListIds}
+        setSelectedListIds={setSelectedListIds}
+        newListName={newListName}
+        setNewListName={setNewListName}
+        newListDescription={newListDescription}
+        setNewListDescription={setNewListDescription}
+        onCreateListSubmit={handleCreateList}
+        onSave={handleSaveSelectedLists}
         onClose={() => setIsListPickerOpen(false)}
       />
 

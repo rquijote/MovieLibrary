@@ -1,51 +1,18 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useState } from 'react';
 import type { MouseEvent } from 'react';
-import { apiDelete, apiGet, apiPost } from '../lib/api';
-import type { AccountStatesResponse, StatusDto } from '../types/media';
 
 interface RatingControlProps {
-  mediaId: number;
-  mediaType: 'movie' | 'tv';
-  onNotify: (kind: 'success' | 'error', message: string) => void;
+  ratingOutOf5: number;
+  onSetRating: (nextRatingOutOf5: number) => Promise<void>;
+  onDeleteRating: () => Promise<void>;
 }
 
 export function RatingControl({
-  mediaId,
-  mediaType,
-  onNotify,
+  ratingOutOf5,
+  onSetRating,
+  onDeleteRating,
 }: RatingControlProps) {
-  const [ratingOutOf5, setRatingOutOf5] = useState(0);
   const [hoverRatingOutOf5, setHoverRatingOutOf5] = useState<number | null>(null);
-
-  const ratingEndpointPrefix = useMemo(() => (mediaType === 'movie' ? 'Movie' : 'TvShow'), [mediaType]);
-
-  useEffect(() => {
-    let isDisposed = false;
-
-    const loadAccountState = async () => {
-      try {
-        const accountState = await apiGet<AccountStatesResponse>(`/api/${ratingEndpointPrefix}/${mediaId}/account-states`);
-
-        if (isDisposed) {
-          return;
-        }
-
-        setRatingOutOf5((accountState.rated?.value ?? 0) / 2);
-      } catch (error) {
-        if (isDisposed) {
-          return;
-        }
-
-        onNotify('error', error instanceof Error ? error.message : 'Loading rating state failed.');
-      }
-    };
-
-    void loadAccountState();
-
-    return () => {
-      isDisposed = true;
-    };
-  }, [mediaId, onNotify, ratingEndpointPrefix]);
 
   const getPointerRating = (event: MouseEvent<HTMLButtonElement>, starIndex: number) => {
     const rect = event.currentTarget.getBoundingClientRect();
@@ -66,23 +33,11 @@ export function RatingControl({
   };
 
   const handleSetRating = async (nextRatingOutOf5: number) => {
-    try {
-      const result = await apiPost<StatusDto>(`/api/${ratingEndpointPrefix}/${mediaId}/rating?rating=${nextRatingOutOf5 * 2}`, null);
-      setRatingOutOf5(nextRatingOutOf5);
-      onNotify('success', result.status_message ?? `Rating updated to ${nextRatingOutOf5.toFixed(1)} / 5.`);
-    } catch (error) {
-      onNotify('error', error instanceof Error ? error.message : 'Rating update failed.');
-    }
+    await onSetRating(nextRatingOutOf5);
   };
 
   const handleDeleteRating = async () => {
-    try {
-      const result = await apiDelete<StatusDto>(`/api/${ratingEndpointPrefix}/${mediaId}/rating`);
-      setRatingOutOf5(0);
-      onNotify('success', result.status_message ?? 'Rating removed.');
-    } catch (error) {
-      onNotify('error', error instanceof Error ? error.message : 'Deleting rating failed.');
-    }
+    await onDeleteRating();
   };
 
   const handleRatingClick = async (event: MouseEvent<HTMLButtonElement>, starIndex: number) => {
