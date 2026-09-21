@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { MediaGrid } from '../components/MediaGrid';
 import { apiGet } from '../lib/api';
 import { buildPagedEndpoint, expandedListEndpoints } from '../lib/media';
+import { formatDateForApi, getNextMonthDateRange } from '../lib/pageHelpers';
 import type {
   MediaCategory,
   MediaItem,
@@ -11,7 +12,7 @@ import type {
   TvShowListResponse,
 } from '../types/media';
 
-const validMediaTypes: MediaType[] = ['movies', 'tv'];
+const validMediaTypes: MediaType[] = ['movies', 'tvshows'];
 const validCategories: MediaCategory[] = [
   'popular',
   'top-rated',
@@ -24,30 +25,33 @@ const validCategories: MediaCategory[] = [
   'on-the-air',
 ];
 
+function buildUpcomingEndpoint(baseEndpoint: string, mediaType: MediaType): string {
+  const { startDate, endDate } = getNextMonthDateRange();
+
+  return mediaType === 'movies'
+    ? `${baseEndpoint}?PrimaryReleaseDateGte=${formatDateForApi(startDate)}&PrimaryReleaseDateLte=${formatDateForApi(endDate)}`
+    : `${baseEndpoint}?FirstAirDateGte=${formatDateForApi(startDate)}&FirstAirDateLte=${formatDateForApi(endDate)}`;
+}
+
 export function ExpandedMediaListPage() {
-  const { mediaType, category } = useParams();
+  const { mediaType, category } = useParams(); 
   const [items, setItems] = useState<MediaItem[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const normalizedMediaType = useMemo(() => {
-    if (mediaType === 'tvshows') {
-      return 'tv';
-    }
-
-    return mediaType;
-  }, [mediaType]);
-
+  // Runtime validator for the route param.
+  // useMemo is a React hook that caches the mediaType between renders. Recomputes when dependencies change.
   const parsedMediaType = useMemo(
     () =>
-      validMediaTypes.includes(normalizedMediaType as MediaType)
-        ? (normalizedMediaType as MediaType)
+      validMediaTypes.includes(mediaType as MediaType)
+        ? (mediaType as MediaType)
         : null,
-    [normalizedMediaType],
+    [mediaType],
   );
 
+  // Runtime validator for the route param.
   const parsedCategory = useMemo(
     () => (validCategories.includes(category as MediaCategory) ? (category as MediaCategory) : null),
     [category],
@@ -63,22 +67,16 @@ export function ExpandedMediaListPage() {
       return null;
     }
 
-    if (parsedCategory !== 'upcoming') {
-      return baseEndpoint;
+    if (parsedCategory === 'upcoming') {
+      return buildUpcomingEndpoint(baseEndpoint, parsedMediaType);
     }
 
-    const today = new Date();
-    const nextMonth = new Date(today);
-    nextMonth.setMonth(nextMonth.getMonth() + 1);
-    const formatDate = (date: Date) => date.toISOString().split('T')[0];
-
-    return parsedMediaType === 'movies'
-      ? `${baseEndpoint}?PrimaryReleaseDateGte=${formatDate(today)}&PrimaryReleaseDateLte=${formatDate(nextMonth)}`
-      : `${baseEndpoint}?FirstAirDateGte=${formatDate(today)}&FirstAirDateLte=${formatDate(nextMonth)}`;
+    return baseEndpoint;
   }, [parsedCategory, parsedMediaType]);
 
   useEffect(() => {
-    const load = async () => {
+      const load = async () => {
+      // If invalid endpoint or parsedMediaType, return empty.
       if (!endpoint || !parsedMediaType) {
         setItems([]);
         setTotalPages(1);

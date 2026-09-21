@@ -1,4 +1,4 @@
-export type MediaType = 'movies' | 'tv';
+export type MediaType = 'movies' | 'tv' | 'tvshows';
 
 export type MediaCategory =
   | 'popular'

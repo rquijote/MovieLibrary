@@ -25,6 +25,8 @@ export function getMediaDate(item: MediaItem): string {
   return 'release_date' in item ? item.release_date : item.first_air_date;
 }
 
+// Two-level lookup: media type (e.g. movies) -> category (e.g. popular) -> API endpoint (values are URL strings).
+// Partial is used to describe an object with optional category keys, otherwise all mediaCategory would need to be listed.
 export const expandedListEndpoints: Record<MediaType, Partial<Record<MediaCategory, string>>> = {
   movies: {
     popular: '/api/MovieLists/popular',
@@ -45,8 +47,20 @@ export const expandedListEndpoints: Record<MediaType, Partial<Record<MediaCatego
     watchlist: '/api/Account/watchlist/tv',
     favorite: '/api/Account/favourite/tv',
   },
+  tvshows: {
+    upcoming: '/api/Discover/tv',
+    popular: '/api/TvShowLists/popular',
+    'top-rated': '/api/TvShowLists/top-rated',
+    'airing-today': '/api/TvShowLists/airing-today',
+    'on-the-air': '/api/TvShowLists/on-the-air',
+    trending: '/api/Trending/tv?timeWindow=day',
+    watchlist: '/api/Account/watchlist/tv',
+    favorite: '/api/Account/favourite/tv',
+  },
 };
 
+// 
+// Appends a page query param, using ? or & depending on whether the endpoint already has query params.
 export function buildPagedEndpoint(baseEndpoint: string, page: number): string {
   const separator = baseEndpoint.includes('?') ? '&' : '?';
   return `${baseEndpoint}${separator}page=${page}`;

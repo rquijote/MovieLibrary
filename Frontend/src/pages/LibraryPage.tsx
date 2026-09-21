@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AccountListCards } from '../components/AccountListCards';
-import { MediaGrid } from '../components/MediaGrid';
+import { MediaRow } from '../components/MediaRow';
 import { MiniHeaderTabs } from '../components/MiniHeaderTabs';
 import { apiGet } from '../lib/api';
 import { getValidTab } from '../lib/pageHelpers';
@@ -118,21 +118,15 @@ export function LibraryPage() {
 
       {activeTab === 'watchlist' ? (
         <div className="library-tab-content">
-          <h2>Watchlist Movies</h2>
-          <MediaGrid items={watchlistMovies?.results ?? []} mediaType="movies" />
-
-          <h2>Watchlist TV Shows</h2>
-          <MediaGrid items={watchlistTv?.results ?? []} mediaType="tv" showYearOnly />
+          <MediaRow title="Watchlist Movies" items={watchlistMovies?.results ?? []} mediaType="movies" category="watchlist" />
+          <MediaRow title="Watchlist TV Shows" items={watchlistTv?.results ?? []} mediaType="tv" category="watchlist" />
         </div>
       ) : null}
 
       {activeTab === 'favourites' ? (
         <div className="library-tab-content">
-          <h2>Favourite Movies</h2>
-          <MediaGrid items={favoriteMovies?.results ?? []} mediaType="movies" />
-
-          <h2>Favourite TV Shows</h2>
-          <MediaGrid items={favoriteTv?.results ?? []} mediaType="tv" showYearOnly />
+          <MediaRow title="Favourite Movies" items={favoriteMovies?.results ?? []} mediaType="movies" category="favorite" />
+          <MediaRow title="Favourite TV Shows" items={favoriteTv?.results ?? []} mediaType="tv" category="favorite" />
         </div>
       ) : null}
 
