@@ -3,17 +3,16 @@ import { useSearchParams } from 'react-router-dom';
 import { MediaRow } from '../components/MediaRow';
 import { MiniHeaderTabs } from '../components/MiniHeaderTabs';
 import { apiGet } from '../lib/api';
+import { formatDateForApi, getNextMonthDateRange, getValidTab } from '../lib/pageHelpers';
 import type { TvShowListResponse } from '../types/media';
 
 type TvShowsTab = 'upcoming' | 'on-the-air' | 'popular' | 'top-rated';
+const tvShowsTabs = ['upcoming', 'on-the-air', 'popular', 'top-rated'] as const;
 
 export function TvShowsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get('tab');
-  const activeTab: TvShowsTab =
-    tabParam === 'upcoming' || tabParam === 'on-the-air' || tabParam === 'popular' || tabParam === 'top-rated'
-      ? tabParam
-      : 'upcoming';
+  const activeTab: TvShowsTab = getValidTab(tabParam, tvShowsTabs, 'upcoming');
   const [upcoming, setUpcoming] = useState<TvShowListResponse | null>(null);
   const [onTheAir, setOnTheAir] = useState<TvShowListResponse | null>(null);
   const [popular, setPopular] = useState<TvShowListResponse | null>(null);
@@ -21,17 +20,13 @@ export function TvShowsPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const today = new Date();
-    const nextMonth = new Date(today);
-    nextMonth.setMonth(nextMonth.getMonth() + 1);
-
-    const formatDate = (date: Date) => date.toISOString().split('T')[0];
+    const { startDate, endDate } = getNextMonthDateRange();
 
     const load = async () => {
       try {
         const [upcomingData, onTheAirData, popularData, topRatedData] = await Promise.all([
           apiGet<TvShowListResponse>(
-            `/api/Discover/tv?FirstAirDateGte=${formatDate(today)}&FirstAirDateLte=${formatDate(nextMonth)}`,
+            `/api/Discover/tv?FirstAirDateGte=${formatDateForApi(startDate)}&FirstAirDateLte=${formatDateForApi(endDate)}`,
           ),
           apiGet<TvShowListResponse>('/api/TvShowLists/on-the-air'),
           apiGet<TvShowListResponse>('/api/TvShowLists/popular'),

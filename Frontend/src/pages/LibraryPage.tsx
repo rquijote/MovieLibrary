@@ -4,19 +4,17 @@ import { AccountListCards } from '../components/AccountListCards';
 import { MediaGrid } from '../components/MediaGrid';
 import { MiniHeaderTabs } from '../components/MiniHeaderTabs';
 import { apiGet } from '../lib/api';
+import { getValidTab } from '../lib/pageHelpers';
 import type { AccountListsResponse, ListDetailsResponse, MovieListResponse, TvShowListResponse } from '../types/media';
 
 type LibraryTab = 'watchlist' | 'favourites' | 'lists';
+const libraryTabs = ['lists', 'favourites', 'watchlist'] as const;
 
 export function LibraryPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const initialTab = searchParams.get('tab');
-  const [activeTab, setActiveTab] = useState<LibraryTab>(
-    initialTab === 'lists' || initialTab === 'favourites' || initialTab === 'watchlist'
-      ? initialTab
-      : 'lists',
-  );
+  const tabParam = searchParams.get('tab');
+  const activeTab: LibraryTab = getValidTab(tabParam, libraryTabs, 'lists');
   const [favoriteMovies, setFavoriteMovies] = useState<MovieListResponse | null>(null);
   const [favoriteTv, setFavoriteTv] = useState<TvShowListResponse | null>(null);
   const [watchlistMovies, setWatchlistMovies] = useState<MovieListResponse | null>(null);
@@ -90,15 +88,10 @@ export function LibraryPage() {
   }, [activeTab, accountLists]);
 
   useEffect(() => {
-    const nextTab = searchParams.get('tab');
-
-    if (nextTab === 'lists' || nextTab === 'favourites' || nextTab === 'watchlist') {
-      setActiveTab((currentTab) => (currentTab === nextTab ? currentTab : nextTab));
-      return;
+    if (!tabParam) {
+      setSearchParams({ tab: activeTab }, { replace: true });
     }
-
-    setSearchParams({ tab: activeTab }, { replace: true });
-  }, [activeTab, searchParams, setSearchParams]);
+  }, [activeTab, setSearchParams, tabParam]);
 
   if (error) {
     return <p>{error}</p>;
@@ -115,10 +108,7 @@ export function LibraryPage() {
       <MiniHeaderTabs
         value={activeTab}
         ariaLabel="Library categories"
-        onChange={(nextTab) => {
-          setActiveTab(nextTab);
-          setSearchParams({ tab: nextTab }, { replace: true });
-        }}
+        onChange={(nextTab) => setSearchParams({ tab: nextTab }, { replace: true })}
         options={[
           { value: 'lists', label: 'Lists' },
           { value: 'watchlist', label: 'Watchlist' },

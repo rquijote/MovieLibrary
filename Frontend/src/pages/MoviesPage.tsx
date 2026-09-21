@@ -3,31 +3,29 @@ import { useSearchParams } from 'react-router-dom';
 import { MediaRow } from '../components/MediaRow';
 import { MiniHeaderTabs } from '../components/MiniHeaderTabs';
 import { apiGet } from '../lib/api';
+import { formatDateForApi, getNextMonthDateRange, getValidTab } from '../lib/pageHelpers';
 import type { MovieListResponse } from '../types/media';
 
-type MoviesTab = 'popular' | 'top-rated' | 'upcoming';
+type MoviesTab = 'popular' | 'top-rated' | 'upcoming'; // The types that define valid tab values.
+const movieTabs = ['popular', 'top-rated', 'upcoming'] as const; // The runtime const used in getValidTab().
 
 export function MoviesPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get('tab');
-  const activeTab: MoviesTab =
-    tabParam === 'popular' || tabParam === 'top-rated' || tabParam === 'upcoming' ? tabParam : 'popular';
+  const activeTab: MoviesTab = getValidTab(tabParam, movieTabs, 'popular');
   const [popular, setPopular] = useState<MovieListResponse | null>(null);
   const [topRated, setTopRated] = useState<MovieListResponse | null>(null);
   const [upcoming, setUpcoming] = useState<MovieListResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-      const today = new Date();
-      const nextMonth = new Date(today);
-      nextMonth.setMonth(nextMonth.getMonth() + 1);
-      const formatDate = (d: Date) => d.toISOString().split('T')[0]
+      const { startDate, endDate } = getNextMonthDateRange();
       const load = async () => {
         try {
         const [popularData, topRatedData, upcomingData] = await Promise.all([
           apiGet<MovieListResponse>('/api/MovieLists/popular'),
           apiGet<MovieListResponse>('/api/MovieLists/top-rated'),
-          apiGet<MovieListResponse>(`/api/Discover/movies?PrimaryReleaseDateGte=${formatDate(today)}&PrimaryReleaseDateLte=${formatDate(nextMonth)}`),
+          apiGet<MovieListResponse>(`/api/Discover/movies?PrimaryReleaseDateGte=${formatDateForApi(startDate)}&PrimaryReleaseDateLte=${formatDateForApi(endDate)}`),
         ]);
 
         setPopular(popularData);
@@ -41,6 +39,7 @@ export function MoviesPage() {
     void load();
   }, []);
 
+  // Keep the URL explicit: if no tab is provided, write the resolved fallback tab to query params.
   useEffect(() => {
     if (!tabParam) {
       setSearchParams({ tab: activeTab }, { replace: true });

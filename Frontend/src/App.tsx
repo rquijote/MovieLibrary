@@ -23,7 +23,6 @@ function App() {
         <Route path="/library/create-list" element={<CreateListPage />} />
         <Route path="/library/lists/:listId" element={<LibraryListDetailsPage />} />
         <Route path="/library/lists/:listId/edit" element={<CreateListPage />} />
-        <Route path="/lists" element={<Navigate to="/library" replace />} />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/:mediaType/:category" element={<ExpandedMediaListRoute />} />
         <Route path="/movie/:id" element={<MovieDetailsPage />} />
@@ -32,9 +31,10 @@ function App() {
         <Route path="*" element={<Navigate to="/not-found" replace />} />
       </Route>
     </Routes>
-  );
+    );
 }
 
+// Route wrapper used to force remount on params change. (Resets the states, mounts effects from scratch.)
 function ExpandedMediaListRoute() {
   const { mediaType, category } = useParams();
   return <ExpandedMediaListPage key={`${mediaType ?? 'media'}-${category ?? 'category'}`} />;
