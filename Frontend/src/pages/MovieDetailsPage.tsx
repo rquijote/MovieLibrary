@@ -7,7 +7,7 @@ import type { MovieDto } from '../types/media';
 
 export function MovieDetailsPage() {
   const { id } = useParams();
-  const [movie, setMovie] = useState<MovieDto | null>(null);
+  const [movie, setMovie] = useState<MovieDto | null>(null); // Holds the fetched movie details used to render the page content.
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {

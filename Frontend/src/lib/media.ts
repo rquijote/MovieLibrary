@@ -59,8 +59,8 @@ export const expandedListEndpoints: Record<MediaType, Partial<Record<MediaCatego
   },
 };
 
-// 
-// Appends a page query param, using ? or & depending on whether the endpoint already has query params.
+// Some endpoints already have query params. This checks if the baseEndpoint already has ?. If it does use &, else use ?.
+// Appends the page number for pagination.
 export function buildPagedEndpoint(baseEndpoint: string, page: number): string {
   const separator = baseEndpoint.includes('?') ? '&' : '?';
   return `${baseEndpoint}${separator}page=${page}`;

@@ -36,7 +36,7 @@ function buildUpcomingEndpoint(baseEndpoint: string, mediaType: MediaType): stri
 export function ExpandedMediaListPage() {
   const { mediaType, category } = useParams(); 
   const [items, setItems] = useState<MediaItem[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1); // setsCurrentPage on prev/next changes.
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -74,6 +74,7 @@ export function ExpandedMediaListPage() {
     return baseEndpoint;
   }, [parsedCategory, parsedMediaType]);
 
+  // useEffect is used because its calling the API to get items. Don't want it to constantly fire every render.
   useEffect(() => {
       const load = async () => {
       // If invalid endpoint or parsedMediaType, return empty.
@@ -88,7 +89,7 @@ export function ExpandedMediaListPage() {
         setIsLoading(true);
         setError(null);
 
-        const pagedEndpoint = buildPagedEndpoint(endpoint, currentPage);
+        const pagedEndpoint = buildPagedEndpoint(endpoint, currentPage); // currentPage is from the prev and next.
 
         if (parsedMediaType === 'movies') {
           const response = await apiGet<MovieListResponse>(pagedEndpoint);
