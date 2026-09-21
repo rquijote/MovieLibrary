@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { AccountListCards } from '../components/AccountListCards';
-import { MediaRow } from '../components/MediaRow';
-import { MiniHeaderTabs } from '../components/MiniHeaderTabs';
+import { AccountListCards } from '../components/layout/AccountListCards';
+import { MediaRow } from '../components/layout/MediaRow';
+import { MiniHeaderTabs } from '../components/layout/MiniHeaderTabs';
 import { apiGet } from '../lib/api';
 import { getValidTab } from '../lib/pageHelpers';
 import type { AccountListsResponse, ListDetailsResponse, MovieListResponse, TvShowListResponse } from '../types/media';

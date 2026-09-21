@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { MediaGrid } from '../components/MediaGrid';
+import { MediaGrid } from '../components/layout/MediaGrid';
 import { apiDelete, apiGet } from '../lib/api';
 import type { ListDetailsResponse, StatusDto } from '../types/media';
 

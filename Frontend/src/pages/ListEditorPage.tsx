@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { apiDelete, apiGet, apiPost } from '../lib/api';
-import { SelectedMoviesList } from '../components/SelectedMoviesList';
+import { SelectedMoviesList } from '../components/lists/SelectedMoviesList';
 import type { ListDetailsResponse, MovieDto, MovieListResponse, StatusDto } from '../types/media';
 
 export function ListEditorPage() {

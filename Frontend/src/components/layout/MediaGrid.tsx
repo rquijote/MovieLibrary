@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
-import { getImageUrl, getMediaDate, getMediaTitle, handleMediaImageError } from '../lib/media';
-import type { MediaItem, MediaType } from '../types/media';
+import { getImageUrl, getMediaDate, getMediaTitle, handleMediaImageError } from '../../lib/media';
+import type { MediaItem, MediaType } from '../../types/media';
 
 interface MediaGridProps {
   items: MediaItem[];

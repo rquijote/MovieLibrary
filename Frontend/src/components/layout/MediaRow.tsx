@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
-import { getImageUrl, getMediaTitle, handleMediaImageError } from '../lib/media';
-import type { MediaCategory, MediaItem, MediaType } from '../types/media';
+import { getImageUrl, getMediaTitle, handleMediaImageError } from '../../lib/media';
+import type { MediaCategory, MediaItem, MediaType } from '../../types/media';
 
 interface MediaRowProps {
   title: string;

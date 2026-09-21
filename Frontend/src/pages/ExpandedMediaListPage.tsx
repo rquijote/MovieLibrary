@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { MediaGrid } from '../components/MediaGrid';
+import { MediaGrid } from '../components/layout/MediaGrid';
 import { apiGet } from '../lib/api';
 import { buildPagedEndpoint, expandedListEndpoints } from '../lib/media';
 import { formatDateForApi, getNextMonthDateRange } from '../lib/pageHelpers';

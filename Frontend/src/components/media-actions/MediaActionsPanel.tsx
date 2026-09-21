@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { apiDelete, apiGet, apiPost } from '../lib/api';
-import type { AccountStatesResponse, StatusDto } from '../types/media';
+import { apiDelete, apiGet, apiPost } from '../../lib/api';
+import type { AccountStatesResponse, StatusDto } from '../../types/media';
 import { ActionToast } from './ActionToast';
 import { ListPickerModal } from './ListPickerModal';
 import { RatingControl } from './RatingControl';
@@ -176,8 +176,10 @@ export function MediaActionsPanel({ mediaId, mediaType, showListActions = true }
         onSetRating={async (nextRatingOutOf5) => {
           try {
             const result = await apiPost<StatusDto>(
-              `/api/${ratingEndpointPrefix}/${mediaId}/rating?rating=${nextRatingOutOf5 * 2}`,
-              null,
+              `/api/${ratingEndpointPrefix}/${mediaId}/rating`,
+              {
+                value: nextRatingOutOf5 * 2,
+              },
             );
             setRatingOutOf5(nextRatingOutOf5);
             showToast('success', result.status_message ?? `Rating updated to ${nextRatingOutOf5.toFixed(1)} / 5.`);

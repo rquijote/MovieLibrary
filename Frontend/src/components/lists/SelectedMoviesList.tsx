@@ -1,5 +1,5 @@
-import { getImageUrl, handleMediaImageError } from '../lib/media';
-import type { MovieDto } from '../types/media';
+import { getImageUrl, handleMediaImageError } from '../../lib/media';
+import type { MovieDto } from '../../types/media';
 
 interface SelectedMoviesListProps {
   items: MovieDto[];

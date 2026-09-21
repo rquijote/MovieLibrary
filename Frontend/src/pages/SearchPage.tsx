@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { MediaGrid } from '../components/MediaGrid';
-import { MiniHeaderTabs } from '../components/MiniHeaderTabs';
+import { MediaGrid } from '../components/layout/MediaGrid';
+import { MiniHeaderTabs } from '../components/layout/MiniHeaderTabs';
 import { apiGet } from '../lib/api';
 import type { MovieListResponse, TvShowListResponse } from '../types/media';
 

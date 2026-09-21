@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { MediaRow } from '../components/MediaRow';
-import { MiniHeaderTabs } from '../components/MiniHeaderTabs';
+import { MediaRow } from '../components/layout/MediaRow';
+import { MiniHeaderTabs } from '../components/layout/MiniHeaderTabs';
 import { apiGet } from '../lib/api';
 import { formatDateForApi, getNextMonthDateRange, getValidTab } from '../lib/pageHelpers';
 import type { MovieListResponse } from '../types/media';

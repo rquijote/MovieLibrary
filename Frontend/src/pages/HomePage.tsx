@@ -1,3 +1,3 @@
 export function HomePage() {
-    return <div></div>
+  return <section aria-label="Home" />;
 }

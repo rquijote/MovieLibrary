@@ -1,5 +1,5 @@
-import { getImageUrl, handleMediaImageError } from '../lib/media';
-import type { AccountListSummary } from '../types/media';
+import { getImageUrl, handleMediaImageError } from '../../lib/media';
+import type { AccountListSummary } from '../../types/media';
 
 interface AccountListCardsProps {
   lists: AccountListSummary[];

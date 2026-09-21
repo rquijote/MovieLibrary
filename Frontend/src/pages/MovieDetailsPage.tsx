@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { MediaActionsPanel } from '../components/MediaActionsPanel';
+import { MediaActionsPanel } from '../components/media-actions/MediaActionsPanel';
 import { apiGet } from '../lib/api';
 import { getImageUrl, handleMediaImageError } from '../lib/media';
 import type { MovieDto } from '../types/media';

@@ -1,5 +1,5 @@
 import { Navigate, Route, Routes, useParams } from 'react-router-dom';
-import { Layout } from './components/Layout';
+import { Layout } from './components/layout/Layout';
 import { ExpandedMediaListPage } from './pages/ExpandedMediaListPage';
 import { ListEditorPage } from './pages/ListEditorPage';
 import { HomePage } from './pages/HomePage';
