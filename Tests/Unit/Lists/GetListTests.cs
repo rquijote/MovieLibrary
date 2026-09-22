@@ -12,7 +12,7 @@ namespace Tests.Unit.Lists
         {
             var expected = new ListDetailsDto 
             { 
-                Id = "1",
+                Id = 1,
                 Name = "The Marvel Universe",
                 CreatedBy = "travisbell",
                 Description = "The idea behind this list is to collect the live action comic book movies from within the Marvel franchise.",
@@ -26,10 +26,10 @@ namespace Tests.Unit.Lists
                 ]
             };
             var listsClientMock = new Mock<IListsClient>();
-            listsClientMock.Setup(x => x.GetList(1))
+            listsClientMock.Setup(x => x.Details(1))
                 .ReturnsAsync(expected);
 
-            var result = await listsClientMock.Object.GetList(1);
+            var result = await listsClientMock.Object.Details(1);
 
             result.Should().NotBeNull();
             result.Name.Should().Be("The Marvel Universe");
@@ -42,7 +42,7 @@ namespace Tests.Unit.Lists
         {
             var expected = new ListDetailsDto 
             { 
-                Id = "2",
+                Id = 2,
                 Name = "2012 Oscar Nominations for Best Picture - 84th Academy Awards",
                 CreatedBy = "Travis Bell",
                 Description = "A list of the films that were nominated at the 2012 Oscars for best picture.",
@@ -55,10 +55,10 @@ namespace Tests.Unit.Lists
                 ]
             };
             var listsClientMock = new Mock<IListsClient>();
-            listsClientMock.Setup(x => x.GetList(2))
+            listsClientMock.Setup(x => x.Details(2))
                 .ReturnsAsync(expected);
 
-            var result = await listsClientMock.Object.GetList(2);
+            var result = await listsClientMock.Object.Details(2);
 
             result.Should().NotBeNull();
             result.Name.Should().Be("2012 Oscar Nominations for Best Picture - 84th Academy Awards");
@@ -70,7 +70,7 @@ namespace Tests.Unit.Lists
         {
             var expected = new ListDetailsDto 
             { 
-                Id = "3",
+                Id = 3,
                 Name = "The DC Comics Universe",
                 CreatedBy = "Travis Bell",
                 Description = "Here's a list of the films that take place in the DC Comics universe.",
@@ -83,10 +83,10 @@ namespace Tests.Unit.Lists
                 ]
             };
             var listsClientMock = new Mock<IListsClient>();
-            listsClientMock.Setup(x => x.GetList(3))
+            listsClientMock.Setup(x => x.Details(3))
                 .ReturnsAsync(expected);
 
-            var result = await listsClientMock.Object.GetList(3);
+            var result = await listsClientMock.Object.Details(3);
 
             result.Should().NotBeNull();
             result.Name.Should().Be("The DC Comics Universe");
@@ -97,10 +97,10 @@ namespace Tests.Unit.Lists
         public async Task GetList_WithInvalidListId_ThrowsException()
         {
             var listsClientMock = new Mock<IListsClient>();
-            listsClientMock.Setup(x => x.GetList(999999))
+            listsClientMock.Setup(x => x.Details(999999))
                 .ThrowsAsync(new KeyNotFoundException("List not found"));
 
-            var act = async () => await listsClientMock.Object.GetList(999999);
+            var act = async () => await listsClientMock.Object.Details(999999);
 
             await act.Should().ThrowAsync<KeyNotFoundException>()
                 .WithMessage("List not found");

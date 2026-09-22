@@ -24,10 +24,10 @@ namespace Tests.Unit.Lists
                 StatusMessage = "Success."
             };
             var listsClientMock = new Mock<IListsClient>();
-            listsClientMock.Setup(x => x.CreateList(It.IsAny<CreateListDto>()))
+            listsClientMock.Setup(x => x.Create(It.IsAny<CreateListDto>()))
                 .ReturnsAsync(expected);
 
-            var result = await listsClientMock.Object.CreateList(request);
+            var result = await listsClientMock.Object.Create(request);
 
             result.Success.Should().BeTrue();
             result.StatusCode.Should().Be(1);
@@ -49,10 +49,10 @@ namespace Tests.Unit.Lists
                 StatusMessage = "Success."
             };
             var listsClientMock = new Mock<IListsClient>();
-            listsClientMock.Setup(x => x.CreateList(It.IsAny<CreateListDto>()))
+            listsClientMock.Setup(x => x.Create(It.IsAny<CreateListDto>()))
                 .ReturnsAsync(expected);
 
-            var result = await listsClientMock.Object.CreateList(request);
+            var result = await listsClientMock.Object.Create(request);
 
             result.Success.Should().BeTrue();
             result.StatusCode.Should().Be(1);

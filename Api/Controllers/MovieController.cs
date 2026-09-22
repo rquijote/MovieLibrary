@@ -1,4 +1,5 @@
 using Application.Interfaces;
+using Application.Models.Dto.Requests;
 using Application.Models.Dto.Responses;
 using Microsoft.AspNetCore.Mvc;
 
@@ -32,9 +33,9 @@ namespace Api.Controllers
         }
 
         [HttpPost("{id}/rating")]
-        public async Task<IActionResult> AddRatingMovie(int id, double rating)
+        public async Task<IActionResult> AddRatingMovie(int id, [FromBody] AddMediaRatingDto request)
         {
-            var result = await _movieClient.AddRatingMovie(id, rating);
+            var result = await _movieClient.AddRatingMovie(id, request.Value);
             return Ok(result);
         }
 

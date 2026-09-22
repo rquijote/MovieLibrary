@@ -1,4 +1,5 @@
 using Application.Interfaces;
+using Application.Models.Dto.Requests;
 using Application.Models.Dto.Responses;
 using Microsoft.AspNetCore.Mvc;
 
@@ -31,11 +32,11 @@ namespace Api.Controllers
         }
 
         [HttpPost("{id}/rating")]
-        public async Task<IActionResult> AddRatingTvShow(int id, double rating)
+        public async Task<IActionResult> AddRatingTvShow(int id, [FromBody] AddMediaRatingDto request)
         {
             try
             {
-                var result = await _tvShowClient.AddRatingTvShow(id, rating);
+                var result = await _tvShowClient.AddRatingTvShow(id, request.Value);
                 return Ok(result);
             }
             catch (KeyNotFoundException ex)

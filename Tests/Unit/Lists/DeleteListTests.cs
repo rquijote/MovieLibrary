@@ -17,10 +17,10 @@ namespace Tests.Unit.Lists
                 StatusMessage = "The item/record was deleted successfully." 
             };
             var listsClientMock = new Mock<IListsClient>();
-            listsClientMock.Setup(x => x.DeleteList(1))
+            listsClientMock.Setup(x => x.Delete(1))
                 .ReturnsAsync(expected);
 
-            var result = await listsClientMock.Object.DeleteList(1);
+            var result = await listsClientMock.Object.Delete(1);
 
             result.Success.Should().BeTrue();
             result.StatusCode.Should().Be(13);
@@ -37,10 +37,10 @@ namespace Tests.Unit.Lists
                 StatusMessage = "The resource you requested could not be found." 
             };
             var listsClientMock = new Mock<IListsClient>();
-            listsClientMock.Setup(x => x.DeleteList(999999))
+            listsClientMock.Setup(x => x.Delete(999999))
                 .ReturnsAsync(expected);
 
-            var result = await listsClientMock.Object.DeleteList(999999);
+            var result = await listsClientMock.Object.Delete(999999);
 
             result.Success.Should().BeFalse();
             result.StatusCode.Should().Be(34);
