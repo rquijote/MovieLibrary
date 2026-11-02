@@ -41,6 +41,9 @@ namespace Api.Services
             if (!string.IsNullOrWhiteSpace(request.WithNetworks))
                 parameters.Add($"with_networks={request.WithNetworks}");
 
+            if (!string.IsNullOrWhiteSpace(request.WithStatus))
+                parameters.Add($"with_status={HttpUtility.UrlEncode(request.WithStatus)}");
+
             if (!string.IsNullOrWhiteSpace(request.WithCompanies))
                 parameters.Add($"with_companies={request.WithCompanies}");
 

@@ -123,15 +123,13 @@ builder.Services.AddHttpClient<IDiscoverTVShowsClient, DiscoverTVShowsClient>((s
     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", bearerTokenValue);
 });
 
-// ListsClient - for TMDB v3 list operations
-builder.Services.AddHttpClient<IListsClient, ListsClient>((serviceProvider, client) =>
-{
-    var config = serviceProvider.GetRequiredService<IConfiguration>();
-    var bearerTokenValue = config["BEARER_TOKEN"] ?? "";
-
-    client.BaseAddress = new Uri($"{tmdbBaseUrl}");
-    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", bearerTokenValue);
-});
+builder.Services.AddSingleton(serviceProvider =>
+    new MySqlConnector.MySqlDataSourceBuilder(
+        serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString("MovieLibrary")
+        ?? throw new InvalidOperationException("Local list storage is not configured.")).Build());
+builder.Services.AddScoped<MySqlListsClient>();
+builder.Services.AddScoped<IListsClient>(serviceProvider => serviceProvider.GetRequiredService<MySqlListsClient>());
+builder.Services.AddScoped<LocalListsFilter>();
 
 var app = builder.Build();
 

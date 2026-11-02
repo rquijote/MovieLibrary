@@ -25,6 +25,9 @@ namespace Application.Models.Dto.Requests
         [JsonPropertyName("with_networks")]
         public string? WithNetworks { get; init; }
 
+        [JsonPropertyName("with_status")]
+        public string? WithStatus { get; init; }
+
         [JsonPropertyName("with_companies")]
         public string? WithCompanies { get; init; }
 

@@ -3,8 +3,10 @@ import { useSearchParams } from 'react-router-dom';
 import { MediaRow } from '../components/layout/MediaRow';
 import { MiniHeaderTabs } from '../components/layout/MiniHeaderTabs';
 import { apiGet } from '../lib/api';
-import { formatDateForApi, getNextMonthDateRange, getValidTab } from '../lib/pageHelpers';
-import type { TvShowListResponse } from '../types/media';
+import { fetchGenreRows, tvGenres, type GenreItemGroup } from '../lib/genres';
+import { buildTvShowDiscoveryEndpoint } from '../lib/media';
+import { getValidTab } from '../lib/pageHelpers';
+import type { TvShowDto } from '../types/media';
 
 type TvShowsTab = 'upcoming' | 'on-the-air' | 'popular' | 'top-rated';
 const tvShowsTabs = ['upcoming', 'on-the-air', 'popular', 'top-rated'] as const;
@@ -13,37 +15,32 @@ export function TvShowsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get('tab');
   const activeTab: TvShowsTab = getValidTab(tabParam, tvShowsTabs, 'upcoming');
-  const [upcoming, setUpcoming] = useState<TvShowListResponse | null>(null);
-  const [onTheAir, setOnTheAir] = useState<TvShowListResponse | null>(null);
-  const [popular, setPopular] = useState<TvShowListResponse | null>(null);
-  const [topRated, setTopRated] = useState<TvShowListResponse | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [genreRows, setGenreRows] = useState<Partial<Record<TvShowsTab, GenreItemGroup<TvShowDto>[]>>>({});
+  const [categoryErrors, setCategoryErrors] = useState<Partial<Record<TvShowsTab, string>>>({});
 
   useEffect(() => {
-    const { startDate, endDate } = getNextMonthDateRange();
+    if (genreRows[activeTab] !== undefined || categoryErrors[activeTab]) {
+      return;
+    }
 
     const load = async () => {
       try {
-        const [upcomingData, onTheAirData, popularData, topRatedData] = await Promise.all([
-          apiGet<TvShowListResponse>(
-            `/api/Discover/tv?FirstAirDateGte=${formatDateForApi(startDate)}&FirstAirDateLte=${formatDateForApi(endDate)}`,
-          ),
-          apiGet<TvShowListResponse>('/api/TvShowLists/on-the-air'),
-          apiGet<TvShowListResponse>('/api/TvShowLists/popular'),
-          apiGet<TvShowListResponse>('/api/TvShowLists/top-rated'),
-        ]);
-
-        setUpcoming(upcomingData);
-        setOnTheAir(onTheAirData);
-        setPopular(popularData);
-        setTopRated(topRatedData);
+        const rows = await fetchGenreRows(
+          tvGenres,
+          (genreId) => buildTvShowDiscoveryEndpoint(activeTab, new Date(), genreId),
+          (endpoint) => apiGet<{ results: TvShowDto[] }>(endpoint),
+        );
+        setGenreRows((current) => ({ ...current, [activeTab]: rows }));
       } catch (loadError) {
-        setError(loadError instanceof Error ? loadError.message : 'Failed to load TV Shows page data.');
+        setCategoryErrors((current) => ({
+          ...current,
+          [activeTab]: loadError instanceof Error ? loadError.message : 'Failed to load TV Shows page data.',
+        }));
       }
     };
 
     void load();
-  }, []);
+  }, [activeTab, categoryErrors, genreRows]);
 
   useEffect(() => {
     if (!tabParam) {
@@ -51,11 +48,13 @@ export function TvShowsPage() {
     }
   }, [activeTab, setSearchParams, tabParam]);
 
-  if (error) {
-    return <p>{error}</p>;
+  const activeError = categoryErrors[activeTab];
+  if (activeError) {
+    return <p>{activeError}</p>;
   }
 
-  if (!upcoming || !onTheAir || !popular || !topRated) {
+  const activeGenreRows = genreRows[activeTab];
+  if (!activeGenreRows) {
     return <p>Loading...</p>;
   }
 
@@ -74,18 +73,9 @@ export function TvShowsPage() {
         ]}
       />
 
-      {activeTab === 'upcoming' ? (
-        <MediaRow title="Upcoming" mediaType="tv" category="upcoming" items={upcoming.results} />
-      ) : null}
-      {activeTab === 'on-the-air' ? (
-        <MediaRow title="On The Air" mediaType="tv" category="on-the-air" items={onTheAir.results} />
-      ) : null}
-      {activeTab === 'popular' ? (
-        <MediaRow title="Popular" mediaType="tv" category="popular" items={popular.results} />
-      ) : null}
-      {activeTab === 'top-rated' ? (
-        <MediaRow title="Top Rated" mediaType="tv" category="top-rated" items={topRated.results} />
-      ) : null}
+      {activeGenreRows.length > 0 ? activeGenreRows.map(({ genre, items }) => (
+        <MediaRow key={genre.id} title={genre.name} mediaType="tv" category={activeTab} genreId={genre.id} items={items} />
+      )) : <p>No shows found for this category.</p>}
     </>
   );
 }

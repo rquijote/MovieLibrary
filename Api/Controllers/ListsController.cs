@@ -8,6 +8,7 @@ namespace Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [ServiceFilter(typeof(LocalListsFilter))]
     public class ListsController(IListsClient listsClient) : ControllerBase
     {
         private readonly IListsClient _listsClient = listsClient;

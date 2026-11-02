@@ -29,11 +29,8 @@ export function getMediaDate(item: MediaItem): string {
 // Partial is used to describe an object with optional category keys, otherwise all mediaCategory would need to be listed.
 export const expandedListEndpoints: Record<MediaType, Partial<Record<MediaCategory, string>>> = {
   movies: {
-    popular: '/api/MovieLists/popular',
-    'top-rated': '/api/MovieLists/top-rated',
     'now-playing': '/api/MovieLists/now-playing',
-    upcoming: '/api/Discover/movies',
-    trending: '/api/Trending/movies?timeWindow=day',
+    trending: '/api/Trending/movies?timeWindow=week',
     watchlist: '/api/Account/watchlist/movies',
     favorite: '/api/Account/favourite/movies',
   },
@@ -48,20 +45,120 @@ export const expandedListEndpoints: Record<MediaType, Partial<Record<MediaCatego
     favorite: '/api/Account/favourite/tv',
   },
   tvshows: {
-    upcoming: '/api/Discover/tv',
-    popular: '/api/TvShowLists/popular',
-    'top-rated': '/api/TvShowLists/top-rated',
     'airing-today': '/api/TvShowLists/airing-today',
-    'on-the-air': '/api/TvShowLists/on-the-air',
     trending: '/api/Trending/tv?timeWindow=day',
     watchlist: '/api/Account/watchlist/tv',
     favorite: '/api/Account/favourite/tv',
   },
 };
 
+export function buildMovieDiscoveryEndpoint(
+  category: 'popular' | 'top-rated' | 'upcoming',
+  fromDate = new Date(),
+  genreId?: number,
+): string {
+  const date = new Date(fromDate);
+  const today = formatLocalDate(date);
+  const params = new URLSearchParams({ IncludeAdult: 'false' });
+  if (genreId !== undefined) {
+    params.set('WithGenres', String(genreId));
+  }
+
+  if (category === 'popular') {
+    params.set('SortBy', 'popularity.desc');
+    params.set('PrimaryReleaseDateLte', today);
+    params.set('VoteCountGte', '250');
+  } else if (category === 'top-rated') {
+    const fiveYearsAgo = new Date(date);
+    fiveYearsAgo.setFullYear(fiveYearsAgo.getFullYear() - 5);
+    params.set('SortBy', 'vote_average.desc');
+    params.set('PrimaryReleaseDateGte', formatLocalDate(fiveYearsAgo));
+    params.set('PrimaryReleaseDateLte', today);
+    params.set('VoteAverageGte', '7');
+    params.set('VoteCountGte', '500');
+  } else {
+    const oneYearFromNow = new Date(date);
+    oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
+    params.set('SortBy', 'popularity.desc');
+    params.set('PrimaryReleaseDateGte', today);
+    params.set('PrimaryReleaseDateLte', formatLocalDate(oneYearFromNow));
+  }
+
+  return `/api/Discover/movies?${params.toString()}`;
+}
+
+export function buildTvShowDiscoveryEndpoint(
+  category: 'popular' | 'top-rated' | 'upcoming' | 'on-the-air',
+  fromDate = new Date(),
+  genreId?: number,
+): string {
+  const date = new Date(fromDate);
+  const today = formatLocalDate(date);
+  const params = new URLSearchParams({ IncludeAdult: 'false' });
+  if (genreId !== undefined) {
+    params.set('WithGenres', String(genreId));
+  }
+
+  if (category === 'popular') {
+    params.set('SortBy', 'popularity.desc');
+    params.set('FirstAirDateLte', today);
+    params.set('VoteCountGte', '250');
+  } else if (category === 'top-rated') {
+    const fiveYearsAgo = new Date(date);
+    fiveYearsAgo.setFullYear(fiveYearsAgo.getFullYear() - 5);
+    params.set('SortBy', 'vote_average.desc');
+    params.set('FirstAirDateGte', formatLocalDate(fiveYearsAgo));
+    params.set('FirstAirDateLte', today);
+    params.set('VoteAverageGte', '7');
+    params.set('VoteCountGte', '500');
+  } else if (category === 'on-the-air') {
+    const fiveYearsAgo = new Date(date);
+    fiveYearsAgo.setFullYear(fiveYearsAgo.getFullYear() - 5);
+    params.set('SortBy', 'popularity.desc');
+    params.set('FirstAirDateGte', formatLocalDate(fiveYearsAgo));
+    params.set('FirstAirDateLte', today);
+    params.set('VoteCountGte', '250');
+    params.set('WithStatus', '0');
+  } else {
+    const oneYearFromNow = new Date(date);
+    oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
+    params.set('SortBy', 'popularity.desc');
+    params.set('FirstAirDateGte', today);
+    params.set('FirstAirDateLte', formatLocalDate(oneYearFromNow));
+  }
+
+  return `/api/Discover/tv?${params.toString()}`;
+}
+
+function formatLocalDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 // Some endpoints already have query params. This checks if the baseEndpoint already has ?. If it does use &, else use ?.
 // Appends the page number for pagination.
 export function buildPagedEndpoint(baseEndpoint: string, page: number): string {
   const separator = baseEndpoint.includes('?') ? '&' : '?';
   return `${baseEndpoint}${separator}page=${page}`;
+}
+
+export async function fetchFirstPages<TItem, TResponse extends { results: TItem[]; total_pages?: number }>(
+  baseEndpoint: string,
+  fetchPage: (endpoint: string) => Promise<TResponse>,
+  maxPages = 3,
+): Promise<TResponse> {
+  const firstPage = await fetchPage(buildPagedEndpoint(baseEndpoint, 1));
+  const pageCount = Math.min(maxPages, Math.max(firstPage.total_pages ?? 1, 1));
+  const additionalPages = await Promise.all(
+    Array.from({ length: pageCount - 1 }, (_, index) =>
+      fetchPage(buildPagedEndpoint(baseEndpoint, index + 2)),
+    ),
+  );
+
+  return {
+    ...firstPage,
+    results: [firstPage, ...additionalPages].flatMap((page) => page.results),
+  };
 }

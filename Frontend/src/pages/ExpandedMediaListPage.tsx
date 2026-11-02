@@ -1,8 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { MediaGrid } from '../components/layout/MediaGrid';
 import { apiGet } from '../lib/api';
-import { buildPagedEndpoint, expandedListEndpoints } from '../lib/media';
+import {
+  buildMovieDiscoveryEndpoint,
+  buildPagedEndpoint,
+  buildTvShowDiscoveryEndpoint,
+  expandedListEndpoints,
+} from '../lib/media';
 import { formatDateForApi, getNextMonthDateRange } from '../lib/pageHelpers';
 import type {
   MediaCategory,
@@ -35,6 +40,9 @@ function buildUpcomingEndpoint(baseEndpoint: string, mediaType: MediaType): stri
 
 export function ExpandedMediaListPage() {
   const { mediaType, category } = useParams(); 
+  const [searchParams] = useSearchParams();
+  const genreParam = searchParams.get('genreId');
+  const genreId = genreParam && /^\d+$/.test(genreParam) ? Number(genreParam) : undefined;
   const [items, setItems] = useState<MediaItem[]>([]);
   const [currentPage, setCurrentPage] = useState(1); // setsCurrentPage on prev/next changes.
   const [totalPages, setTotalPages] = useState(1);
@@ -62,6 +70,34 @@ export function ExpandedMediaListPage() {
       return null;
     }
 
+    if (parsedMediaType === 'movies') {
+      switch (parsedCategory) {
+        case 'popular':
+        case 'top-rated':
+        case 'upcoming':
+          return buildMovieDiscoveryEndpoint(parsedCategory);
+      }
+    }
+
+    if (parsedMediaType === 'movies') {
+      switch (parsedCategory) {
+        case 'popular':
+        case 'top-rated':
+        case 'upcoming':
+          return buildMovieDiscoveryEndpoint(parsedCategory, new Date(), genreId);
+      }
+    }
+
+    if (parsedMediaType === 'tvshows') {
+      switch (parsedCategory) {
+        case 'popular':
+        case 'top-rated':
+        case 'upcoming':
+        case 'on-the-air':
+          return buildTvShowDiscoveryEndpoint(parsedCategory, new Date(), genreId);
+      }
+    }
+
     const baseEndpoint = expandedListEndpoints[parsedMediaType][parsedCategory];
     if (!baseEndpoint) {
       return null;
@@ -72,7 +108,7 @@ export function ExpandedMediaListPage() {
     }
 
     return baseEndpoint;
-  }, [parsedCategory, parsedMediaType]);
+  }, [genreId, parsedCategory, parsedMediaType]);
 
   // useEffect is used because its calling the API to get items. Don't want it to constantly fire every render.
   useEffect(() => {

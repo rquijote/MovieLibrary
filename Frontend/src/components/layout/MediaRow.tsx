@@ -7,17 +7,19 @@ interface MediaRowProps {
   items: MediaItem[];
   mediaType: MediaType;
   category: MediaCategory;
+  genreId?: number;
 }
 
-export function MediaRow({ title, items, mediaType, category }: MediaRowProps) {
+export function MediaRow({ title, items, mediaType, category, genreId }: MediaRowProps) {
   const navigate = useNavigate();
   const expandedRoute = mediaType === 'tv' ? `/tvshows/${category}` : `/${mediaType}/${category}`;
+  const expandedRouteWithGenre = genreId === undefined ? expandedRoute : `${expandedRoute}?genreId=${genreId}`;
 
   return (
     <section className="media-row-container">
       <div className="media-row-header">
         <h3>{title}</h3>
-        <button className="view-more-btn" type="button" onClick={() => navigate(expandedRoute)}>
+        <button className="view-more-btn" type="button" onClick={() => navigate(expandedRouteWithGenre)}>
           View More
         </button>
       </div>

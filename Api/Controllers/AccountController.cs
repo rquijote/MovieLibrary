@@ -2,6 +2,7 @@
 using Application.Models.Dto.Requests;
 using Microsoft.AspNetCore.Mvc;
 using Application.Interfaces;
+using Api.Services;
 
 namespace Api.Controllers
 {
@@ -54,9 +55,10 @@ namespace Api.Controllers
         }
 
         [HttpGet("lists")]
-        public async Task<IActionResult> GetLists([FromQuery] int page = 1)
+        [ServiceFilter(typeof(LocalListsFilter))]
+        public async Task<IActionResult> GetLists([FromServices] MySqlListsClient listsClient, [FromQuery] int page = 1)
         {
-            var result = await _accountClient.GetListsAsync(page);
+            var result = await listsClient.GetLists(page);
             return Ok(result);
         }
     }
