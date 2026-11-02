@@ -3,9 +3,11 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AccountListCards } from '../components/layout/AccountListCards';
 import { MediaRow } from '../components/layout/MediaRow';
 import { MiniHeaderTabs } from '../components/layout/MiniHeaderTabs';
+import { LoadingState } from '../components/layout/LoadingState';
 import { apiGet } from '../lib/api';
 import { getValidTab } from '../lib/pageHelpers';
 import type { AccountListsResponse, ListDetailsResponse, MovieListResponse, TvShowListResponse } from '../types/media';
+import './Lists.css';
 
 type LibraryTab = 'watchlist' | 'favourites' | 'lists';
 const libraryTabs = ['lists', 'favourites', 'watchlist'] as const;
@@ -21,44 +23,41 @@ export function LibraryPage() {
   const [watchlistTv, setWatchlistTv] = useState<TvShowListResponse | null>(null);
   const [accountLists, setAccountLists] = useState<AccountListsResponse | null>(null);
   const [listPreviewPostersById, setListPreviewPostersById] = useState<Record<number, string[]>>({});
-  const [isTabLoading, setIsTabLoading] = useState(false);
+  const [isTabLoading, setIsTabLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [previewWarning, setPreviewWarning] = useState<string | null>(null);
+  const [loadAttempt, setLoadAttempt] = useState(0);
 
   useEffect(() => {
-    const preloadWatchlistAndFavourites = async () => {
+    let active = true;
+    const load = async () => {
       try {
         setIsTabLoading(true);
-        const [watchlistMoviesData, watchlistTvData, favoriteMoviesData, favoriteTvData] = await Promise.all([
-          apiGet<MovieListResponse>('/api/Account/watchlist/movies'),
-          apiGet<TvShowListResponse>('/api/Account/watchlist/tv'),
-          apiGet<MovieListResponse>('/api/Account/favourite/movies'),
-          apiGet<TvShowListResponse>('/api/Account/favourite/tv'),
-        ]);
-
-        setWatchlistMovies(watchlistMoviesData);
-        setWatchlistTv(watchlistTvData);
-        setFavoriteMovies(favoriteMoviesData);
-        setFavoriteTv(favoriteTvData);
         setError(null);
-      } catch (loadError) {
-        setError(loadError instanceof Error ? loadError.message : 'Failed to preload library data.');
-      } finally {
-        setIsTabLoading(false);
-      }
-    };
-
-    void preloadWatchlistAndFavourites();
-  }, []);
-
-  useEffect(() => {
-    const loadLists = async () => {
-      try {
-        setIsTabLoading(true);
+        setPreviewWarning(null);
+        if (activeTab !== 'lists') {
+          const category = activeTab === 'watchlist' ? 'watchlist' : 'favourite';
+          const [movies, tv] = await Promise.all([
+            apiGet<MovieListResponse>(`/api/Account/${category}/movies`),
+            apiGet<TvShowListResponse>(`/api/Account/${category}/tv`),
+          ]);
+          if (!active) return;
+          if (activeTab === 'watchlist') {
+            setWatchlistMovies(movies);
+            setWatchlistTv(tv);
+          } else {
+            setFavoriteMovies(movies);
+            setFavoriteTv(tv);
+          }
+          return;
+        }
         const accountListsData = await apiGet<AccountListsResponse>('/api/Account/lists?page=1');
+        if (!active) return;
         const sortedLists = [...accountListsData.results].sort((left, right) => right.id - left.id);
         setAccountLists({ ...accountListsData, results: sortedLists });
+        setIsTabLoading(false);
 
-        const detailsResults = await Promise.all(
+        const detailsResults = await Promise.allSettled(
           sortedLists.map(async (list) => {
             const details = await apiGet<ListDetailsResponse>(`/api/Lists/${list.id}/details`);
             return {
@@ -71,21 +70,25 @@ export function LibraryPage() {
           }),
         );
 
-        setListPreviewPostersById(
-          Object.fromEntries(detailsResults.map((entry) => [entry.listId, entry.posters])) as Record<number, string[]>,
-        );
-        setError(null);
+        if (!active) return;
+        const previews: Record<number, string[]> = {};
+        for (const result of detailsResults) {
+          if (result.status === 'fulfilled') previews[result.value.listId] = result.value.posters;
+        }
+        setListPreviewPostersById(previews);
+        if (detailsResults.some((result) => result.status === 'rejected')) {
+          setPreviewWarning('Some cover previews could not load. Your lists are still available.');
+        }
       } catch (loadError) {
-        setError(loadError instanceof Error ? loadError.message : 'Failed to load custom lists data.');
+        if (active) setError(loadError instanceof Error ? loadError.message : 'Failed to load your library.');
       } finally {
-        setIsTabLoading(false);
+        if (active) setIsTabLoading(false);
       }
     };
 
-    if (activeTab === 'lists' && !accountLists) {
-      void loadLists();
-    }
-  }, [activeTab, accountLists]);
+    void load();
+    return () => { active = false; };
+  }, [activeTab, loadAttempt]);
 
   useEffect(() => {
     if (!tabParam) {
@@ -93,17 +96,13 @@ export function LibraryPage() {
     }
   }, [activeTab, setSearchParams, tabParam]);
 
-  if (error) {
-    return <p>{error}</p>;
-  }
-
-  if (isTabLoading) {
-    return <p>Loading...</p>;
-  }
-
   return (
-    <section>
-      <h1>My Library</h1>
+    <section className="lists-page">
+      <header className="lists-heading">
+        <p className="lists-eyebrow">Made for you</p>
+        <h1>Your library</h1>
+        <p className="muted">The stories you love, and the ones you have yet to discover.</p>
+      </header>
 
       <MiniHeaderTabs
         value={activeTab}
@@ -116,22 +115,31 @@ export function LibraryPage() {
         ]}
       />
 
-      {activeTab === 'watchlist' ? (
+      {error ? <div className="lists-error" role="alert"><p>{error}</p>
+        <button type="button" className="view-more-btn" onClick={() => setLoadAttempt((attempt) => attempt + 1)}>Try again</button>
+      </div> : null}
+      {previewWarning ? <p role="status" className="muted">{previewWarning}</p> : null}
+      {isTabLoading ? <LoadingState label="Loading your library" /> : null}
+      {!isTabLoading && !error && activeTab === 'watchlist' ? (
         <div className="library-tab-content">
           <MediaRow title="Watchlist Movies" items={watchlistMovies?.results ?? []} mediaType="movies" category="watchlist" />
           <MediaRow title="Watchlist TV Shows" items={watchlistTv?.results ?? []} mediaType="tv" category="watchlist" />
         </div>
       ) : null}
 
-      {activeTab === 'favourites' ? (
+      {!isTabLoading && !error && activeTab === 'favourites' ? (
         <div className="library-tab-content">
           <MediaRow title="Favourite Movies" items={favoriteMovies?.results ?? []} mediaType="movies" category="favorite" />
           <MediaRow title="Favourite TV Shows" items={favoriteTv?.results ?? []} mediaType="tv" category="favorite" />
         </div>
       ) : null}
 
-      {activeTab === 'lists' ? (
-        <div className="library-list-page-layout">
+      {!isTabLoading && !error && activeTab === 'lists' ? (
+        <div>
+          <div className="lists-toolbar">
+            <span className="muted">{accountLists?.total_results ?? 0} lists</span>
+            <button type="button" className="view-more-btn" onClick={() => navigate('/library/create-list')}>Create a list</button>
+          </div>
           <div className="library-lists-main">
             <AccountListCards
               lists={accountLists?.results ?? []}
@@ -140,11 +148,6 @@ export function LibraryPage() {
             />
           </div>
 
-          <aside className="library-list-command-center">
-            <button type="button" className="create-list-button" onClick={() => navigate('/library/create-list')}>
-              Create New List
-            </button>
-          </aside>
         </div>
       ) : null}
     </section>

@@ -25,6 +25,95 @@ export function getMediaDate(item: MediaItem): string {
   return 'release_date' in item ? item.release_date : item.first_air_date;
 }
 
+export function filterMediaWithPoster<TItem extends MediaItem>(items: readonly TItem[]): TItem[] {
+  return items.filter((item) => Boolean(item.poster_path));
+}
+
+type YearFilter = number | { min?: number; max?: number };
+
+export function getMediaYearBounds(items: MediaItem[]): { min: number; max: number } | undefined {
+  const years = items.map(getMediaDate)
+    .filter((date) => /^[1-9]\d{3}-\d{2}-\d{2}$/.test(date))
+    .map((date) => Number(date.slice(0, 4)));
+  if (years.length === 0) return undefined;
+  return { min: Math.min(...years), max: Math.max(...years) };
+}
+
+export function filterMediaItems(items: MediaItem[], genreId?: number, year?: YearFilter): MediaItem[] {
+  return items.filter((item) =>
+    (genreId === undefined || item.genre_ids.includes(genreId))
+    && (year === undefined || (typeof year === 'number'
+      ? getMediaDate(item)?.slice(0, 4) === String(year)
+      : /^\d{4}/.test(getMediaDate(item) ?? '')
+        && (year.min === undefined || Number(getMediaDate(item).slice(0, 4)) >= year.min)
+        && (year.max === undefined || Number(getMediaDate(item).slice(0, 4)) <= year.max))),
+  );
+}
+
+export function buildFilteredDiscoveryEndpoint(endpoint: string, mediaType: MediaType, year?: YearFilter): string {
+  if (year === undefined) return endpoint;
+  const [path, query] = endpoint.split('?');
+  const params = new URLSearchParams(query);
+  if (typeof year === 'number') {
+    params.set(mediaType === 'movies' ? 'PrimaryReleaseYear' : 'FirstAirDateYear', String(year));
+  } else {
+    const prefix = mediaType === 'movies' ? 'PrimaryReleaseDate' : 'FirstAirDate';
+    if (year.min !== undefined) {
+      const lower = `${year.min}-01-01`;
+      const existing = params.get(`${prefix}Gte`);
+      params.set(`${prefix}Gte`, existing && existing > lower ? existing : lower);
+    }
+    if (year.max !== undefined) {
+      const upper = `${year.max}-12-31`;
+      const existing = params.get(`${prefix}Lte`);
+      params.set(`${prefix}Lte`, existing && existing < upper ? existing : upper);
+    }
+  }
+  return `${path}?${params.toString()}`;
+}
+
+export function getAccessiblePageCount(totalPages = 1): number {
+  return Math.min(500, Math.max(1, totalPages));
+}
+
+export function paginateFilteredMedia(items: MediaItem[], page: number, genreId?: number, year?: YearFilter) {
+  const matches = filterMediaItems(items, genreId, year);
+  const totalPages = Math.max(1, Math.ceil(matches.length / 20));
+  const currentPage = Math.min(page, totalPages);
+  return {
+    results: matches.slice((currentPage - 1) * 20, currentPage * 20),
+    totalPages,
+    currentPage,
+    totalResults: matches.length,
+  };
+}
+
+export async function fetchAllMediaPages(
+  endpoint: string,
+  fetchPage: (endpoint: string) => Promise<{ results: MediaItem[]; total_pages?: number }>,
+  signal: AbortSignal,
+  onProgress: (loaded: number, total: number) => void,
+): Promise<MediaItem[]> {
+  signal.throwIfAborted();
+  const first = await fetchPage(buildPagedEndpoint(endpoint, 1));
+  signal.throwIfAborted();
+  const total = getAccessiblePageCount(first.total_pages);
+  const items = [...first.results];
+  onProgress(1, total);
+  // Limit concurrent requests and preserve the feed's ordering.
+  for (let page = 2; page <= total; page += 4) {
+    signal.throwIfAborted();
+    const batch = await Promise.all(
+      Array.from({ length: Math.min(4, total - page + 1) }, (_, index) =>
+        fetchPage(buildPagedEndpoint(endpoint, page + index))),
+    );
+    signal.throwIfAborted();
+    items.push(...batch.flatMap((response) => response.results));
+    onProgress(Math.min(page + 3, total), total);
+  }
+  return [...new Map(items.map((item) => [item.id, item])).values()];
+}
+
 // Two-level lookup: media type (e.g. movies) -> category (e.g. popular) -> API endpoint (values are URL strings).
 // Partial is used to describe an object with optional category keys, otherwise all mediaCategory would need to be listed.
 export const expandedListEndpoints: Record<MediaType, Partial<Record<MediaCategory, string>>> = {

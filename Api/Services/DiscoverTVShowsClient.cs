@@ -38,6 +38,9 @@ namespace Api.Services
             if (!string.IsNullOrWhiteSpace(request.WithGenres))
                 parameters.Add($"with_genres={request.WithGenres}");
 
+            if (!string.IsNullOrWhiteSpace(request.WithPeople))
+                parameters.Add($"with_people={request.WithPeople}");
+
             if (!string.IsNullOrWhiteSpace(request.WithNetworks))
                 parameters.Add($"with_networks={request.WithNetworks}");
 

@@ -22,5 +22,19 @@ namespace Api.Controllers
             var result = await _searchClient.SearchTVShowsAsync(query);
             return Ok(result);
         }
+
+        [HttpGet("people")]
+        public async Task<IActionResult> SearchPeople([FromQuery] string query)
+        {
+            var result = await _searchClient.SearchPeopleAsync(query);
+            return Ok(result);
+        }
+
+        [HttpGet("keywords")]
+        public async Task<IActionResult> SearchKeywords([FromQuery] string query)
+        {
+            var result = await _searchClient.SearchKeywordsAsync(query);
+            return Ok(result);
+        }
     }
 }

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { apiDelete, apiGet, apiPost } from '../../lib/api';
-import type { AccountStatesResponse, StatusDto } from '../../types/media';
+import type { AccountStatesResponse } from '../../types/media';
 import { ActionToast } from './ActionToast';
 import { ListPickerModal } from './ListPickerModal';
 import { RatingControl } from './RatingControl';
@@ -18,11 +18,11 @@ export function MediaActionsPanel({ mediaId, mediaType, showListActions = true }
   const [isFavorited, setIsFavorited] = useState(false);
   const [isFavoriteHovered, setIsFavoriteHovered] = useState(false);
   const [isListPickerOpen, setIsListPickerOpen] = useState(false);
-  const [toast, setToast] = useState<{ id: number; kind: 'success' | 'error'; message: string } | null>(null);
+  const [toast, setToast] = useState<{ id: number; kind: 'success' | 'error' | 'pending'; message: string } | null>(null);
   const toastIdRef = useRef(0);
   const ratingEndpointPrefix = mediaType === 'movie' ? 'Movie' : 'TvShow';
 
-  const showToast = (kind: 'success' | 'error', message: string) => {
+  const showToast = (kind: 'success' | 'error' | 'pending', message: string) => {
     toastIdRef.current += 1;
     setToast({ id: toastIdRef.current, kind, message });
   };
@@ -61,15 +61,15 @@ export function MediaActionsPanel({ mediaId, mediaType, showListActions = true }
     const nextState = !isWatchlisted;
 
     try {
-      const result = await apiPost<StatusDto>('/api/Account/watchlist', {
+      const result = await apiPost('/api/Account/watchlist', {
         media_type: mediaType,
         media_id: mediaId,
         watchlist: nextState,
       });
       setIsWatchlisted(nextState);
       showToast(
-        result.success ? 'success' : 'error',
-        result.status_message ?? (result.success ? 'Watchlist updated.' : 'Watchlist update failed.'),
+        result.queued ? 'pending' : 'success',
+        result.status_message ?? 'Watchlist updated.',
       );
     } catch (error) {
       showToast('error', error instanceof Error ? error.message : 'Watchlist update failed.');
@@ -78,13 +78,13 @@ export function MediaActionsPanel({ mediaId, mediaType, showListActions = true }
 
   const handleFavorite = async (add: boolean) => {
     try {
-      const result = await apiPost<StatusDto>('/api/Account/favorite', {
+      const result = await apiPost('/api/Account/favorite', {
         media_type: mediaType,
         media_id: mediaId,
         favorite: add,
       });
       setIsFavorited(add);
-      showToast('success', result.status_message ?? (add ? 'Added to favorites.' : 'Removed from favorites.'));
+      showToast(result.queued ? 'pending' : 'success', result.status_message ?? (add ? 'Added to favorites.' : 'Removed from favorites.'));
     } catch (error) {
       showToast('error', error instanceof Error ? error.message : 'Favorites update failed.');
     }
@@ -175,23 +175,23 @@ export function MediaActionsPanel({ mediaId, mediaType, showListActions = true }
         ratingOutOf5={ratingOutOf5}
         onSetRating={async (nextRatingOutOf5) => {
           try {
-            const result = await apiPost<StatusDto>(
+            const result = await apiPost(
               `/api/${ratingEndpointPrefix}/${mediaId}/rating`,
               {
                 value: nextRatingOutOf5 * 2,
               },
             );
             setRatingOutOf5(nextRatingOutOf5);
-            showToast('success', result.status_message ?? `Rating updated to ${nextRatingOutOf5.toFixed(1)} / 5.`);
+            showToast(result.queued ? 'pending' : 'success', result.status_message ?? `Rating updated to ${nextRatingOutOf5.toFixed(1)} / 5.`);
           } catch (error) {
             showToast('error', error instanceof Error ? error.message : 'Rating update failed.');
           }
         }}
         onDeleteRating={async () => {
           try {
-            const result = await apiDelete<StatusDto>(`/api/${ratingEndpointPrefix}/${mediaId}/rating`);
+            const result = await apiDelete(`/api/${ratingEndpointPrefix}/${mediaId}/rating`);
             setRatingOutOf5(0);
-            showToast('success', result.status_message ?? 'Rating removed.');
+            showToast(result.queued ? 'pending' : 'success', result.status_message ?? 'Rating removed.');
           } catch (error) {
             showToast('error', error instanceof Error ? error.message : 'Deleting rating failed.');
           }

@@ -40,6 +40,9 @@ namespace Application.Models.Dto.Responses
         [JsonPropertyName("next_episode_to_air")]
         public EpisodeToAirDto? NextEpisodeToAir { get; init; }
 
+        [JsonPropertyName("last_episode_to_air")]
+        public EpisodeToAirDto? LastEpisodeToAir { get; init; }
+
         [JsonPropertyName("number_of_episodes")]
         public int NumberOfEpisodes { get; init; }
 
@@ -69,6 +72,39 @@ namespace Application.Models.Dto.Responses
 
         [JsonPropertyName("production_countries")]
         public List<ProductionCountryDto> ProductionCountries { get; init; } = [];
+
+        [JsonPropertyName("aggregate_credits")]
+        public CreditsDto? AggregateCredits { get; init; }
+
+        [JsonPropertyName("videos")]
+        public VideoListDto? Videos { get; init; }
+
+        [JsonPropertyName("images")]
+        public ImageListDto? Images { get; init; }
+
+        [JsonPropertyName("recommendations")]
+        public MediaRecommendationsDto<TvShowDto>? Recommendations { get; init; }
+
+        [JsonPropertyName("similar")]
+        public MediaRecommendationsDto<TvShowDto>? Similar { get; init; }
+
+        [JsonPropertyName("reviews")]
+        public ReviewsDto? Reviews { get; init; }
+
+        [JsonPropertyName("content_ratings")]
+        public ContentRatingsDto? ContentRatings { get; init; }
+
+        [JsonPropertyName("keywords")]
+        public TvKeywordsDto? Keywords { get; init; }
+
+        [JsonPropertyName("external_ids")]
+        public ExternalIdsDto? ExternalIds { get; init; }
+
+        [JsonPropertyName("translations")]
+        public TranslationsDto? Translations { get; init; }
+
+        [JsonPropertyName("created_by")]
+        public List<TvCreatorDto> CreatedBy { get; init; } = [];
 
         [JsonPropertyName("seasons")]
         public List<SeasonDto> Seasons { get; init; } = [];
@@ -177,5 +213,23 @@ namespace Application.Models.Dto.Responses
 
         [JsonPropertyName("vote_average")]
         public double VoteAverage { get; init; }
+    }
+
+    public sealed record TvCreatorDto
+    {
+        [JsonPropertyName("id")]
+        public int Id { get; init; }
+
+        [JsonPropertyName("name")]
+        public string Name { get; init; } = string.Empty;
+
+        [JsonPropertyName("credit_id")]
+        public string? CreditId { get; init; }
+
+        [JsonPropertyName("gender")]
+        public int Gender { get; init; }
+
+        [JsonPropertyName("profile_path")]
+        public string? ProfilePath { get; init; }
     }
 }

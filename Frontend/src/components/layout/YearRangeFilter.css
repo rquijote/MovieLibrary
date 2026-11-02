@@ -1,0 +1,93 @@
+.expanded-media-filters .year-range-filter {
+  min-width: 0;
+  width: 20rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.year-range-filter legend {
+  margin-bottom: 0.6rem;
+  padding: 0;
+  color: #cbd5e1;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.year-range-boxes {
+  display: flex;
+  align-items: end;
+  gap: 0.75rem;
+}
+
+.year-range-boxes label {
+  flex: 1;
+  min-width: 0;
+}
+
+.year-range-boxes > span {
+  align-self: center;
+  margin-top: 1.25rem;
+  color: #94a3b8;
+}
+
+.expanded-media-filters .year-range-boxes input {
+  width: 100%;
+}
+
+.year-range-track {
+  position: relative;
+  height: 1.5rem;
+  margin: 0.75rem 0.6rem 0;
+}
+
+.year-range-track::before {
+  content: '';
+  position: absolute;
+  inset: calc(50% - 2px) 0 auto;
+  height: 4px;
+  border-radius: 4px;
+  background: linear-gradient(to right, #334155 var(--range-start), #93c5fd var(--range-start),
+    #93c5fd var(--range-end), #334155 var(--range-end));
+}
+
+.expanded-media-filters .year-range-track input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  min-height: 0;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  appearance: none;
+  pointer-events: none;
+}
+
+.year-range-track input::-webkit-slider-thumb {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #0f172a;
+  border-radius: 50%;
+  background: #bfdbfe;
+  appearance: none;
+  pointer-events: auto;
+  cursor: ew-resize;
+}
+
+.year-range-track input::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: 2px solid #0f172a;
+  border-radius: 50%;
+  background: #bfdbfe;
+  pointer-events: auto;
+  cursor: ew-resize;
+}
+
+@media (max-width: 600px) {
+  .expanded-media-filters .year-range-filter {
+    width: 100%;
+  }
+}

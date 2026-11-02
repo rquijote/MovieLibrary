@@ -11,15 +11,33 @@ namespace Api.Services
         public async Task<MovieListResponseDto> SearchMoviesAsync([FromQuery] string query)
         {
             var response = await _http.GetAsync($"movie?query={Uri.EscapeDataString(query)}");
+            response.EnsureSuccessStatusCode();
             var result = await response.Content.ReadFromJsonAsync<MovieListResponseDto>();
-            return result ?? new MovieListResponseDto();
+            return result ?? throw new InvalidOperationException("Failed to deserialize movie search response.");
         }
 
         public async Task<TvShowListResponseDto> SearchTVShowsAsync(string query)
         {
             var response = await _http.GetAsync($"tv?query={Uri.EscapeDataString(query)}");
+            response.EnsureSuccessStatusCode();
             var result = await response.Content.ReadFromJsonAsync<TvShowListResponseDto>();
-            return result ?? new TvShowListResponseDto();
+            return result ?? throw new InvalidOperationException("Failed to deserialize TV search response.");
+        }
+
+        public async Task<PersonSearchResponseDto> SearchPeopleAsync(string query)
+        {
+            var response = await _http.GetAsync($"person?query={Uri.EscapeDataString(query)}");
+            response.EnsureSuccessStatusCode();
+            var result = await response.Content.ReadFromJsonAsync<PersonSearchResponseDto>();
+            return result ?? throw new InvalidOperationException("Failed to deserialize people search response.");
+        }
+
+        public async Task<KeywordSearchResponseDto> SearchKeywordsAsync(string query)
+        {
+            var response = await _http.GetAsync($"keyword?query={Uri.EscapeDataString(query)}");
+            response.EnsureSuccessStatusCode();
+            var result = await response.Content.ReadFromJsonAsync<KeywordSearchResponseDto>();
+            return result ?? throw new InvalidOperationException("Failed to deserialize keyword search response.");
         }
     }
 }

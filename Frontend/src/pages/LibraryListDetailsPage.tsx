@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { MediaGrid } from '../components/layout/MediaGrid';
+import { LoadingState } from '../components/layout/LoadingState';
 import { apiDelete, apiGet } from '../lib/api';
-import type { ListDetailsResponse, StatusDto } from '../types/media';
+import type { ListDetailsResponse } from '../types/media';
+import './Lists.css';
 
 export function LibraryListDetailsPage() {
   const navigate = useNavigate();
@@ -12,8 +14,12 @@ export function LibraryListDetailsPage() {
   const [error, setError] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [loadAttempt, setLoadAttempt] = useState(0);
+  const deleting = useRef(false);
 
   useEffect(() => {
+    let active = true;
     const load = async () => {
       if (!listId) {
         setList(null);
@@ -24,25 +30,32 @@ export function LibraryListDetailsPage() {
       try {
         setIsLoading(true);
         const result = await apiGet<ListDetailsResponse>(`/api/Lists/${listId}/details`);
+        if (!active) return;
         setList(result);
         setError(null);
       } catch (loadError) {
-        setList(null);
-        setError(loadError instanceof Error ? loadError.message : 'Failed to load list details.');
+        if (active) {
+          setList(null);
+          setError(loadError instanceof Error ? loadError.message : 'Failed to load list details.');
+        }
       } finally {
-        setIsLoading(false);
+        if (active) setIsLoading(false);
       }
     };
 
     void load();
-  }, [listId]);
+    return () => { active = false; };
+  }, [listId, loadAttempt]);
 
   if (error) {
-    return <p>{error}</p>;
+    return <section className="lists-page"><Link to="/library?tab=lists" className="lists-back">Back to your library</Link>
+      <div className="lists-error" role="alert"><p>{error}</p>
+        <button type="button" className="view-more-btn" onClick={() => { setError(null); setLoadAttempt((attempt) => attempt + 1); }}>Try again</button>
+      </div></section>;
   }
 
   if (isLoading) {
-    return <p>Loading...</p>;
+    return <LoadingState variant="grid" label="Loading list" />;
   }
 
   if (!list) {
@@ -50,28 +63,33 @@ export function LibraryListDetailsPage() {
   }
 
   const handleDeleteList = async () => {
+    if (deleting.current) return;
     try {
+      deleting.current = true;
       setIsDeleting(true);
-      await apiDelete<StatusDto>(`/api/Lists/${list.id}`);
+      setDeleteError(null);
+      await apiDelete(`/api/Lists/${list.id}`);
       navigate('/library?tab=lists');
     } catch (deleteError) {
-      setError(deleteError instanceof Error ? deleteError.message : 'Failed to delete list.');
+      setDeleteError(deleteError instanceof Error ? deleteError.message : 'Failed to delete list.');
     } finally {
+      deleting.current = false;
       setIsDeleting(false);
     }
   };
 
   return (
     <>
-      <section className="library-list-page-layout">
-        <div className="library-list-page-main">
+      <section className="lists-page">
+        <Link className="lists-back" to="/library?tab=lists">Back to your library</Link>
+        <header className="lists-heading">
+          <p className="lists-eyebrow">Your collection</p>
           <h1>{list.name}</h1>
-          <p>{list.description ?? ''}</p>
-          <p className="muted">{list.item_count} {list.item_count === 1 ? 'movie' : 'movies'}</p>
-          <MediaGrid items={list.items} mediaType="movies" />
-        </div>
-
-        <aside className="library-list-command-center">
+          {list.description ? <p className="muted">{list.description}</p> : null}
+        </header>
+        <div className="lists-toolbar">
+        <span className="muted">{list.item_count} {list.item_count === 1 ? 'movie' : 'movies'}</span>
+        <div className="lists-toolbar-actions">
           <button
             type="button"
             className="view-more-btn"
@@ -83,20 +101,26 @@ export function LibraryListDetailsPage() {
             type="button"
             className="view-more-btn view-more-btn-danger"
             disabled={isDeleting}
-            onClick={() => setIsDeleteModalOpen(true)}
+            onClick={() => { setDeleteError(null); setIsDeleteModalOpen(true); }}
           >
             {isDeleting ? 'Deleting...' : 'Delete this list'}
           </button>
-        </aside>
+        </div>
+        </div>
+        {list.items.length ? <MediaGrid items={list.items} mediaType="movies" /> : <div className="lists-empty">
+          <strong>A little room for inspiration.</strong>Edit this list to add your first movie.
+        </div>}
       </section>
 
       {isDeleteModalOpen ? (
-        <div className="list-picker-overlay" role="presentation" onClick={() => setIsDeleteModalOpen(false)}>
-          <div className="list-picker-modal delete-confirm-modal" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
-            <h3>Delete List</h3>
-            <p>Are you sure you want to delete this list?</p>
+        <div className="list-picker-overlay" role="presentation" onClick={() => { if (!isDeleting) setIsDeleteModalOpen(false); }}>
+          <div className="list-picker-modal delete-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="delete-list-title" onClick={(event) => event.stopPropagation()}
+            onKeyDown={(event) => { if (event.key === 'Escape' && !isDeleting) setIsDeleteModalOpen(false); }}>
+            <h3 id="delete-list-title">Delete this list?</h3>
+            <p>This will permanently delete "{list.name}". Your movies will not be deleted.</p>
+            {deleteError ? <p className="lists-error" role="alert">{deleteError}</p> : null}
             <div className="delete-confirm-actions">
-              <button type="button" className="delete-cancel-button" onClick={() => setIsDeleteModalOpen(false)}>Cancel</button>
+              <button type="button" autoFocus disabled={isDeleting} className="delete-cancel-button" onClick={() => setIsDeleteModalOpen(false)}>Keep list</button>
               <button
                 type="button"
                 className="delete-list-button"

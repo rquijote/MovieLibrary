@@ -1,14 +1,14 @@
 import { useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
 import { apiGet, apiPost } from '../../lib/api';
-import type { AccountListSummary, AccountListsResponse, StatusDto } from '../../types/media';
+import type { AccountListSummary, AccountListsResponse } from '../../types/media';
 import { CreateListForm } from '../lists/CreateListForm';
 
 interface ListPickerModalProps {
   isOpen: boolean;
   mediaId: number;
   mediaType: 'movie' | 'tv';
-  onNotify: (kind: 'success' | 'error', message: string) => void;
+  onNotify: (kind: 'success' | 'error' | 'pending', message: string) => void;
   onClose: () => void;
 }
 
@@ -103,13 +103,13 @@ export function ListPickerModal({
     }
 
     try {
-      const result = await apiPost<StatusDto>('/api/Lists', {
+      const result = await apiPost('/api/Lists', {
         name: trimmedName,
         description: description.trim() || null,
         language: 'en',
       });
 
-      onNotify('success', result.status_message ?? 'List created.');
+      onNotify(result.queued ? 'pending' : 'success', result.status_message ?? 'List created.');
       await loadAccountLists(true);
     } catch (error) {
       onNotify('error', error instanceof Error ? error.message : 'Failed to create list.');
@@ -124,13 +124,16 @@ export function ListPickerModal({
     }
 
     try {
+      let queued = false;
       for (const listId of selectedListIds) {
-        await apiPost<StatusDto>(`/api/Lists/${listId}/add_movie`, mediaId);
+        const result = await apiPost(`/api/Lists/${listId}/add_movie`, mediaId);
+        queued ||= result.queued;
       }
 
       onNotify(
-        'success',
-        selectedListIds.length === 1 ? 'Added to 1 list.' : `Added to ${selectedListIds.length} lists.`,
+        queued ? 'pending' : 'success',
+        queued ? 'List changes saved on this device. Pending synchronization.'
+          : selectedListIds.length === 1 ? 'Added to 1 list.' : `Added to ${selectedListIds.length} lists.`,
       );
 
       setSelectedListIds([]);
@@ -220,7 +223,7 @@ export function ListPickerModal({
           />
         ) : null}
 
-        {isListsLoading ? <p>Loading lists...</p> : null}
+        {isListsLoading ? <LoadingState variant="inline" label="Finding your lists" /> : null}
 
         {!isListsLoading && accountLists.length === 0 ? <p>No custom lists found.</p> : null}
         {!isListsLoading && accountLists.length > 0 && filteredAccountLists.length === 0 ? <p>No matching lists found.</p> : null}
@@ -254,3 +257,4 @@ export function ListPickerModal({
     </div>
   );
 }
+import { LoadingState } from '../layout/LoadingState';

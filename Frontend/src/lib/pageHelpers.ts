@@ -26,6 +26,19 @@ export function formatDateForApi(date: Date): string {
   return date.toISOString().split('T')[0];
 }
 
+export function formatPersonDate(value: string): string {
+  const parts = new Intl.DateTimeFormat('en', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    timeZone: 'UTC',
+  }).formatToParts(new Date(`${value}T00:00:00Z`));
+
+  return ['year', 'month', 'day']
+    .map((type) => parts.find((part) => part.type === type)?.value)
+    .join(' ');
+}
+
 /**
  * Builds a date range from a start date through one month later.
  * @param fromDate Start date for the range. Defaults to today.

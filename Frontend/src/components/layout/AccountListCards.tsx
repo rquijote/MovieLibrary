@@ -9,7 +9,7 @@ interface AccountListCardsProps {
 
 export function AccountListCards({ lists, previewPostersByListId, onSelectList }: AccountListCardsProps) {
   if (lists.length === 0) {
-    return <p>No custom lists found.</p>;
+    return <div className="lists-empty"><strong>Make it your own.</strong>Create a list to collect movies for your next watch.</div>;
   }
 
   return (

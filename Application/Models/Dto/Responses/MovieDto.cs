@@ -11,7 +11,7 @@ namespace Application.Models.Dto.Responses
         public string? BackdropPath { get; init; }
 
         [JsonPropertyName("belongs_to_collection")]
-        public object? BelongsToCollection { get; init; }
+        public MovieCollectionDto? BelongsToCollection { get; init; }
 
         [JsonPropertyName("budget")]
         public long Budget { get; init; }
@@ -57,6 +57,36 @@ namespace Application.Models.Dto.Responses
 
         [JsonPropertyName("production_countries")]
         public List<ProductionCountryDto> ProductionCountries { get; init; } = [];
+
+        [JsonPropertyName("credits")]
+        public CreditsDto? Credits { get; init; }
+
+        [JsonPropertyName("videos")]
+        public VideoListDto? Videos { get; init; }
+
+        [JsonPropertyName("images")]
+        public ImageListDto? Images { get; init; }
+
+        [JsonPropertyName("recommendations")]
+        public MediaRecommendationsDto<MovieDto>? Recommendations { get; init; }
+
+        [JsonPropertyName("similar")]
+        public MediaRecommendationsDto<MovieDto>? Similar { get; init; }
+
+        [JsonPropertyName("reviews")]
+        public ReviewsDto? Reviews { get; init; }
+
+        [JsonPropertyName("release_dates")]
+        public ReleaseDatesDto? ReleaseDates { get; init; }
+
+        [JsonPropertyName("keywords")]
+        public MovieKeywordsDto? Keywords { get; init; }
+
+        [JsonPropertyName("external_ids")]
+        public ExternalIdsDto? ExternalIds { get; init; }
+
+        [JsonPropertyName("translations")]
+        public TranslationsDto? Translations { get; init; }
 
         [JsonPropertyName("release_date")]
         public string ReleaseDate { get; init; } = string.Empty;

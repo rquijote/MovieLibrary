@@ -22,6 +22,9 @@ namespace Application.Models.Dto.Requests
         [JsonPropertyName("with_genres")]
         public string? WithGenres { get; init; }
 
+        [JsonPropertyName("with_people")]
+        public string? WithPeople { get; init; }
+
         [JsonPropertyName("with_networks")]
         public string? WithNetworks { get; init; }
 

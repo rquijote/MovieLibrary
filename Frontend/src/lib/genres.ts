@@ -46,15 +46,61 @@ export interface GenreItemGroup<TItem extends MediaItem> {
   items: TItem[];
 }
 
+interface CachedGenreItems {
+  expiresAt: number;
+  items: MediaItem[];
+}
+
+const genreCacheDurationMs = 120_000;
+const genreItemsCache = new Map<string, CachedGenreItems>();
+const genreItemRequests = new Map<string, Promise<MediaItem[]>>();
+
+function fetchGenreItems<TItem extends MediaItem>(
+  endpoint: string,
+  fetchResults: (endpoint: string) => Promise<{ results: TItem[] }>,
+): Promise<TItem[]> {
+  const cached = genreItemsCache.get(endpoint);
+  if (cached && cached.expiresAt > Date.now()) {
+    return Promise.resolve(cached.items as TItem[]);
+  }
+  if (cached) {
+    genreItemsCache.delete(endpoint);
+  }
+
+  const pendingRequest = genreItemRequests.get(endpoint);
+  if (pendingRequest) {
+    return pendingRequest as Promise<TItem[]>;
+  }
+
+  const request = fetchResults(endpoint).then(({ results }) => {
+    genreItemsCache.set(endpoint, { expiresAt: Date.now() + genreCacheDurationMs, items: results });
+    return results;
+  }).finally(() => {
+    if (genreItemRequests.get(endpoint) === request) {
+      genreItemRequests.delete(endpoint);
+    }
+  });
+
+  genreItemRequests.set(endpoint, request as Promise<MediaItem[]>);
+  return request;
+}
+
 export async function fetchGenreRows<TItem extends MediaItem>(
   genres: readonly GenreDto[],
   buildEndpoint: (genreId: number) => string,
   fetchResults: (endpoint: string) => Promise<{ results: TItem[] }>,
+  onGroup?: (group: GenreItemGroup<TItem>) => void,
 ): Promise<GenreItemGroup<TItem>[]> {
-  const rows = await Promise.all(genres.map(async (genre) => ({
-    genre,
-    items: (await fetchResults(buildEndpoint(genre.id))).results,
-  })));
+  const rows = await Promise.all(genres.map(async (genre) => {
+    const group = {
+      genre,
+      items: await fetchGenreItems(buildEndpoint(genre.id), fetchResults),
+    };
+    if (group.items.length > 0) {
+      onGroup?.(group);
+    }
+    return group;
+  }));
 
   return rows.filter((row) => row.items.length > 0);
 }

@@ -6,5 +6,7 @@ namespace Application.Interfaces
     {
         Task<MovieListResponseDto> SearchMoviesAsync(string query);
         Task<TvShowListResponseDto> SearchTVShowsAsync(string query);
+        Task<PersonSearchResponseDto> SearchPeopleAsync(string query);
+        Task<KeywordSearchResponseDto> SearchKeywordsAsync(string query);
     }
 }

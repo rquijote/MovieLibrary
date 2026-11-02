@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Application.Interfaces;
 using Application.Models.Dto.Requests;
 using Application.Models.Dto.Responses;
@@ -18,8 +19,8 @@ namespace Api.Controllers
             {
                 var result = await _tvShowClient.GetTvShowById(id);
                 return Ok(result);
-            } 
-            catch (Exception ex)
+            }
+            catch (KeyNotFoundException ex)
             {
                 var statusDto = new StatusDto
                 {
@@ -28,6 +29,70 @@ namespace Api.Controllers
                     StatusMessage = ex.Message
                 };
                 return NotFound(statusDto);
+            }
+        }
+
+        /// <summary>Retrieves recommended TV shows.</summary>
+        /// <param name="id">The source TV show ID.</param>
+        /// <param name="page">The requested result page.</param>
+        /// <returns>A page of recommended TV shows.</returns>
+        [HttpGet("{id}/recommendations")]
+        public Task<IActionResult> GetRecommendations(int id, [FromQuery, Range(1, 500)] int page = 1)
+            => GetRelatedTvShows(id, false, page);
+
+        /// <summary>Retrieves similar TV shows.</summary>
+        /// <param name="id">The source TV show ID.</param>
+        /// <param name="page">The requested result page.</param>
+        /// <returns>A page of similar TV shows.</returns>
+        [HttpGet("{id}/similar")]
+        public Task<IActionResult> GetSimilar(int id, [FromQuery, Range(1, 500)] int page = 1)
+            => GetRelatedTvShows(id, true, page);
+
+        private async Task<IActionResult> GetRelatedTvShows(int id, bool similar, int page)
+        {
+            try
+            {
+                return Ok(await _tvShowClient.GetRelatedTvShows(id, similar, page));
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new StatusDto { Success = false, StatusCode = 34, StatusMessage = ex.Message });
+            }
+        }
+
+        [HttpGet("{id}/season/{seasonNumber}")]
+        public async Task<IActionResult> GetSeasonById(int id, int seasonNumber)
+        {
+            try
+            {
+                return Ok(await _tvShowClient.GetSeasonById(id, seasonNumber));
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new StatusDto
+                {
+                    Success = false,
+                    StatusCode = 34,
+                    StatusMessage = ex.Message
+                });
+            }
+        }
+
+        [HttpGet("{id}/season/{seasonNumber}/episode/{episodeNumber}")]
+        public async Task<IActionResult> GetEpisodeById(int id, int seasonNumber, int episodeNumber)
+        {
+            try
+            {
+                return Ok(await _tvShowClient.GetEpisodeById(id, seasonNumber, episodeNumber));
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new StatusDto
+                {
+                    Success = false,
+                    StatusCode = 34,
+                    StatusMessage = ex.Message
+                });
             }
         }
 

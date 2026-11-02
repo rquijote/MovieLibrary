@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Application.Interfaces;
 using Application.Models.Dto.Requests;
 using Application.Models.Dto.Responses;
@@ -29,6 +30,34 @@ namespace Api.Controllers
                 };
 
                 return NotFound(statusDto);
+            }
+        }
+
+        /// <summary>Retrieves recommended movies.</summary>
+        /// <param name="id">The source movie ID.</param>
+        /// <param name="page">The requested result page.</param>
+        /// <returns>A page of recommended movies.</returns>
+        [HttpGet("{id}/recommendations")]
+        public Task<IActionResult> GetRecommendations(int id, [FromQuery, Range(1, 500)] int page = 1)
+            => GetRelatedMovies(id, false, page);
+
+        /// <summary>Retrieves similar movies.</summary>
+        /// <param name="id">The source movie ID.</param>
+        /// <param name="page">The requested result page.</param>
+        /// <returns>A page of similar movies.</returns>
+        [HttpGet("{id}/similar")]
+        public Task<IActionResult> GetSimilar(int id, [FromQuery, Range(1, 500)] int page = 1)
+            => GetRelatedMovies(id, true, page);
+
+        private async Task<IActionResult> GetRelatedMovies(int id, bool similar, int page)
+        {
+            try
+            {
+                return Ok(await _movieClient.GetRelatedMovies(id, similar, page));
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new StatusDto { Success = false, StatusCode = 34, StatusMessage = ex.Message });
             }
         }
 

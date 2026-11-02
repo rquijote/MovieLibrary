@@ -44,6 +44,9 @@ namespace Api.Services
             if (!string.IsNullOrWhiteSpace(request.WithCast))
                 parameters.Add($"with_cast={request.WithCast}");
 
+            if (!string.IsNullOrWhiteSpace(request.WithPeople))
+                parameters.Add($"with_people={request.WithPeople}");
+
             if (!string.IsNullOrWhiteSpace(request.WithCrew))
                 parameters.Add($"with_crew={request.WithCrew}");
 

@@ -42,6 +42,22 @@ builder.Services.AddHttpClient<ISearchClient, SearchClient>(
     }
 );
 
+builder.Services.AddHttpClient<IPersonClient, PersonClient>((serviceProvider, client) =>
+{
+    var config = serviceProvider.GetRequiredService<IConfiguration>();
+    client.BaseAddress = new Uri($"{tmdbBaseUrl}person/");
+    client.DefaultRequestHeaders.Authorization =
+        new AuthenticationHeaderValue("Bearer", config["BEARER_TOKEN"] ?? "");
+});
+
+builder.Services.AddHttpClient<ICollectionClient, CollectionClient>((serviceProvider, client) =>
+{
+    var config = serviceProvider.GetRequiredService<IConfiguration>();
+    client.BaseAddress = new Uri($"{tmdbBaseUrl}collection/");
+    client.DefaultRequestHeaders.Authorization =
+        new AuthenticationHeaderValue("Bearer", config["BEARER_TOKEN"] ?? "");
+});
+
 // TrendingClient - for trending movies and TV shows
 builder.Services.AddHttpClient<ITrendingClient, TrendingClient>((serviceProvider, client) =>
 {

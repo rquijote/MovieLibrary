@@ -1,6 +1,6 @@
 export interface ActionToastMessage {
   id: number;
-  kind: 'success' | 'error';
+  kind: 'success' | 'error' | 'pending';
   message: string;
 }
 
@@ -17,7 +17,7 @@ export function ActionToast({ toast, durationMs = 4000, onDismiss }: ActionToast
 
   return (
     <div className="action-toast-container" key={toast.id} role="status" aria-live="polite">
-      <div className={toast.kind === 'error' ? 'action-toast action-toast-error' : 'action-toast action-toast-success'}>
+      <div className={`action-toast action-toast-${toast.kind}`}>
         <p>{toast.message}</p>
         <div
           className="action-toast-progress" // This class defines the animation counting down. It is full width initially, but scales x from 1 to 0.

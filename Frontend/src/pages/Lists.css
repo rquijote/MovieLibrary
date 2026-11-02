@@ -1,0 +1,254 @@
+.lists-page {
+  width: 100%;
+  max-width: none;
+  padding-block: 1rem 2rem;
+}
+
+.lists-back {
+  display: inline-block;
+  margin-bottom: 1.5rem;
+  color: #94a3b8;
+  font-size: 0.875rem;
+  text-decoration: none;
+}
+
+.lists-back:hover {
+  color: #f8fafc;
+}
+
+.lists-heading {
+  margin-bottom: 2rem;
+}
+
+.lists-eyebrow {
+  margin-bottom: 0.65rem;
+  color: #94a3b8;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.lists-heading h1 {
+  margin-bottom: 0.75rem;
+  color: #f1f5f9;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 400;
+  overflow-wrap: anywhere;
+}
+
+.lists-heading > p:last-child {
+  max-width: 46rem;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.create-list-page.lists-page .list-create-form {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.list-editor-fields {
+  min-width: 0;
+  border: 0;
+  padding: 0;
+}
+
+.list-editor-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.4fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.list-editor-panel {
+  min-width: 0;
+  padding: clamp(1rem, 2.5vw, 1.75rem);
+  border: 1px solid #263449;
+  border-radius: 0.75rem;
+  background: #111827;
+}
+
+.list-editor-panel h2 {
+  margin-bottom: 1.25rem;
+  color: #e2e8f0;
+  font-size: 1.15rem;
+  font-weight: 500;
+}
+
+.list-editor-panel label {
+  display: block;
+  margin-bottom: 0.55rem;
+  color: #cbd5e1;
+  font-size: 0.875rem;
+}
+
+.create-list-page.lists-page .list-create-form :is(input, textarea) {
+  width: 100%;
+  min-width: 0;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid #334155;
+  border-radius: 0.5rem;
+  background: #0f172a;
+  color: #f1f5f9;
+  font: inherit;
+}
+
+.list-editor-panel > input {
+  margin-bottom: 1.5rem;
+}
+
+.lists-page :is(input, textarea, button, a):focus-visible {
+  outline: 2px solid #94a3b8;
+  outline-offset: 3px;
+}
+
+.list-editor-note {
+  margin-top: 1rem;
+  color: #94a3b8;
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
+.list-section-heading,
+.lists-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.list-count {
+  color: #94a3b8;
+  font-size: 0.8rem;
+}
+
+.lists-page .create-list-movie-dropdown {
+  max-height: 22rem;
+  border-color: #334155;
+  background: #111827;
+  box-shadow: 0 1rem 2rem rgb(0 0 0 / 35%);
+}
+
+.lists-page .create-list-movie-option {
+  gap: 0.85rem;
+  padding: 0.75rem;
+  border-color: #263449;
+  background: #111827;
+  color: #e2e8f0;
+}
+
+.lists-page .create-list-movie-option:hover {
+  background: #1e293b;
+}
+
+.create-list-movie-option img {
+  width: 36px;
+  height: 54px;
+  border-radius: 0.25rem;
+  object-fit: cover;
+}
+
+.create-list-movie-option > span {
+  flex: 1;
+  min-width: 0;
+}
+
+.create-list-movie-option :is(strong, small) {
+  display: block;
+}
+
+.create-list-movie-option strong {
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+
+.create-list-movie-option small {
+  color: #94a3b8;
+  margin-top: 0.25rem;
+}
+
+.lists-page .selected-movies-list {
+  margin-top: 1.25rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.lists-page .selected-movie-row {
+  padding: 0.65rem;
+  border-color: #263449;
+  background: #0f172a;
+}
+
+.lists-page .selected-movie-row img {
+  width: 42px;
+  height: 63px;
+}
+
+.lists-page .selected-movie-main h3 {
+  font-size: 0.95rem;
+  overflow-wrap: anywhere;
+}
+
+.lists-empty {
+  margin-top: 1.25rem;
+  padding: 2.5rem 1rem;
+  border: 1px dashed #334155;
+  border-radius: 0.6rem;
+  color: #94a3b8;
+  text-align: center;
+  line-height: 1.7;
+}
+
+.lists-empty strong {
+  display: block;
+  margin-bottom: 0.4rem;
+  color: #cbd5e1;
+  font-weight: 500;
+}
+
+.lists-page .list-create-actions {
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #263449;
+}
+
+.lists-error,
+.lists-search-error {
+  margin-block: 1rem;
+  padding: 1rem;
+  border: 1px solid #7f3b46;
+  border-radius: 0.5rem;
+  background: #281b25;
+  color: #fecdd3;
+  line-height: 1.6;
+}
+
+.lists-page :is(button:disabled, fieldset:disabled input, fieldset:disabled textarea) {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.lists-toolbar {
+  margin-bottom: 1.5rem;
+  padding-block: 1rem;
+  border-block: 1px solid #263449;
+}
+
+.lists-toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+@media (max-width: 760px) {
+  .list-editor-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

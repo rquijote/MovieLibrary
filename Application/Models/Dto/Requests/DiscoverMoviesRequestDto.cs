@@ -28,6 +28,9 @@ namespace Application.Models.Dto.Requests
         [JsonPropertyName("with_cast")]
         public string? WithCast { get; init; }
 
+        [JsonPropertyName("with_people")]
+        public string? WithPeople { get; init; }
+
         [JsonPropertyName("with_crew")]
         public string? WithCrew { get; init; }
 
