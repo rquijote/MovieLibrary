@@ -585,6 +585,136 @@ button {
   gap: 0.4rem;
 }
 
+.header-account-controls,
+.account-menu {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.account-dialog {
+  width: min(28rem, calc(100% - 2rem));
+  margin: auto;
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
+  padding: 0;
+  border: 1px solid #334155;
+  border-radius: 1rem;
+  background: #111827;
+  color: #e2e8f0;
+}
+
+.account-dialog::backdrop {
+  background: rgb(2 6 23 / 75%);
+  backdrop-filter: blur(4px);
+}
+
+.account-dialog-content {
+  padding: 1.5rem;
+}
+
+.account-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.account-dialog-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.account-dialog .account-menu {
+  margin-top: 1.25rem;
+}
+
+.profile-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  object-fit: cover;
+}
+
+.account-menu {
+  position: relative;
+  flex-wrap: wrap;
+}
+
+.account-name {
+  max-width: 9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #cbd5e1;
+  font-size: 0.875rem;
+}
+
+.account-login-button {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #334155;
+  border-radius: 0.5rem;
+  background: #111827;
+  color: #e2e8f0;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.account-login-button:disabled,
+.account-cancel-button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.account-cancel-button {
+  padding: 0.5rem 0.25rem;
+  border: 0;
+  background: none;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.account-cancel-button:hover {
+  color: #e2e8f0;
+}
+
+.account-menu-hint {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 0.85rem;
+}
+
+.account-menu-hint a {
+  color: #e2e8f0;
+}
+
+.account-menu-error {
+  flex-basis: 100%;
+  max-width: 24rem;
+  color: #fecdd3;
+  font-size: 0.875rem;
+}
+
+.account-required {
+  padding-block: 2rem;
+}
+
+.account-required .account-menu {
+  margin-top: 1.5rem;
+}
+
+.session-error {
+  padding: 1rem;
+  background: #281b25;
+  color: #fecdd3;
+}
+
+.session-error button {
+  margin-left: 1rem;
+}
+
 .search-toggle {
   width: 2rem;
   height: 2rem;
@@ -1183,8 +1313,13 @@ button {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  border: 1px solid #cbd5e1;
-  background: #e2e8f0;
+  border: 1px solid #475569;
+  background: linear-gradient(135deg, #334155, #0f172a);
+  color: #e2e8f0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0 3px rgb(148 163 184 / 8%);
   position: relative;
   overflow: hidden;
   flex-shrink: 0;
@@ -1192,31 +1327,25 @@ button {
   cursor: pointer;
 }
 
+.profile-placeholder:hover {
+  border-color: #94a3b8;
+  background: linear-gradient(135deg, #475569, #1e293b);
+}
+
 .profile-placeholder:focus-visible {
   outline: 2px solid #cbd5e1;
   outline-offset: 3px;
 }
 
-.profile-placeholder-head {
-  position: absolute;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: #64748b;
-  top: 8px;
-  left: 50%;
-  transform: translateX(-50%);
+.profile-avatar-icon {
+  width: 24px;
+  height: 24px;
 }
 
-.profile-placeholder-body {
-  position: absolute;
-  width: 22px;
-  height: 14px;
-  border-radius: 14px 14px 0 0;
-  background: #64748b;
-  bottom: 6px;
-  left: 50%;
-  transform: translateX(-50%);
+.profile-initial {
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1;
 }
 
 .page-content {

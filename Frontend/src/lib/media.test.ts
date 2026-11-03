@@ -8,6 +8,7 @@ import {
   fetchAllMediaPages,
   getAccessiblePageCount,
   filterMediaWithPoster,
+  prioritizeMediaWithPoster,
   paginateFilteredMedia,
 } from './media';
 import type { MovieDto, TvShowDto } from '../types/media';
@@ -98,6 +99,14 @@ describe('expanded media filters', () => {
     const showWithPoster = { ...show, id: 4, poster_path: '/show-poster.jpg' };
     expect(filterMediaWithPoster([movie, show, movieWithPoster, showWithPoster]))
       .toEqual([movieWithPoster, showWithPoster]);
+  });
+
+  it('prioritizes poster artwork without dropping or reordering titles within each group', () => {
+    const firstPoster = { ...movie, id: 3, poster_path: '/first.jpg' };
+    const secondPoster = { ...show, id: 4, poster_path: '/second.jpg' };
+    const noPoster = { ...movie, id: 5 };
+    expect(prioritizeMediaWithPoster([movie, firstPoster, noPoster, secondPoster]))
+      .toEqual([firstPoster, secondPoster, movie, noPoster]);
   });
 
   it('fills filtered pages from sparse matches across multiple feed pages', async () => {

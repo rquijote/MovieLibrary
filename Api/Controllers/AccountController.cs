@@ -8,6 +8,7 @@ namespace Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [TmdbAccountRequired]
     public class AccountController(IAccountClient accountClient) : ControllerBase
     {
         private readonly IAccountClient _accountClient = accountClient;

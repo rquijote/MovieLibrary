@@ -4,7 +4,16 @@ import type { AccountListsResponse, AccountStatesResponse, ListDetailsResponse, 
 import { cacheContent, cacheLimit, readOfflineData, writeOfflineData } from './offlineStore';
 import { tmdbDetailsCacheProjection } from './tmdbCache';
 
-const origin = 'https://movie-library.test';
+const origin = 'https://movie-library.test|account:1';
+const identity = vi.hoisted(() => ({ id: 1 as number | null }));
+vi.mock('./session', () => ({
+  getAccountId: () => identity.id,
+  assertAccount: (id: number | null) => {
+    if (id !== identity.id) throw new Error('The signed-in account changed.');
+  },
+  sessionHeaders: () => identity.id === null ? {} : { 'X-TMDB-Account-Id': String(identity.id), 'X-CSRF-TOKEN': 'test-csrf' },
+  expireSession: () => { identity.id = null; },
+}));
 let online = true;
 let api: typeof import('./api');
 const movie = {
@@ -22,6 +31,7 @@ beforeEach(async () => {
   vi.restoreAllMocks();
   vi.resetModules();
   online = true;
+  identity.id = 1;
   vi.stubGlobal('indexedDB', new IDBFactory());
   let lock = Promise.resolve();
   vi.stubGlobal('navigator', {
@@ -34,12 +44,89 @@ beforeEach(async () => {
       },
     },
   });
-  vi.stubGlobal('window', { location: { origin }, addEventListener: vi.fn(), setInterval: vi.fn() });
+  vi.stubGlobal('window', { location: { origin: 'https://movie-library.test' }, addEventListener: vi.fn(), setInterval: vi.fn() });
   vi.stubGlobal('fetch', vi.fn());
   api = await import('./api');
 });
 
 describe('persistent offline reads', () => {
+  it('never returns another account snapshot or projects its pending edits', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce(json({ page: 1, results: [movie] }));
+    await api.apiGet('/api/Account/watchlist/movies');
+    online = false;
+    await api.apiPost('/api/Account/watchlist', { media_id: 43, media_type: 'movie', watchlist: true });
+    identity.id = 2;
+    await expect(api.apiGet('/api/Account/watchlist/movies')).rejects.toThrow('has not been saved');
+    expect(await api.syncOfflineChanges()).toEqual(new Map());
+    expect((await readOfflineData(origin)).queue).toHaveLength(1);
+    identity.id = 1;
+    await expect(api.apiGet('/api/Account/watchlist/movies')).resolves.toMatchObject({
+      results: expect.arrayContaining([expect.objectContaining({ id: 42 })]),
+    });
+  });
+
+  it('does not send another account queue after a cookie/session mismatch', async () => {
+    online = false;
+    await api.apiPost('/api/Account/favorite', { media_id: 42, media_type: 'movie', favorite: true });
+    online = true;
+    vi.mocked(fetch).mockResolvedValueOnce(json({}, 403));
+    await api.syncOfflineChanges();
+    expect(identity.id).toBeNull();
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(fetch).mock.calls[0][1]).toMatchObject({
+      credentials: 'include', headers: expect.objectContaining({ 'X-TMDB-Account-Id': '1' }),
+    });
+    expect((await readOfflineData(origin)).queue).toHaveLength(1);
+  });
+
+  it('blocks anonymous private reads and writes before fetching or queuing', async () => {
+    identity.id = null;
+    await expect(api.apiGet('/api/Lists/42/details')).rejects.toThrow('Log in with TMDB');
+    await expect(api.apiPost('/api/Lists', { name: 'Private' })).rejects.toThrow('Log in with TMDB');
+    await api.syncOfflineChanges();
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it('clears only the logging-out account cache and edits', async () => {
+    online = false;
+    await api.apiPost('/api/Lists', { name: 'Account one' });
+    identity.id = 2;
+    await api.apiPost('/api/Lists', { name: 'Account two' });
+    await api.clearAccountOfflineData(1);
+    expect((await readOfflineData(origin)).queue).toEqual([]);
+    expect((await readOfflineData('https://movie-library.test|account:2')).queue).toHaveLength(1);
+  });
+
+  it('quarantines legacy unowned snapshots and queues', async () => {
+    const data = await readOfflineData('https://movie-library.test');
+    cacheContent(data, '/api/Account/lists?page=1', { results: [{ id: 22, name: 'Old shared list' }] });
+    data.queue.push({
+      id: 'legacy', method: 'DELETE', path: '/api/Lists/22', state: 'pending',
+    });
+    await writeOfflineData('https://movie-library.test', data);
+    await api.syncOfflineChanges();
+    expect(fetch).not.toHaveBeenCalled();
+    online = false;
+    await expect(api.apiGet('/api/Account/lists?page=1')).rejects.toThrow('has not been saved');
+  });
+
+  it('rejects a private response if the local account changed while it was in flight', async () => {
+    let finish: ((response: Response) => void) | undefined;
+    let started: (() => void) | undefined;
+    const requestStarted = new Promise<void>((resolve) => { started = resolve; });
+    vi.mocked(fetch).mockImplementationOnce(() => {
+      started?.();
+      return new Promise<Response>((resolve) => { finish = resolve; });
+    });
+    const pending = api.apiGet('/api/Account/lists?page=1');
+    const rejected = expect(pending).rejects.toThrow('account changed');
+    await requestStarted;
+    identity.id = 2;
+    finish?.(json({ results: [{ id: 22, name: 'Private account one' }] }));
+    await rejected;
+    expect((await readOfflineData('https://movie-library.test|account:2')).cache).toEqual({});
+  });
+
   it('returns extended details online and persists the compact core for offline refresh', async () => {
     const extended = {
       ...movie, credits: { cast: [{ id: 8, name: 'Actor' }] },
@@ -196,7 +283,9 @@ describe('durable edits and replay', () => {
     await api.syncOfflineChanges();
     expect(fetch).toHaveBeenCalledTimes(1);
     expect((await readOfflineData(origin)).queue).toHaveLength(2);
-    expect(api.getOfflineStatus().error).toContain('(401)');
+    expect(api.getOfflineStatus().error).toContain('session changed or expired');
+    expect(identity.id).toBeNull();
+    identity.id = 1;
     await api.discardPendingChanges();
     expect((await readOfflineData(origin)).queue).toEqual([]);
   });

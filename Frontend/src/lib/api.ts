@@ -4,9 +4,13 @@ import {
   cacheContent, readOfflineData, resolveListPath, withOfflineLock, writeOfflineData,
 } from './offlineStore.ts';
 import type { OfflineData, PendingMutation } from './offlineStore.ts';
+import { assertAccount, expireSession, getAccountId, sessionHeaders } from './session';
 
 const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, '') ?? '';
-const scope = apiBaseUrl || window.location.origin;
+const storageScope = (accountId: number | null) =>
+  `${apiBaseUrl || window.location.origin}|${accountId === null ? 'public' : `account:${accountId}`}`;
+const privatePath = (path: string) => /^\/api\/(Account|Lists)(\/|$)/.test(path)
+  || /^\/api\/(Movie|TvShow)\/\d+\/(account-states|rating)(\?|$)/.test(path);
 const queuedMessage = 'Saved on this device. Pending synchronization; not yet saved to the server.';
 let status = {
   offline: !navigator.onLine, cached: false, pending: 0, syncing: false,
@@ -29,6 +33,9 @@ export function reportOfflineError(error: unknown) {
 }
 
 export async function apiGet<T>(path: string, cacheProjection?: (content: unknown) => unknown): Promise<T> {
+  const accountId = getAccountId();
+  if (privatePath(path) && accountId === null) throw new Error('Log in with TMDB to access your library.');
+  const scope = storageScope(accountId);
   let data: OfflineData | undefined;
   try {
     data = await withOfflineLock(scope, () => readOfflineData(scope));
@@ -52,10 +59,12 @@ export async function apiGet<T>(path: string, cacheProjection?: (content: unknow
   try {
     if (!navigator.onLine) throw new TypeError('You are offline.');
     response = await fetch(`${apiBaseUrl}${resolvedPath}`, {
-      ...buildJsonRequest(), signal: AbortSignal.timeout(8000), cache: 'no-store',
+      ...buildJsonRequest({}, accountId), signal: AbortSignal.timeout(8000), cache: 'no-store',
     });
+    assertAccount(accountId);
   } catch (error) {
     if (!(error instanceof TypeError) && !(error instanceof DOMException && error.name === 'TimeoutError')) throw error;
+    assertAccount(accountId);
     updateStatus({ offline: true });
     if (cached !== undefined) {
       updateStatus({ cached: true });
@@ -65,6 +74,7 @@ export async function apiGet<T>(path: string, cacheProjection?: (content: unknow
   }
   // Never mask authorization failures, missing records, or invalid requests with stale content.
   if (!response.ok) {
+    if (response.status === 401 || (response.status === 403 && privatePath(path))) expireSession();
     if (response.status >= 500 && cached !== undefined) {
       updateStatus({ offline: true, cached: true });
       return cached as T;
@@ -72,10 +82,12 @@ export async function apiGet<T>(path: string, cacheProjection?: (content: unknow
     throw await requestError(response, path);
   }
   const content: unknown = await response.json();
+  assertAccount(accountId);
   updateStatus({ offline: false });
   try {
     return await withOfflineLock(scope, async () => {
       const current = await readOfflineData(scope);
+      assertAccount(accountId);
       if (current.revision !== data?.revision) {
         return cacheProjection ? content as T : (projectedContent(current, resolvedPath) ?? content) as T;
       }
@@ -84,6 +96,7 @@ export async function apiGet<T>(path: string, cacheProjection?: (content: unknow
       return cacheProjection ? content as T : (projectedContent(current, resolvedPath) ?? content) as T;
     });
   } catch (error) {
+    assertAccount(accountId);
     reportOfflineError(error);
     return content as T;
   }
@@ -139,8 +152,12 @@ export async function apiUpdateList(
 }
 
 async function mutateMany(requests: MutationRequest[]): Promise<MutationResult[]> {
+  const accountId = getAccountId();
+  if (accountId === null) throw new Error('Log in with TMDB before changing your library.');
+  const scope = storageScope(accountId);
   const mutations = await withOfflineLock(scope, async () => {
     const data = await readOfflineData(scope);
+    assertAccount(accountId);
     if (data.queue.length + requests.length > 100) {
       throw new Error('Cannot save these changes: the queue holds at most 100 edits. Synchronize before making more changes.');
     }
@@ -153,7 +170,8 @@ async function mutateMany(requests: MutationRequest[]): Promise<MutationResult[]
     updateStatus({ pending: data.queue.length, synced: false });
     return mutations;
   });
-  const results = navigator.onLine ? await syncOfflineChanges() : new Map<string, StatusDto>();
+  const results = navigator.onLine ? await syncOfflineChanges(false, accountId) : new Map<string, StatusDto>();
+  assertAccount(accountId);
   return withOfflineLock(scope, async () => {
     const data = await readOfflineData(scope);
     return mutations.map(({ id, localListId }): MutationResult => {
@@ -170,7 +188,13 @@ async function mutateMany(requests: MutationRequest[]): Promise<MutationResult[]
   });
 }
 
-export async function syncOfflineChanges(retry = false): Promise<Map<string, StatusDto>> {
+export async function syncOfflineChanges(retry = false, accountId = getAccountId()): Promise<Map<string, StatusDto>> {
+  assertAccount(accountId);
+  if (accountId === null) {
+    updateStatus({ pending: 0, syncing: false });
+    return new Map();
+  }
+  const scope = storageScope(accountId);
   return withOfflineLock(scope, async () => {
     const data = await readOfflineData(scope);
     const results = new Map<string, StatusDto>();
@@ -188,6 +212,7 @@ export async function syncOfflineChanges(retry = false): Promise<Map<string, Sta
         }
       }
       while (navigator.onLine && data.queue.length > 0) {
+        assertAccount(accountId);
         const mutation = data.queue[0];
         if ((mutation.state === 'sending' || mutation.state === 'uncertain') && safeToReplay(mutation)) {
           mutation.state = 'pending';
@@ -212,10 +237,11 @@ export async function syncOfflineChanges(retry = false): Promise<Map<string, Sta
             ...buildJsonRequest({
               method: mutation.method,
               ...(mutation.body === undefined ? {} : { body: JSON.stringify(mutation.body) }),
-            }),
+            }, accountId),
             signal: AbortSignal.timeout(10000),
           });
         } catch (error) {
+          assertAccount(accountId);
           const safe = safeToReplay(mutation);
           mutation.state = safe ? 'pending' : 'uncertain';
           mutation.error = safe ? 'Connection unavailable. Pending edits will retry when the connection returns.'
@@ -223,6 +249,15 @@ export async function syncOfflineChanges(retry = false): Promise<Map<string, Sta
           await writeOfflineData(scope, data);
           updateStatus({ offline: true, error: mutation.error, needsConfirmation: !safe });
           console.warn(mutation.error, error);
+          break;
+        }
+        assertAccount(accountId);
+        if (response.status === 401 || response.status === 403) {
+          mutation.state = 'pending';
+          mutation.error = 'Your TMDB session changed or expired. Log in to the same account before synchronizing.';
+          await writeOfflineData(scope, data);
+          updateStatus({ error: mutation.error });
+          expireSession();
           break;
         }
         let result: StatusDto | undefined;
@@ -282,12 +317,27 @@ export async function syncOfflineChanges(retry = false): Promise<Map<string, Sta
 }
 
 export async function discardPendingChanges() {
+  const scope = storageScope(getAccountId());
   await withOfflineLock(scope, async () => {
     const data = await readOfflineData(scope);
     data.queue = [];
     await writeOfflineData(scope, data);
     updateStatus({ pending: 0, error: null, needsConfirmation: false });
   });
+}
+
+export async function clearAccountOfflineData(accountId: number | null) {
+  if (accountId === null) return;
+  const scope = storageScope(accountId);
+  await withOfflineLock(scope, async () => {
+    const data = await readOfflineData(scope);
+    data.cache = {};
+    data.queue = [];
+    data.listIds = {};
+    data.completed = {};
+    await writeOfflineData(scope, data);
+  });
+  updateStatus({ pending: 0, cached: false, synced: false, error: null });
 }
 
 export async function initializeOfflineSupport() {
@@ -324,11 +374,13 @@ async function requestError(response: Response, path: string): Promise<Error> {
   return fallback;
 }
 
-function buildJsonRequest(init: RequestInit = {}): RequestInit {
+function buildJsonRequest(init: RequestInit = {}, accountId = getAccountId()): RequestInit {
   return {
     ...init,
+    credentials: 'include',
     headers: {
       Accept: 'application/json',
+      ...sessionHeaders(accountId),
       ...(init.body ? { 'Content-Type': 'application/json' } : {}),
       ...(init.headers ?? {}),
     },

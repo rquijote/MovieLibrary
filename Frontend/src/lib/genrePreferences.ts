@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { movieGenres, tvGenres } from './genres';
+import { getAccountId } from './session';
 
 export const MAX_GENRE_SELECTIONS = 6;
 export const genrePreferencesStorageKey = 'movie-library-genre-preferences';
@@ -15,6 +16,7 @@ const defaultPreferences: GenrePreferences = {
 };
 
 const preferencesChangedEvent = 'movie-library:genre-preferences-changed';
+const storageKey = () => `${genrePreferencesStorageKey}:${getAccountId() ?? 'public'}`;
 
 function sanitizeIds(value: unknown, validIds: Set<number>, fallback: number[]): number[] {
   if (!Array.isArray(value)) {
@@ -27,7 +29,7 @@ function sanitizeIds(value: unknown, validIds: Set<number>, fallback: number[]):
 
 export function readGenrePreferences(): GenrePreferences {
   try {
-    const stored = window.localStorage.getItem(genrePreferencesStorageKey);
+    const stored = window.localStorage.getItem(storageKey());
     if (!stored) {
       return { movies: [...defaultPreferences.movies], tv: [...defaultPreferences.tv] };
     }
@@ -53,7 +55,7 @@ export function saveGenrePreferences(preferences: GenrePreferences): void {
     tv: sanitizeIds(preferences.tv, new Set(tvGenres.map(({ id }) => id)), []),
   };
 
-  window.localStorage.setItem(genrePreferencesStorageKey, JSON.stringify(sanitized));
+  window.localStorage.setItem(storageKey(), JSON.stringify(sanitized));
   window.dispatchEvent(new Event(preferencesChangedEvent));
 }
 

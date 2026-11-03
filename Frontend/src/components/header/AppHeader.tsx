@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { GenrePreferencesDialog } from './GenrePreferencesDialog';
 import { HeaderSearch } from './HeaderSearch';
+import { AccountMenu } from './AccountMenu';
 
 type DropdownName = 'movies' | 'tvshows' | 'library';
 
@@ -133,19 +134,12 @@ export function AppHeader() {
           </div>
           <HeaderSearch />
         </nav>
-        <button
-          className="profile-placeholder"
-          type="button"
-          aria-label="Edit genre preferences"
-          title="Edit genre preferences"
-          onClick={() => {
+        <div className="header-account-controls">
+          <AccountMenu profile onPreferences={() => {
             closeMenu();
             setIsGenrePreferencesOpen(true);
-          }}
-        >
-          <span className="profile-placeholder-head" />
-          <span className="profile-placeholder-body" />
-        </button>
+          }} />
+        </div>
       </div>
       {isGenrePreferencesOpen ? <GenrePreferencesDialog onClose={() => setIsGenrePreferencesOpen(false)} /> : null}
     </header>

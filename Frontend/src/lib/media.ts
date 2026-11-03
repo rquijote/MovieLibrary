@@ -29,6 +29,12 @@ export function filterMediaWithPoster<TItem extends MediaItem>(items: readonly T
   return items.filter((item) => Boolean(item.poster_path));
 }
 
+export function prioritizeMediaWithPoster<TItem extends MediaItem>(items: readonly TItem[]): TItem[] {
+  const withPoster = items.filter((item) => Boolean(item.poster_path));
+  const withoutPoster = items.filter((item) => !item.poster_path);
+  return [...withPoster, ...withoutPoster];
+}
+
 type YearFilter = number | { min?: number; max?: number };
 
 export function getMediaYearBounds(items: MediaItem[]): { min: number; max: number } | undefined {

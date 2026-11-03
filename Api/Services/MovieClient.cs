@@ -4,7 +4,7 @@ using Application.Models.Dto.Responses;
 
 namespace Api.Services
 {
-    public sealed class MovieClient(HttpClient http) : IMovieClient
+    public sealed class MovieClient(HttpClient http, CurrentTmdbUser? user = null) : IMovieClient
     {
         private readonly HttpClient _http = http;
 
@@ -48,7 +48,7 @@ namespace Api.Services
 
         public async Task<AccountStatesDto> GetAccountStateMovie(int id)
         {
-            var response = await _http.GetAsync($"{id}/account_states");
+            var response = await _http.GetAsync($"{id}/account_states?{SessionQuery}");
 
             if (!response.IsSuccessStatusCode || response.StatusCode == HttpStatusCode.NotFound)
             {
@@ -65,7 +65,8 @@ namespace Api.Services
         public async Task<StatusDto> AddRatingMovie(int id, double rating)
         {
             var body = new { value = rating };
-            var response = await _http.PostAsJsonAsync($"{id}/rating", body);
+            var response = await _http.PostAsJsonAsync($"{id}/rating?{SessionQuery}", body);
+            response.EnsureSuccessStatusCode();
 
             var result = await response.Content.ReadFromJsonAsync<StatusDto>();
             return result ?? throw new InvalidOperationException("Failed to deserialize status response.");
@@ -73,11 +74,13 @@ namespace Api.Services
 
         public async Task<StatusDto> DeleteRatingMovie(int id)
         {
-            var response = await _http.DeleteAsync($"{id}/rating");
+            var response = await _http.DeleteAsync($"{id}/rating?{SessionQuery}");
+            response.EnsureSuccessStatusCode();
 
             var result = await response.Content.ReadFromJsonAsync<StatusDto>();
             return result ?? throw new InvalidOperationException("Failed to deserialize status response.");
         }
 
+        private string SessionQuery => user?.SessionQuery ?? throw new UnauthorizedAccessException("TMDB authentication required.");
     }
 }

@@ -319,7 +319,13 @@ export function ExpandedMediaListPage() {
           <LoadingState variant="grid" label="Loading titles" />
         </div>
       ) : items.length === 0 ? <p>No media matches these filters. Try another genre or year.</p>
-        : <MediaGrid items={items} mediaType={parsedMediaType} showYearOnly />}
+        : <MediaGrid
+          items={items}
+          mediaType={parsedMediaType}
+          showYearOnly
+          preferImages={Boolean(relatedCategory)
+            || (parsedCategory !== null && parsedCategory !== 'watchlist' && parsedCategory !== 'favorite')}
+        />}
     </section>
   );
 }

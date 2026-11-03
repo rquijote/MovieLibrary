@@ -4,6 +4,8 @@ import type { AccountStatesResponse } from '../../types/media';
 import { ActionToast } from './ActionToast';
 import { ListPickerModal } from './ListPickerModal';
 import { RatingControl } from './RatingControl';
+import { useSession } from '../../lib/session';
+import { AccountDialog } from '../header/AccountDialog';
 
 interface MediaActionsPanelProps {
   mediaId: number;
@@ -12,12 +14,14 @@ interface MediaActionsPanelProps {
 }
 
 export function MediaActionsPanel({ mediaId, mediaType, showListActions = true }: MediaActionsPanelProps) {
+  const session = useSession();
   const [ratingOutOf5, setRatingOutOf5] = useState(0);
   const [isWatchlisted, setIsWatchlisted] = useState(false);
   const [isWatchlistHovered, setIsWatchlistHovered] = useState(false);
   const [isFavorited, setIsFavorited] = useState(false);
   const [isFavoriteHovered, setIsFavoriteHovered] = useState(false);
   const [isListPickerOpen, setIsListPickerOpen] = useState(false);
+  const [loginReason, setLoginReason] = useState<string | null>(null);
   const [toast, setToast] = useState<{ id: number; kind: 'success' | 'error' | 'pending'; message: string } | null>(null);
   const toastIdRef = useRef(0);
   const ratingEndpointPrefix = mediaType === 'movie' ? 'Movie' : 'TvShow';
@@ -29,6 +33,7 @@ export function MediaActionsPanel({ mediaId, mediaType, showListActions = true }
 
   useEffect(() => {
     let isDisposed = false;
+    if (!session.authenticated) return;
 
     const loadAccountState = async () => {
       try {
@@ -55,9 +60,13 @@ export function MediaActionsPanel({ mediaId, mediaType, showListActions = true }
     return () => {
       isDisposed = true;
     };
-  }, [mediaId, mediaType, ratingEndpointPrefix]);
+  }, [mediaId, mediaType, ratingEndpointPrefix, session.authenticated, session.account?.id]);
 
   const handleWatchlistToggle = async () => {
+    if (!session.authenticated) {
+      setLoginReason('Log in to save this title to your watchlist.');
+      return;
+    }
     const nextState = !isWatchlisted;
 
     try {
@@ -77,6 +86,10 @@ export function MediaActionsPanel({ mediaId, mediaType, showListActions = true }
   };
 
   const handleFavorite = async (add: boolean) => {
+    if (!session.authenticated) {
+      setLoginReason('Log in to save this title to your favourites.');
+      return;
+    }
     try {
       const result = await apiPost('/api/Account/favorite', {
         media_type: mediaType,
@@ -93,6 +106,10 @@ export function MediaActionsPanel({ mediaId, mediaType, showListActions = true }
   const watchlistLabel = isWatchlisted && isWatchlistHovered ? 'Remove' : 'Watchlist';
   const favoriteLabel = isFavorited && isFavoriteHovered ? 'Remove' : 'Favorite';
   const openListPicker = () => {
+    if (!session.authenticated) {
+      setLoginReason('Log in to add this title to your personal lists.');
+      return;
+    }
     setIsListPickerOpen(true);
   };
 
@@ -174,6 +191,10 @@ export function MediaActionsPanel({ mediaId, mediaType, showListActions = true }
       <RatingControl
         ratingOutOf5={ratingOutOf5}
         onSetRating={async (nextRatingOutOf5) => {
+          if (!session.authenticated) {
+            setLoginReason('Log in to rate this title.');
+            return;
+          }
           try {
             const result = await apiPost(
               `/api/${ratingEndpointPrefix}/${mediaId}/rating`,
@@ -188,6 +209,10 @@ export function MediaActionsPanel({ mediaId, mediaType, showListActions = true }
           }
         }}
         onDeleteRating={async () => {
+          if (!session.authenticated) {
+            setLoginReason('Log in to change your rating.');
+            return;
+          }
           try {
             const result = await apiDelete(`/api/${ratingEndpointPrefix}/${mediaId}/rating`);
             setRatingOutOf5(0);
@@ -198,13 +223,15 @@ export function MediaActionsPanel({ mediaId, mediaType, showListActions = true }
         }}
       />
 
-      <ListPickerModal
+      {loginReason ? <AccountDialog reason={loginReason} onClose={() => setLoginReason(null)} /> : null}
+
+      {session.authenticated ? <ListPickerModal
         isOpen={showListActions && isListPickerOpen}
         mediaId={mediaId}
         mediaType={mediaType}
         onNotify={showToast}
         onClose={() => setIsListPickerOpen(false)}
-      />
+      /> : null}
 
       <ActionToast
         toast={toast}

@@ -3,7 +3,9 @@ import { Link } from 'react-router-dom';
 import { MediaRow } from '../components/layout/MediaRow';
 import { apiGet } from '../lib/api';
 import { movieGenres, tvGenres } from '../lib/genres';
-import { filterMediaWithPoster, getImageUrl, getMediaDate, getMediaTitle, handleMediaImageError } from '../lib/media';
+import {
+  getImageUrl, getMediaDate, getMediaTitle, handleMediaImageError, prioritizeMediaWithPoster,
+} from '../lib/media';
 import type { MediaItem, MovieDto, MovieListResponse, TvShowDto, TvShowListResponse } from '../types/media';
 import './HomePage.css';
 
@@ -32,7 +34,7 @@ function getTrendingMovies(): Promise<HomeFeed<MovieDto>> {
   }
 
   const request = apiGet<MovieListResponse>('/api/Trending/movies?timeWindow=week')
-    .then(({ results }) => ({ items: filterMediaWithPoster(results), error: false }), () => ({ items: [], error: true }))
+    .then(({ results }) => ({ items: prioritizeMediaWithPoster(results), error: false }), () => ({ items: [], error: true }))
     .then((feed) => {
       cachedMovieFeed = feed;
       return feed;
@@ -56,7 +58,7 @@ function getTrendingTv(): Promise<HomeFeed<TvShowDto>> {
   }
 
   const request = apiGet<TvShowListResponse>('/api/Trending/tv?timeWindow=week')
-    .then(({ results }) => ({ items: filterMediaWithPoster(results), error: false }), () => ({ items: [], error: true }))
+    .then(({ results }) => ({ items: prioritizeMediaWithPoster(results), error: false }), () => ({ items: [], error: true }))
     .then((feed) => {
       cachedTvFeed = feed;
       return feed;
@@ -103,7 +105,10 @@ function interleaveTrendingContent(movies: MovieDto[], tvShows: TvShowDto[]): Fe
     }
   }
 
-  return items;
+  return [
+    ...items.filter(({ item }) => Boolean(item.poster_path)),
+    ...items.filter(({ item }) => !item.poster_path),
+  ];
 }
 
 export function HomePage() {
@@ -262,7 +267,7 @@ export function HomePage() {
             <button type="button" className="home-retry" onClick={() => retryLoading('movies')}>Try again</button>
           </div>
         ) : movies.length > 0 ? (
-          <MediaRow title="Trending movies" items={movies.slice(0, 6)} mediaType="movies" category="trending" />
+          <MediaRow title="Trending movies" items={movies} mediaType="movies" category="trending" preferImages fillRow />
         ) : (
           <p className="home-feed-message">No trending movies are available right now.</p>
         )}
@@ -275,7 +280,7 @@ export function HomePage() {
             <button type="button" className="home-retry" onClick={() => retryLoading('tv')}>Try again</button>
           </div>
         ) : tvShows.length > 0 ? (
-          <MediaRow title="Trending TV" items={tvShows.slice(0, 6)} mediaType="tv" category="trending" />
+          <MediaRow title="Trending TV" items={tvShows} mediaType="tv" category="trending" preferImages fillRow />
         ) : (
           <p className="home-feed-message">No trending TV shows are available right now.</p>
         )}

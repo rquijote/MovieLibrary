@@ -3,6 +3,38 @@ title: React + TypeScript + Vite
 description: Frontend setup and offline caching behavior for Movie Library
 ---
 
+## TMDB login and personal libraries
+
+Click the profile picture in the header to open your account dialog.
+Your TMDB profile photo appears when available; otherwise the button shows your
+username initial, or a profile icon when signed out.
+The account popup is centered in the viewport. Homepage trending rows adapt their
+card count to the available width, filling one row while keeping poster-backed
+titles first.
+While signed out, rating a title, adding it to a list, saving a favourite or
+watchlist item, or opening your library shows a login prompt first.
+Choose **Continue with TMDB** in that prompt to start authentication;
+opening or dismissing the prompt does not start login or save the attempted action.
+TMDB approval always opens in a new tab, leaving Movie Library open.
+Select **Approve** there. The app checks for approval every five seconds and when
+you return to its tab, then signs you in automatically. Closing the popup or an
+expired login stops the checks; authentication errors are shown in the popup.
+The app never collects or stores your TMDB password. The API keeps the TMDB
+session in its protected, HttpOnly authentication cookie; frontend code receives
+only account display information and an anti-forgery token.
+
+Favourites, watchlists, ratings, and account-state requests use the logged-in
+TMDB account, not a shared configured session. Custom lists remain in MySQL,
+but every read and change is checked against the list's TMDB account owner.
+The ownership migration assigns pre-existing shared lists to the previously
+configured `ACCOUNT_ID`, not the first person who logs in.
+
+Use **Log out** in your profile dialog before sharing the browser.
+Genre preferences are also available from this dialog.
+Account-specific React views are
+reset when identity changes. Genre preferences are also namespaced by account,
+but remain device-local rather than being synchronized to TMDB.
+
 ## Expanded media lists
 
 Use genre and release year (first-air year for TV) to filter expanded lists.
@@ -28,7 +60,8 @@ Filters and page numbers are saved in the URL for refresh and browser navigation
 
 ## Offline content and edits
 
-Successful API reads are saved in IndexedDB, scoped to the configured API URL.
+Successful API reads are saved in IndexedDB, scoped to the configured API URL
+and verified TMDB account ID (or a separate public scope when logged out).
 Requests try the network first, with an eight-second timeout. If disconnected,
 timed out, or receiving a server error, the app shows the saved response when one
 exists. Unvisited content and new searches still require a connection. HTTP 4xx
@@ -74,17 +107,27 @@ Storage failures are displayed, and edits are not reported as queued unless
 they were saved successfully. Web Locks prevent competing tabs from replaying
 the same queue concurrently.
 
-Saved library data belongs to this browser profile and the server's currently
-configured account. Do not share that profile for private libraries. Synchronize
-or discard pending changes, then clear this site's browser data before changing
-the server account or API configuration.
+Private reads and edits require a verified TMDB login. Account identity is
+verified online at startup before any private content is displayed or queued
+edits replay. If offline on startup, public browsing remains available but the
+library stays locked. After verification, the current tab can use its own saved
+library and queue edits during a disconnect.
+
+Logging out removes the current account's saved API snapshots and pending edits
+from this browser. A confirmation warns before discarding unsynchronized edits.
+Other tabs are notified to reload their session. Each private request includes
+the expected TMDB account ID; the server rejects a mismatch rather than applying
+one account's pending edits to another. Old, unpartitioned browser snapshots and
+queues are not reused or replayed. Synchronize old pending edits before upgrading.
+These browser caches are not encrypted; use separate browser profiles on shared
+devices when privacy from other device users is required.
 
 ### Try offline behavior
 
 1. Run `npm run build`, then `npm run preview`.
-2. Visit content, details, and your library while connected.
-3. In browser developer tools, enable offline mode and reload a previously
-   visited route.
+2. Log in with TMDB, then visit content, details, and your library while connected.
+3. In browser developer tools, enable offline mode without reloading to exercise
+   private offline edits. Reload a public route to test offline shell browsing.
 4. Change a rating, favourite, watchlist, or list and confirm the pending banner.
 5. Reconnect and confirm that the queue clears, then refresh server content.
 

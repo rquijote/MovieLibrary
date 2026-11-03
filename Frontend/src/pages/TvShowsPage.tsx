@@ -92,7 +92,7 @@ export function TvShowsPage() {
       ) : (
         <>
           {activeGenreRows?.map(({ genre, items }) => (
-            <MediaRow key={genre.id} title={genre.name} mediaType="tv" category={activeTab} genreId={genre.id} items={items} />
+            <MediaRow key={genre.id} title={genre.name} mediaType="tv" category={activeTab} genreId={genre.id} items={items} preferImages />
           ))}
           {isGenreLoading ? <LoadingState variant={activeGenreRows?.length ? 'inline' : 'rows'} label="Loading selected genres" /> : null}
           {!isGenreLoading && activeGenreRows?.length === 0 ? <p>No shows found for this category.</p> : null}

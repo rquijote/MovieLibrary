@@ -2,9 +2,12 @@ import { useSyncExternalStore } from 'react';
 import {
   discardPendingChanges, getOfflineStatus, reportOfflineError, subscribeOfflineStatus, syncOfflineChanges,
 } from '../../lib/api';
+import { useSession } from '../../lib/session';
 
 export function OfflineStatus() {
+  const session = useSession();
   const status = useSyncExternalStore(subscribeOfflineStatus, getOfflineStatus);
+  if (!session.authenticated && status.pending > 0) return null;
   if (!status.offline && !status.cached && !status.pending && !status.error && !status.synced) return null;
 
   const retry = () => {

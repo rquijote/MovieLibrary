@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getImageUrl, getMediaTitle } from '../../lib/media';
+import { getImageUrl, getMediaTitle, prioritizeMediaWithPoster } from '../../lib/media';
 import type { MediaCategory, MediaItem, MediaType } from '../../types/media';
 
 type MediaRowProps = {
@@ -8,13 +8,29 @@ type MediaRowProps = {
   items: MediaItem[];
   mediaType: MediaType;
   genreId?: number;
+  preferImages?: boolean;
+  fillRow?: boolean;
 } & (
   | { category: MediaCategory; expandedPath?: never }
   | { category?: never; expandedPath: string }
 );
 
-export function MediaRow({ title, items, mediaType, category, genreId, expandedPath }: MediaRowProps) {
+export function MediaRow({ title, items, mediaType, category, genreId, expandedPath, preferImages = false, fillRow = false }: MediaRowProps) {
   const navigate = useNavigate();
+  const rowRef = useRef<HTMLDivElement>(null);
+  const [columnCount, setColumnCount] = useState(6);
+  const orderedItems = preferImages ? prioritizeMediaWithPoster(items) : items;
+  const displayItems = fillRow ? orderedItems.slice(0, columnCount) : orderedItems;
+  useEffect(() => {
+    const row = rowRef.current;
+    if (!fillRow || !row) return;
+    const observer = new ResizeObserver(() => {
+      const columns = getComputedStyle(row).gridTemplateColumns.split(' ').filter(Boolean).length;
+      setColumnCount(Math.max(1, columns));
+    });
+    observer.observe(row);
+    return () => observer.disconnect();
+  }, [fillRow]);
   const expandedRoute = mediaType === 'tv' ? `/tvshows/${category}` : `/${mediaType}/${category}`;
   const expandedRouteWithGenre = genreId === undefined ? expandedRoute : `${expandedRoute}?genreId=${genreId}`;
 
@@ -27,8 +43,8 @@ export function MediaRow({ title, items, mediaType, category, genreId, expandedP
         </button>
       </div>
 
-      <div className="media-row">
-        {items.map((item) => (
+      <div className="media-row" ref={rowRef}>
+        {displayItems.map((item) => (
           <MediaRowItem
             key={`${mediaType}-${item.id}-${item.poster_path ?? ''}`}
             item={item}

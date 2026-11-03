@@ -8,7 +8,7 @@ using MySqlConnector;
 
 namespace Api.Services;
 
-public sealed class MySqlListsClient(MySqlDataSource dataSource, IMovieClient movieClient) : IListsClient
+public sealed class MySqlListsClient(MySqlDataSource dataSource, IMovieClient movieClient, CurrentTmdbUser user) : IListsClient
 {
     public async Task<StatusDto> Create(CreateListDto request)
     {
@@ -16,9 +16,9 @@ public sealed class MySqlListsClient(MySqlDataSource dataSource, IMovieClient mo
         await using var connection = await dataSource.OpenConnectionAsync();
         var listId = await connection.QuerySingleAsync<int>(
             """
-            INSERT INTO user_lists (name, description) VALUES (@Name, @Description);
+            INSERT INTO user_lists (name, description, owner_account_id) VALUES (@Name, @Description, @ownerId);
             SELECT LAST_INSERT_ID();
-            """, new { Name = request.Name.Trim(), Description = request.Description ?? "" });
+            """, new { Name = request.Name.Trim(), Description = request.Description ?? "", ownerId = user.AccountId });
         return Success(listId);
     }
 
@@ -28,15 +28,15 @@ public sealed class MySqlListsClient(MySqlDataSource dataSource, IMovieClient mo
         await using var connection = await dataSource.OpenConnectionAsync();
         await EnsureList(connection, listId);
         await connection.ExecuteAsync(
-            "UPDATE user_lists SET name = @Name, description = @Description WHERE id = @listId",
-            new { listId, Name = request.Name.Trim(), Description = request.Description ?? "" });
+            "UPDATE user_lists SET name = @Name, description = @Description WHERE id = @listId AND owner_account_id = @ownerId",
+            new { listId, Name = request.Name.Trim(), Description = request.Description ?? "", ownerId = user.AccountId });
         return Success(listId);
     }
 
     public async Task<StatusDto> Delete(int listId)
     {
         await using var connection = await dataSource.OpenConnectionAsync();
-        var deleted = await connection.ExecuteAsync("DELETE FROM user_lists WHERE id = @listId", new { listId });
+        var deleted = await connection.ExecuteAsync("DELETE FROM user_lists WHERE id = @listId AND owner_account_id = @ownerId", new { listId, ownerId = user.AccountId });
         if (deleted == 0)
             throw new KeyNotFoundException("List not found.");
         return Success(listId);
@@ -47,9 +47,11 @@ public sealed class MySqlListsClient(MySqlDataSource dataSource, IMovieClient mo
         await using var connection = await dataSource.OpenConnectionAsync();
         using var result = await connection.QueryMultipleAsync(
             """
-            SELECT id, name, description FROM user_lists WHERE id = @listId;
-            SELECT movie_json FROM user_list_items WHERE list_id = @listId ORDER BY added_at, movie_id;
-            """, new { listId });
+            SELECT id, name, description FROM user_lists WHERE id = @listId AND owner_account_id = @ownerId;
+            SELECT items.movie_json FROM user_list_items items
+            JOIN user_lists lists ON lists.id = items.list_id
+            WHERE lists.id = @listId AND lists.owner_account_id = @ownerId ORDER BY items.added_at, items.movie_id;
+            """, new { listId, ownerId = user.AccountId });
         var list = await result.ReadSingleOrDefaultAsync<ListDetailsDto>()
             ?? throw new KeyNotFoundException("List not found.");
         var snapshots = await result.ReadAsync<string>();
@@ -82,7 +84,10 @@ public sealed class MySqlListsClient(MySqlDataSource dataSource, IMovieClient mo
         await using var connection = await dataSource.OpenConnectionAsync();
         await EnsureList(connection, listId);
         await connection.ExecuteAsync(
-            "DELETE FROM user_list_items WHERE list_id = @listId AND movie_id = @mediaId", new { listId, mediaId });
+            """
+            DELETE items FROM user_list_items items JOIN user_lists lists ON lists.id = items.list_id
+            WHERE lists.id = @listId AND lists.owner_account_id = @ownerId AND items.movie_id = @mediaId
+            """, new { listId, mediaId, ownerId = user.AccountId });
         return Success(listId);
     }
 
@@ -90,7 +95,11 @@ public sealed class MySqlListsClient(MySqlDataSource dataSource, IMovieClient mo
     {
         await using var connection = await dataSource.OpenConnectionAsync();
         await EnsureList(connection, listId);
-        await connection.ExecuteAsync("DELETE FROM user_list_items WHERE list_id = @listId", new { listId });
+        await connection.ExecuteAsync(
+            """
+            DELETE items FROM user_list_items items JOIN user_lists lists ON lists.id = items.list_id
+            WHERE lists.id = @listId AND lists.owner_account_id = @ownerId
+            """, new { listId, ownerId = user.AccountId });
         return Success(listId);
     }
 
@@ -102,8 +111,11 @@ public sealed class MySqlListsClient(MySqlDataSource dataSource, IMovieClient mo
         await using var connection = await dataSource.OpenConnectionAsync();
         await EnsureList(connection, listId);
         var present = mediaType == MediaType.movie && await connection.ExecuteScalarAsync<bool>(
-            "SELECT EXISTS(SELECT 1 FROM user_list_items WHERE list_id = @listId AND movie_id = @mediaId)",
-            new { listId, mediaId });
+            """
+            SELECT EXISTS(SELECT 1 FROM user_list_items items JOIN user_lists lists ON lists.id = items.list_id
+            WHERE lists.id = @listId AND lists.owner_account_id = @ownerId AND items.movie_id = @mediaId)
+            """,
+            new { listId, mediaId, ownerId = user.AccountId });
         return new ListItemStatusDto { Id = listId, ItemPresent = present };
     }
 
@@ -114,11 +126,11 @@ public sealed class MySqlListsClient(MySqlDataSource dataSource, IMovieClient mo
         await using var connection = await dataSource.OpenConnectionAsync();
         using var result = await connection.QueryMultipleAsync(
             """
-            SELECT COUNT(*) FROM user_lists;
+            SELECT COUNT(*) FROM user_lists WHERE owner_account_id = @ownerId;
             SELECT lists.id, lists.name, lists.description,
                    (SELECT COUNT(*) FROM user_list_items items WHERE items.list_id = lists.id) AS ItemCount
-            FROM user_lists lists ORDER BY lists.id DESC LIMIT @pageSize OFFSET @offset;
-            """, new { pageSize, offset = ((long)page - 1) * pageSize });
+            FROM user_lists lists WHERE lists.owner_account_id = @ownerId ORDER BY lists.id DESC LIMIT @pageSize OFFSET @offset;
+            """, new { pageSize, offset = ((long)page - 1) * pageSize, ownerId = user.AccountId });
         var count = await result.ReadSingleAsync<int>();
         var lists = (await result.ReadAsync<AccountListSummaryDto>()).ToList();
         return new AccountListsResponseDto
@@ -128,13 +140,13 @@ public sealed class MySqlListsClient(MySqlDataSource dataSource, IMovieClient mo
         };
     }
 
-    private static async Task EnsureList(MySqlConnection connection, int listId, MySqlTransaction? transaction = null)
+    private async Task EnsureList(MySqlConnection connection, int listId, MySqlTransaction? transaction = null)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(listId);
         var query = transaction is null
-            ? "SELECT id FROM user_lists WHERE id = @listId"
-            : "SELECT id FROM user_lists WHERE id = @listId FOR UPDATE";
-        var id = await connection.QuerySingleOrDefaultAsync<int?>(query, new { listId }, transaction);
+            ? "SELECT id FROM user_lists WHERE id = @listId AND owner_account_id = @ownerId"
+            : "SELECT id FROM user_lists WHERE id = @listId AND owner_account_id = @ownerId FOR UPDATE";
+        var id = await connection.QuerySingleOrDefaultAsync<int?>(query, new { listId, ownerId = user.AccountId }, transaction);
         if (id is null)
             throw new KeyNotFoundException("List not found.");
     }

@@ -3,8 +3,10 @@ USE movielibrary;
 
 CREATE TABLE IF NOT EXISTS user_lists (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    owner_account_id INT NOT NULL,
     name VARCHAR(200) NOT NULL,
-    description VARCHAR(2000) NOT NULL DEFAULT ''
+    description VARCHAR(2000) NOT NULL DEFAULT '',
+    INDEX ix_user_lists_owner (owner_account_id, id)
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS user_list_items (

@@ -1,18 +1,16 @@
-using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using MySqlConnector;
 
 namespace Api.Services;
 
-public sealed class LocalListsFilter(IHostEnvironment environment, IConfiguration configuration) : IAsyncResourceFilter, IExceptionFilter
+public sealed class LocalListsFilter(IConfiguration configuration) : IAsyncResourceFilter, IExceptionFilter
 {
     public async Task OnResourceExecutionAsync(ResourceExecutingContext context, ResourceExecutionDelegate next)
     {
-        var remoteAddress = context.HttpContext.Connection.RemoteIpAddress;
-        if (!environment.IsDevelopment() || (remoteAddress is not null && !IPAddress.IsLoopback(remoteAddress)))
+        if (context.HttpContext.User.Identity?.IsAuthenticated != true)
         {
-            context.Result = new NotFoundResult();
+            context.Result = new UnauthorizedResult();
             return;
         }
 

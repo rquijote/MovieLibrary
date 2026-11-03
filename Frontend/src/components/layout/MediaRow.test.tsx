@@ -19,6 +19,15 @@ function render(posterPath: string | null) {
   );
 }
 
+function renderPreferredOrder() {
+  const withPoster = { ...movie, id: 2, title: 'With poster', poster_path: '/poster.jpg' };
+  return renderToStaticMarkup(
+    <MemoryRouter>
+      <MediaRow title="Movies" items={[movie, withPoster]} mediaType="movies" category="popular" preferImages />
+    </MemoryRouter>,
+  );
+}
+
 describe('media row artwork', () => {
   it('reveals the existing hover title by default when the poster is absent', () => {
     const markup = render(null);
@@ -34,5 +43,10 @@ describe('media row artwork', () => {
     expect(markup).toContain('https://image.tmdb.org/t/p/w185/poster.jpg');
     expect(markup).not.toContain('media-row-item-no-image');
     expect(markup).not.toContain('media-row-poster-placeholder');
+  });
+
+  it('shows poster-backed titles before titles without posters when requested', () => {
+    const markup = renderPreferredOrder();
+    expect(markup.indexOf('With poster')).toBeLessThan(markup.indexOf('Movie without artwork'));
   });
 });

@@ -103,11 +103,11 @@ export function MoviesPage() {
       {activeTab !== 'trending' && selectedGenreKey.length === 0 ? (
         <p>Choose movie genres from your profile to see recommendations here.</p>
       ) : activeTab === 'trending' ? (
-        isLoading ? <LoadingState label="Loading movies" /> : <MediaRow title="Trending This Week" mediaType="movies" category="trending" items={trending?.results ?? []} />
+        isLoading ? <LoadingState label="Loading movies" /> : <MediaRow title="Trending This Week" mediaType="movies" category="trending" items={trending?.results ?? []} preferImages />
       ) : (
         <>
           {activeGenreRows?.map(({ genre, items }) => (
-            <MediaRow key={genre.id} title={genre.name} mediaType="movies" category={activeTab} genreId={genre.id} items={items} />
+            <MediaRow key={genre.id} title={genre.name} mediaType="movies" category={activeTab} genreId={genre.id} items={items} preferImages />
           ))}
           {isGenreLoading ? <LoadingState variant={activeGenreRows?.length ? 'inline' : 'rows'} label="Loading selected genres" /> : null}
           {!isGenreLoading && activeGenreRows?.length === 0 ? <p>No movies found for this category.</p> : null}

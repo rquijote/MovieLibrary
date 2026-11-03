@@ -3,6 +3,7 @@ using Application.Interfaces;
 using Application.Models.Dto.Requests;
 using Application.Models.Dto.Responses;
 using Microsoft.AspNetCore.Mvc;
+using Api.Services;
 
 namespace Api.Controllers
 {
@@ -62,6 +63,7 @@ namespace Api.Controllers
         }
 
         [HttpPost("{id}/rating")]
+        [TmdbAccountRequired]
         public async Task<IActionResult> AddRatingMovie(int id, [FromBody] AddMediaRatingDto request)
         {
             var result = await _movieClient.AddRatingMovie(id, request.Value);
@@ -69,6 +71,7 @@ namespace Api.Controllers
         }
 
         [HttpDelete("{id}/rating")]
+        [TmdbAccountRequired]
         public async Task<IActionResult> DeleteRatingMovie(int id)
         {
             var result = await _movieClient.DeleteRatingMovie(id);
@@ -76,6 +79,7 @@ namespace Api.Controllers
         }
 
         [HttpGet("{id}/account-states")]
+        [TmdbAccountRequired]
         public async Task<IActionResult> GetAccountStateMovie(int id)
         {
             try

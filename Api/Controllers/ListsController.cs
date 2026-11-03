@@ -8,6 +8,7 @@ namespace Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [TmdbAccountRequired]
     [ServiceFilter(typeof(LocalListsFilter))]
     public class ListsController(IListsClient listsClient) : ControllerBase
     {

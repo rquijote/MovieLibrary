@@ -1,5 +1,7 @@
 import { Navigate, Route, Routes, useParams } from 'react-router-dom';
 import { Layout } from './components/layout/Layout';
+import { RequireAccount } from './components/layout/RequireAccount';
+import { useSession } from './lib/session';
 import { ExpandedMediaListPage } from './pages/ExpandedMediaListPage';
 import { ListEditorPage } from './pages/ListEditorPage';
 import { HomePage } from './pages/HomePage';
@@ -18,16 +20,17 @@ import { TvSeasonDetailsPage } from './pages/TvSeasonDetailsPage';
 import { TvShowsPage } from './pages/TvShowsPage';
 
 function App() {
+  const session = useSession();
   return (
-    <Routes>
+    <Routes key={session.account?.id ?? 'public'}>
       <Route element={<Layout />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/movies" element={<MoviesPage />} />
         <Route path="/tvshows" element={<TvShowsPage />} />
-        <Route path="/library" element={<LibraryPage />} />
-        <Route path="/library/create-list" element={<ListEditorPage />} />
-        <Route path="/library/lists/:listId" element={<LibraryListDetailsPage />} />
-        <Route path="/library/lists/:listId/edit" element={<ListEditorPage />} />
+        <Route path="/library" element={<RequireAccount><LibraryPage /></RequireAccount>} />
+        <Route path="/library/create-list" element={<RequireAccount><ListEditorPage /></RequireAccount>} />
+        <Route path="/library/lists/:listId" element={<RequireAccount><LibraryListDetailsPage /></RequireAccount>} />
+        <Route path="/library/lists/:listId/edit" element={<RequireAccount><ListEditorPage /></RequireAccount>} />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/person/:id" element={<PersonDetailsPage />} />
         <Route path="/keyword/:id" element={<KeywordResultsPage />} />
@@ -48,7 +51,8 @@ function App() {
 // Route wrapper used to force remount on params change. (Resets the states, mounts effects from scratch.)
 function ExpandedMediaListRoute() {
   const { mediaType, category, sourceId } = useParams();
-  return <ExpandedMediaListPage key={`${mediaType ?? 'media'}-${sourceId ?? ''}-${category ?? 'category'}`} />;
+  const content = <ExpandedMediaListPage key={`${mediaType ?? 'media'}-${sourceId ?? ''}-${category ?? 'category'}`} />;
+  return category === 'favorite' || category === 'watchlist' ? <RequireAccount>{content}</RequireAccount> : content;
 }
 
 export default App;

@@ -3,6 +3,7 @@ using Application.Interfaces;
 using Application.Models.Dto.Requests;
 using Application.Models.Dto.Responses;
 using Microsoft.AspNetCore.Mvc;
+using Api.Services;
 
 namespace Api.Controllers
 {
@@ -97,6 +98,7 @@ namespace Api.Controllers
         }
 
         [HttpPost("{id}/rating")]
+        [TmdbAccountRequired]
         public async Task<IActionResult> AddRatingTvShow(int id, [FromBody] AddMediaRatingDto request)
         {
             try
@@ -117,6 +119,7 @@ namespace Api.Controllers
         }
 
         [HttpDelete("{id}/rating")]
+        [TmdbAccountRequired]
         public async Task<IActionResult> DeleteRatingTvShow(int id)
         {
             try
@@ -137,6 +140,7 @@ namespace Api.Controllers
         }
 
         [HttpGet("{id}/account-states")]
+        [TmdbAccountRequired]
         public async Task<IActionResult> GetAccountStateTvShow(int id)
         {
             try

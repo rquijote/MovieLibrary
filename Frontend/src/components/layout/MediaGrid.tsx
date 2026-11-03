@@ -1,19 +1,23 @@
 import { useNavigate } from 'react-router-dom';
-import { getImageUrl, getMediaDate, getMediaTitle, handleMediaImageError } from '../../lib/media';
+import {
+  getImageUrl, getMediaDate, getMediaTitle, handleMediaImageError, prioritizeMediaWithPoster,
+} from '../../lib/media';
 import type { MediaItem, MediaType } from '../../types/media';
 
 interface MediaGridProps {
   items: MediaItem[];
   mediaType: MediaType;
   showYearOnly?: boolean;
+  preferImages?: boolean;
 }
 
-export function MediaGrid({ items, mediaType, showYearOnly = mediaType === 'movies' }: MediaGridProps) {
+export function MediaGrid({ items, mediaType, showYearOnly = mediaType === 'movies', preferImages = false }: MediaGridProps) {
   const navigate = useNavigate();
+  const displayItems = preferImages ? prioritizeMediaWithPoster(items) : items;
 
   return (
     <div className="media-grid">
-      {items.map((item) => (
+      {displayItems.map((item) => (
         <button
           key={`${mediaType}-grid-${item.id}`}
           type="button"
