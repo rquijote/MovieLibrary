@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { movieGenres, tvGenres } from './genres';
 import { getAccountId } from './session';
 
-export const MAX_GENRE_SELECTIONS = 6;
 export const genrePreferencesStorageKey = 'movie-library-genre-preferences';
 
 export interface GenrePreferences {
@@ -23,8 +22,7 @@ function sanitizeIds(value: unknown, validIds: Set<number>, fallback: number[]):
     return [...fallback];
   }
 
-  return [...new Set(value.filter((id): id is number => typeof id === 'number' && validIds.has(id)))]
-    .slice(0, MAX_GENRE_SELECTIONS);
+  return [...new Set(value.filter((id): id is number => typeof id === 'number' && validIds.has(id)))];
 }
 
 export function readGenrePreferences(): GenrePreferences {

@@ -29,7 +29,10 @@ export function applyMutation(data: OfflineData, mutation: PendingMutation) {
   if (path === '/api/Lists' && mutation.method === 'POST' && listId !== undefined) {
     data.cache[`/api/Lists/${listId}/details`] ??= {
       savedAt: Date.now(),
-      data: { id: listId, name: body.name, description: body.description ?? '', item_count: 0, items: [] },
+      data: {
+        id: listId, name: body.name, description: body.description ?? '',
+        tags: body.tags ?? [], movie_order: body.movie_order ?? [], item_count: 0, items: [],
+      },
     };
   }
 
@@ -42,6 +45,7 @@ export function applyMutation(data: OfflineData, mutation: PendingMutation) {
         if (lists.page === 1) {
           lists.results.unshift({
             id: listId, name: String(body.name), description: String(body.description ?? ''), item_count: 0,
+            tags: Array.isArray(body.tags) ? body.tags : [],
           });
         }
         lists.total_results += 1;
@@ -53,7 +57,10 @@ export function applyMutation(data: OfflineData, mutation: PendingMutation) {
       }
       if (listMatch && mutation.method === 'PUT') {
         const list = lists.results.find((item) => item.id === Number(listMatch[1]));
-        if (list) Object.assign(list, { name: body.name, description: body.description ?? '' });
+        if (list) {
+          Object.assign(list, { name: body.name, description: body.description ?? '' });
+          if (Array.isArray(body.tags) && body.tags.every((tag): tag is string => typeof tag === 'string')) list.tags = body.tags;
+        }
       }
     }
 
@@ -65,6 +72,8 @@ export function applyMutation(data: OfflineData, mutation: PendingMutation) {
       const details = entry.data as ListDetailsResponse;
       if (mutation.method === 'PUT') {
         Object.assign(details, { name: body.name, description: body.description ?? '' });
+        if (Array.isArray(body.tags) && body.tags.every((tag): tag is string => typeof tag === 'string')) details.tags = body.tags;
+        if (Array.isArray(body.movie_order) && body.movie_order.every((id): id is number => typeof id === 'number')) details.movie_order = body.movie_order;
       } else if (listMatch[2] === 'clear') {
         details.items = [];
       } else if (listMatch[2] === 'remove_movie') {
@@ -72,6 +81,11 @@ export function applyMutation(data: OfflineData, mutation: PendingMutation) {
       } else if (listMatch[2] === 'add_movie' && !details.items.some((item) => item.id === mutation.body)) {
         const movie = findMedia(data.cache, Number(mutation.body), 'movie');
         if (movie && 'title' in movie) details.items.push(movie);
+      }
+      if (details.movie_order?.length) {
+        const positions = new Map(details.movie_order.map((id, index) => [id, index]));
+        details.items.sort((first, second) =>
+          (positions.get(first.id) ?? Infinity) - (positions.get(second.id) ?? Infinity));
       }
       details.item_count = details.items.length;
       for (const cached of Object.values(data.cache)) {

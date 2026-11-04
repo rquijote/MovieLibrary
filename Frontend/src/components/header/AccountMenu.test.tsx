@@ -1,4 +1,5 @@
 import { renderToStaticMarkup } from 'react-dom/server';
+import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AccountMenu } from './AccountMenu';
 import { AccountDialog } from './AccountDialog';
@@ -68,6 +69,7 @@ describe('account confirmation UI', () => {
     expect(markup).toContain('<dialog');
     expect(markup).toContain('Log in to rate this title.');
     expect(markup).toContain('Continue with TMDB');
+    expect(markup).not.toContain('Import Letterboxd CSV');
     expect(mocks.start).not.toHaveBeenCalled();
   });
 
@@ -84,14 +86,18 @@ describe('account confirmation UI', () => {
     expect(mocks.remove).not.toHaveBeenCalled();
   });
 
-  it('offers logout and genre preferences from a signed-in profile', () => {
+  it('offers settings and direct logout in a signed-in dropdown, not a dialog', () => {
     mocks.session.authenticated = true;
     mocks.session.account = { id: 42, username: 'movie-fan' };
-    const markup = renderToStaticMarkup(<AccountDialog onClose={() => {}} onPreferences={() => {}} />);
-    expect(markup).toContain('Your profile');
+    const markup = renderToStaticMarkup(<MemoryRouter><AccountMenu profile initiallyOpen /></MemoryRouter>);
+    expect(markup).toContain('aria-expanded="true"');
     expect(markup).toContain('movie-fan');
+    expect(markup).toContain('href="/settings"');
+    expect(markup).toContain('Settings');
     expect(markup).toContain('Log out');
-    expect(markup).toContain('Genre preferences');
+    expect(markup).not.toContain('Genre preferences');
+    expect(markup).not.toContain('Import Letterboxd CSV');
+    expect(markup).not.toContain('<dialog');
     expect(markup).not.toContain('Continue with TMDB');
   });
 });

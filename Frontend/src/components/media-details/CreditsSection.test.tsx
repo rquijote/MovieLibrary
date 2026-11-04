@@ -29,6 +29,8 @@ describe('cast section', () => {
     expect(markup).toContain('Character 1');
     expect(markup).toContain('10 episodes');
     expect(markup).toContain('Show all 13 cast members');
+    expect(markup.match(/class="person-credit-image"/g)).toHaveLength(13);
+    expect(markup.match(/width="185" height="278"/g)).toHaveLength(13);
     expect(markup).not.toContain('Crew');
     expect(markup).not.toContain('Hidden director');
   });

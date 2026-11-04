@@ -1,0 +1,33 @@
+.settings-page {
+  display: grid;
+  gap: 1.5rem;
+  max-width: 56rem;
+  margin: 0 auto;
+  padding-block: 2rem;
+}
+
+.settings-page h1 {
+  margin: 0 0 0.5rem;
+}
+
+.settings-page > header p {
+  margin: 0;
+  color: #94a3b8;
+}
+
+.settings-panel {
+  min-width: 0;
+  padding: clamp(1rem, 3vw, 1.5rem);
+  border: 1px solid #334155;
+  border-radius: 0.75rem;
+  background: #111827;
+}
+
+.settings-panel .letterboxd-import {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.settings-panel .letterboxd-import h2 {
+  font-size: 1.35rem;
+}

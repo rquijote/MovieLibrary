@@ -134,14 +134,14 @@ type MutationRequest = Pick<PendingMutation, 'method' | 'path' | 'body'>;
 
 export async function apiUpdateList(
   listId: number,
-  body: { name: string; description: string | null; language: string },
+  body: { name: string; description: string | null; language: string; tags?: string[] },
   previousIds: number[],
   selectedIds: number[],
 ): Promise<MutationResult[]> {
   const previous = new Set(previousIds);
   const selected = new Set(selectedIds);
   return mutateMany([
-    { method: 'PUT', path: `/api/Lists/${listId}`, body },
+    { method: 'PUT', path: `/api/Lists/${listId}`, body: { ...body, movie_order: selectedIds } },
     ...previousIds.filter((id) => !selected.has(id)).map((id): MutationRequest => ({
       method: 'POST', path: `/api/Lists/${listId}/remove_movie`, body: id,
     })),

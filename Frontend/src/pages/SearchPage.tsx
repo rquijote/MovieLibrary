@@ -87,7 +87,7 @@ export function SearchPage() {
 
       {activeTab === 'movies' || activeTab === 'tv' ? (
         <>
-          <form className="expanded-media-filters" aria-label="Search result filters"
+          <form className="expanded-media-filters" aria-label="Search result filters" autoComplete="off"
             key={`${query}-${min}-${max}-${filterReset}`}
             onSubmit={(event) => {
               event.preventDefault();
@@ -108,7 +108,6 @@ export function SearchPage() {
               setSearchParams(next);
             }}>
             <YearRangeFilter key={activeTab} min={min} max={max}
-              items={activeTab === 'movies' ? movies?.results ?? [] : tvShows?.results ?? []}
               label={activeTab === 'movies' ? 'Released between' : 'Premiered between'} />
             <div className="media-filter-actions">
               <button type="button" onClick={() => {

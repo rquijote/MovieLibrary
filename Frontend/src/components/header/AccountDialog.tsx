@@ -1,15 +1,12 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
-import { clearAccountOfflineData, getOfflineStatus } from '../../lib/api';
 import {
-  completeTmdbLogin, getAccountId, logoutFromTmdb, startTmdbLogin, useSession,
+  completeTmdbLogin, startTmdbLogin,
 } from '../../lib/session';
 
-export function AccountDialog({ onClose, onPreferences, reason }: {
+export function AccountDialog({ onClose, reason }: {
   onClose: () => void;
-  onPreferences?: () => void;
   reason?: string;
 }) {
-  const session = useSession();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const titleId = useId();
   const [busy, setBusy] = useState(false);
@@ -71,26 +68,17 @@ export function AccountDialog({ onClose, onPreferences, reason }: {
 
   const act = async () => {
     if (inFlight.current) return;
-    if (session.authenticated && getOfflineStatus().pending > 0
-      && !window.confirm('There are unsynchronized edits on this device. Logging out will remove them. Log out anyway?')) return;
     // Opened synchronously within the click so pop-up blockers allow it.
-    const approvalTab = session.authenticated ? null : window.open('about:blank', '_blank');
+    const approvalTab = window.open('about:blank', '_blank');
     if (approvalTab) approvalTab.opener = null;
     setBusy(true);
     inFlight.current = true;
     setError(null);
     try {
-      if (session.authenticated) {
-        const accountId = getAccountId();
-        const revoked = await logoutFromTmdb();
-        await clearAccountOfflineData(accountId);
-        window.location.assign(revoked ? '/' : '/?logout_warning=1');
-      } else {
-        const approval = await startTmdbLogin();
-        approvalTab?.location.replace(approval.approvalUrl);
-        setApprovalUrl(approval.approvalUrl);
-        if (!approvalTab) setError('Your browser blocked the new tab. Use the TMDB link below to open it.');
-      }
+      const approval = await startTmdbLogin();
+      approvalTab?.location.replace(approval.approvalUrl);
+      setApprovalUrl(approval.approvalUrl);
+      if (!approvalTab) setError('Your browser blocked the new tab. Use the TMDB link below to open it.');
     } catch (error) {
       approvalTab?.close();
       setError(error instanceof Error ? error.message : 'Account action failed. Try again.');
@@ -114,14 +102,14 @@ export function AccountDialog({ onClose, onPreferences, reason }: {
     }}>
     <div className="account-dialog-content">
     <header className="account-dialog-header">
-      <h2 id={titleId}>{session.authenticated ? 'Your profile' : 'Log in to Movie Library'}</h2>
+      <h2 id={titleId}>Log in to Movie Library</h2>
       <button className="account-cancel-button" type="button" disabled={busy} onClick={onClose} aria-label="Close account dialog">Close</button>
     </header>
-    {!session.authenticated ? <p className="account-menu-hint">
+    <p className="account-menu-hint">
       {reason ?? 'Save your favourites, rate titles, and keep your lists private to your account.'}
       {' '}TMDB opens in a new tab. Movie Library never asks for your password.
-    </p> : null}
-    {approvalUrl && !session.authenticated ? <div className="account-menu account-menu-pending">
+    </p>
+    {approvalUrl ? <div className="account-menu account-menu-pending">
       <p className="account-menu-hint">
         Approve access on the{' '}
         <a href={approvalUrl} target="_blank" rel="noopener noreferrer">TMDB tab</a>. You will be signed in automatically.
@@ -133,10 +121,8 @@ export function AccountDialog({ onClose, onPreferences, reason }: {
       </button>
       {error ? <p className="account-menu-error" role="alert">{error}</p> : null}
     </div> : <div className="account-menu">
-    {session.account ? <span className="account-name" title={session.account.username}>{session.account.username}</span> : null}
-    {onPreferences ? <button className="account-login-button" type="button" disabled={busy} onClick={onPreferences}>Genre preferences</button> : null}
     <button className="account-login-button" type="button" disabled={busy} onClick={() => void act()}>
-      {busy ? 'Please wait...' : session.authenticated ? 'Log out' : 'Continue with TMDB'}
+      {busy ? 'Please wait...' : 'Continue with TMDB'}
     </button>
     {error ? <p className="account-menu-error" role="alert">{error}</p> : null}
   </div>}

@@ -384,6 +384,7 @@ describe('durable edits and replay', () => {
     cacheContent(data, '/api/Lists/7/details', {
       id: 7, name: 'Original', description: '', items: [{ ...movie, id: 41 }], item_count: 1,
     });
+
     await writeOfflineData(origin, data);
     online = false;
     const results = await api.apiUpdateList(7, { name: 'Updated', description: 'Offline', language: 'en' }, [41], [42]);
@@ -403,6 +404,58 @@ describe('durable edits and replay', () => {
     expect(vi.mocked(fetch).mock.calls.map(([url, init]) => [url, init?.method])).toEqual([
       ['/health', undefined], ['/api/Lists/7', 'PUT'], ['/api/Lists/7/remove_movie', 'POST'], ['/api/Lists/7/add_movie', 'POST'],
     ]);
+  });
+
+  it('persists tags and movie order across offline edits, additions, and queue replay', async () => {
+    const data = await readOfflineData(origin);
+    cacheContent(data, '/api/Account/lists?page=1', {
+      page: 1, total_pages: 1, total_results: 1,
+      results: [{ id: 7, name: 'Original', description: '', tags: [], item_count: 1 }],
+    });
+    cacheContent(data, '/api/Movie/42', movie);
+    cacheContent(data, '/api/Lists/7/details', {
+      id: 7, name: 'Original', description: '', tags: [], items: [{ ...movie, id: 41 }], item_count: 1,
+    });
+    await writeOfflineData(origin, data);
+    online = false;
+    await api.apiUpdateList(7, { name: 'Ordered', description: '', language: 'en', tags: ['Weekend'] }, [41], [42, 41]);
+    expect(await api.apiGet('/api/Lists/7/details')).toMatchObject({
+      tags: ['Weekend'], movie_order: [42, 41], items: [{ id: 42 }, { id: 41 }],
+    });
+    expect(await api.apiGet('/api/Account/lists?page=1')).toMatchObject({
+      results: [{ id: 7, tags: ['Weekend'] }],
+    });
+    const queued = (await readOfflineData(origin)).queue;
+    expect(queued[0].body).toMatchObject({ tags: ['Weekend'], movie_order: [42, 41] });
+    online = true;
+    vi.mocked(fetch).mockResolvedValueOnce(json('Healthy')).mockImplementation(async () => json(success));
+    await api.syncOfflineChanges();
+    expect((await readOfflineData(origin)).queue).toEqual([]);
+    online = false;
+    expect(await api.apiGet('/api/Lists/7/details')).toMatchObject({
+      tags: ['Weekend'], items: [{ id: 42 }, { id: 41 }],
+    });
+    expect(await api.apiGet('/api/Account/lists?page=1')).toMatchObject({
+      results: [{ id: 7, tags: ['Weekend'] }],
+    });
+  });
+
+  it('preserves omitted summary tags and allows clearing them without cached list details', async () => {
+    const data = await readOfflineData(origin);
+    cacheContent(data, '/api/Account/lists?page=2', {
+      page: 2, total_pages: 2, total_results: 21,
+      results: [{ id: 7, name: 'Original', description: '', tags: ['Weekend'], item_count: 0 }],
+    });
+    await writeOfflineData(origin, data);
+    online = false;
+    await api.apiUpdateList(7, { name: 'Renamed', description: '', language: 'en' }, [], []);
+    expect(await api.apiGet('/api/Account/lists?page=2')).toMatchObject({
+      results: [{ id: 7, tags: ['Weekend'] }],
+    });
+    await api.apiUpdateList(7, { name: 'Renamed', description: '', language: 'en', tags: [] }, [], []);
+    expect(await api.apiGet('/api/Account/lists?page=2')).toMatchObject({
+      results: [{ id: 7, tags: [] }],
+    });
   });
 
   it('does not enqueue a partial list edit when the durable queue is full', async () => {

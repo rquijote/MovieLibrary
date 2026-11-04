@@ -200,6 +200,13 @@ builder.Services.AddScoped<LocalListsFilter>();
 
 var app = builder.Build();
 
+if (args.Contains("--migrate-list-metadata", StringComparer.Ordinal))
+{
+    await using var scope = app.Services.CreateAsyncScope();
+    await ListMetadataMigration.Run(scope.ServiceProvider.GetRequiredService<MySqlConnector.MySqlDataSource>());
+    return;
+}
+
 if (args.Contains("--migrate-list-owners", StringComparer.Ordinal))
 {
     await using var scope = app.Services.CreateAsyncScope();

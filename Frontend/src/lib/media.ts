@@ -37,12 +37,42 @@ export function prioritizeMediaWithPoster<TItem extends MediaItem>(items: readon
 
 type YearFilter = number | { min?: number; max?: number };
 
-export function getMediaYearBounds(items: MediaItem[]): { min: number; max: number } | undefined {
+export interface MediaYearBounds {
+  min: number;
+  max: number;
+}
+
+export function getMediaYearBounds(items: MediaItem[]): MediaYearBounds | undefined {
   const years = items.map(getMediaDate)
-    .filter((date) => /^[1-9]\d{3}-\d{2}-\d{2}$/.test(date))
+    .filter((date) => /^[1-9]\d{3}-\d{2}-\d{2}$/.test(date ?? ''))
     .map((date) => Number(date.slice(0, 4)));
   if (years.length === 0) return undefined;
   return { min: Math.min(...years), max: Math.max(...years) };
+}
+
+export async function fetchDiscoveryYearBounds(
+  endpoint: string,
+  mediaType: MediaType,
+  fetchPage: (endpoint: string) => Promise<{ results: MediaItem[] }>,
+): Promise<MediaYearBounds | undefined> {
+  const [path, query] = endpoint.split('?');
+  const params = new URLSearchParams(query);
+  params.delete('page');
+  const dateField = mediaType === 'movies' ? 'PrimaryReleaseDate' : 'FirstAirDate';
+  // Exclude undated titles so they cannot occupy the first date-sorted page.
+  if (!params.has(`${dateField}Gte`)) params.set(`${dateField}Gte`, '1000-01-01');
+  const sortField = mediaType === 'movies' ? 'primary_release_date' : 'first_air_date';
+  const endpoints = ['asc', 'desc'].map((direction) => {
+    const sorted = new URLSearchParams(params);
+    sorted.set('SortBy', `${sortField}.${direction}`);
+    sorted.set('page', '1');
+    return `${path}?${sorted}`;
+  });
+  const responses = await Promise.all(endpoints.map(fetchPage));
+  const items = responses.flatMap((response) => response.results);
+  const bounds = getMediaYearBounds(items);
+  if (items.length && !bounds) throw new Error('Year limits could not be determined from the returned dates.');
+  return bounds;
 }
 
 export function filterMediaItems(items: MediaItem[], genreId?: number, year?: YearFilter): MediaItem[] {

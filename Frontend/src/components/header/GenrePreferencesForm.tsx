@@ -1,67 +1,50 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { movieGenres, tvGenres } from '../../lib/genres';
 import {
-  MAX_GENRE_SELECTIONS,
   readGenrePreferences,
   saveGenrePreferences,
   type GenrePreferences,
 } from '../../lib/genrePreferences';
-import './GenrePreferencesDialog.css';
+import './GenrePreferencesForm.css';
 
-interface GenrePreferencesDialogProps {
-  onClose: () => void;
-}
-
-export function GenrePreferencesDialog({ onClose }: GenrePreferencesDialogProps) {
+export function GenrePreferencesForm() {
   const [draft, setDraft] = useState(readGenrePreferences);
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const toggleGenre = (type: keyof GenrePreferences, genreId: number) => {
+    setSaved(false);
+    setError(null);
     setDraft((current) => {
       const selected = current[type];
       return {
         ...current,
         [type]: selected.includes(genreId)
           ? selected.filter((id) => id !== genreId)
-          : selected.length < MAX_GENRE_SELECTIONS ? [...selected, genreId] : selected,
+          : [...selected, genreId],
       };
     });
   };
 
   const save = () => {
-    saveGenrePreferences(draft);
-    onClose();
+    setSaved(false);
+    setError(null);
+    try {
+      saveGenrePreferences(draft);
+      setSaved(true);
+    } catch (saveError) {
+      setError(saveError instanceof Error ? saveError.message : 'Could not save your genre preferences.');
+    }
   };
 
   return (
-    <div
-      className="genre-preferences-backdrop"
-      role="presentation"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) {
-          onClose();
-        }
-      }}
-    >
-      <section className="genre-preferences-dialog" role="dialog" aria-modal="true" aria-labelledby="genre-preferences-title">
+      <form aria-labelledby="genre-preferences-title" autoComplete="off" onSubmit={(event) => { event.preventDefault(); save(); }}>
         <header className="genre-preferences-header">
           <div>
-            <h2 id="genre-preferences-title">Choose your genres</h2>
-            <p>Select up to {MAX_GENRE_SELECTIONS} for each category.</p>
+            <h2 id="genre-preferences-title">Genre preferences</h2>
+            <p>Select as many genres as you like for each category.</p>
+            <p>These preferences are saved for your account on this browser.</p>
           </div>
-          <button type="button" className="genre-preferences-close" onClick={onClose} aria-label="Close genre preferences">
-            ×
-          </button>
         </header>
 
         <div className="genre-preferences-groups">
@@ -78,8 +61,8 @@ export function GenrePreferencesDialog({ onClose }: GenrePreferencesDialogProps)
                     <label className="genre-preferences-option" key={genre.id}>
                       <input
                         type="checkbox"
+                        autoComplete="off"
                         checked={selected}
-                        disabled={!selected && draft[type].length >= MAX_GENRE_SELECTIONS}
                         onChange={() => toggleGenre(type, genre.id)}
                       />
                       <span>{genre.name}</span>
@@ -87,16 +70,26 @@ export function GenrePreferencesDialog({ onClose }: GenrePreferencesDialogProps)
                   );
                 })}
               </div>
-              <span className="genre-preferences-count">{draft[type].length} of {MAX_GENRE_SELECTIONS} selected</span>
+              <span className="genre-preferences-count">{draft[type].length} selected</span>
             </fieldset>
           ))}
         </div>
 
         <footer className="genre-preferences-actions">
-          <button className="genre-preferences-cancel" type="button" onClick={onClose}>Cancel</button>
-          <button className="genre-preferences-save" type="button" onClick={save}>Save preferences</button>
+          <button className="genre-preferences-cancel" type="button" onClick={() => {
+            setDraft({ movies: [], tv: [] });
+            setSaved(false);
+            setError(null);
+          }}>Remove all</button>
+          <button className="genre-preferences-cancel" type="button" onClick={() => {
+            setDraft(readGenrePreferences());
+            setSaved(false);
+            setError(null);
+          }}>Reset changes</button>
+          <button className="genre-preferences-save" type="submit">Save preferences</button>
         </footer>
-      </section>
-    </div>
+        {saved ? <p role="status">Genre preferences saved.</p> : null}
+        {error ? <p className="account-menu-error" role="alert">{error}</p> : null}
+      </form>
   );
 }

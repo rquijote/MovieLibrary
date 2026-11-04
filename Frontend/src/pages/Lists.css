@@ -20,20 +20,12 @@
   margin-bottom: 2rem;
 }
 
-.lists-eyebrow {
-  margin-bottom: 0.65rem;
-  color: #94a3b8;
-  font-size: 0.75rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
 .lists-heading h1 {
   margin-bottom: 0.75rem;
   color: #f1f5f9;
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: clamp(2rem, 4vw, 3rem);
-  font-weight: 400;
+  font-family: inherit;
+  font-size: 2rem;
+  font-weight: 700;
   overflow-wrap: anywhere;
 }
 
@@ -61,7 +53,76 @@
   display: grid;
   grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.4fr);
   gap: 1.5rem;
-  align-items: start;
+  align-items: stretch;
+}
+
+.list-heading-divider {
+  border: 0;
+  border-top: 1px solid #263449;
+  margin-top: 1.25rem;
+}
+
+.list-description-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.list-description-panel textarea {
+  flex: 1;
+  min-height: 10rem;
+  resize: vertical;
+}
+
+.list-movies-panel {
+  grid-column: 1 / -1;
+}
+
+.list-tag-input {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.list-tag-input input {
+  flex: 1;
+}
+
+.list-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.list-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  padding: 0.3rem 0.65rem;
+  border: 1px solid #334155;
+  border-radius: 1rem;
+  color: #cbd5e1;
+  font-size: 0.85rem;
+}
+
+.list-tag button,
+.movie-order-controls button {
+  border: 0;
+  background: transparent;
+  color: #cbd5e1;
+  cursor: pointer;
+  padding: 0.25rem;
+}
+
+.movie-order-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.movie-order-controls .movie-drag-handle {
+  cursor: grab;
 }
 
 .list-editor-panel {
@@ -99,18 +160,6 @@
 
 .list-editor-panel > input {
   margin-bottom: 1.5rem;
-}
-
-.lists-page :is(input, textarea, button, a):focus-visible {
-  outline: 2px solid #94a3b8;
-  outline-offset: 3px;
-}
-
-.list-editor-note {
-  margin-top: 1rem;
-  color: #94a3b8;
-  font-size: 0.8rem;
-  line-height: 1.6;
 }
 
 .list-section-heading,
@@ -215,8 +264,26 @@
 .lists-page .list-create-actions {
   justify-content: flex-end;
   margin-top: 1.5rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid #263449;
+}
+
+.lists-tag-filter {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  color: #cbd5e1;
+  font-size: 0.875rem;
+}
+
+.lists-tag-filter select {
+  max-width: 100%;
+  min-width: 0;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #334155;
+  border-radius: 0.5rem;
+  background: #0f172a;
+  color: #f1f5f9;
+  font: inherit;
 }
 
 .lists-error,

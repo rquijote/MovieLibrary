@@ -28,7 +28,8 @@ public sealed class ListOwnershipTests
     private static MySqlListsClient Client(MySqlDataSource source, int accountId)
     {
         var movies = new Mock<IMovieClient>();
-        movies.Setup(client => client.GetMovieById(It.IsAny<int>())).ReturnsAsync(new MovieDto { Id = 123, Title = "Test movie" });
+        movies.Setup(client => client.GetMovieById(It.IsAny<int>()))
+            .ReturnsAsync((int id) => new MovieDto { Id = id, Title = "Test movie" });
         return new(source, movies.Object, User(accountId));
     }
 
@@ -54,7 +55,50 @@ public sealed class ListOwnershipTests
             """);
         if (!legacy)
             await connection.ExecuteAsync("ALTER TABLE user_lists ADD COLUMN owner_account_id INT NOT NULL, ADD INDEX ix_user_lists_owner (owner_account_id, id)");
+        await ListMetadataMigration.Run(source);
         return source;
+    }
+
+    [MySqlAvailableFact]
+    public async Task GivenListMetadata_WhenSavingAndReopening_PreservesTagsAndMovieOrder()
+    {
+        await using var source = await CreateSource();
+        await ListMetadataMigration.Run(source);
+        var owner = Client(source, 10);
+        var created = await owner.Create(new CreateListDto
+        {
+            Name = "Ordered", Language = "en", Tags = [" Weekend ", "weekend", "Drama"], MovieOrder = [456, 123]
+        });
+        var id = created.ListId!.Value;
+        await owner.AddMovie(id, 123);
+        await owner.AddMovie(id, 456);
+        var details = await owner.Details(id);
+        Assert.Equal(["Weekend", "Drama"], details.Tags);
+        var summary = Assert.Single((await owner.GetLists(1)).Results);
+        Assert.Equal(details.Tags, summary.Tags);
+        Assert.Equal(2, summary.ItemCount);
+        Assert.Equal([456, 123], details.Items.Select(movie => movie.Id));
+        await owner.Update(id, new CreateListDto { Name = "Renamed", Language = "en" });
+        Assert.Equal(details.Tags, (await owner.Details(id)).Tags);
+        await owner.Update(id, new CreateListDto { Name = "Renamed", Language = "en", Tags = [], MovieOrder = [123, 456] });
+        var updated = await owner.Details(id);
+        Assert.Empty(updated.Tags);
+        Assert.Equal([123, 456], updated.Items.Select(movie => movie.Id));
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task GivenInvalidMetadata_WhenCreating_RejectsBeforeOpeningDatabase(bool invalidTags)
+    {
+        await using var source = new MySqlDataSourceBuilder("Server=localhost;User ID=test;Database=test").Build();
+        var request = new CreateListDto
+        {
+            Name = "Invalid", Language = "en",
+            Tags = invalidTags ? [new string('x', 41)] : [],
+            MovieOrder = invalidTags ? [] : [123, 123]
+        };
+        await Assert.ThrowsAsync<ArgumentException>(() => Client(source, 10).Create(request));
     }
 
     [MySqlAvailableFact]

@@ -16,16 +16,18 @@ export function CreateListForm({
   onSubmit,
 }: CreateListFormProps) {
   return (
-    <form className="list-create-form" onSubmit={onSubmit}>
+    <form className="list-create-form" autoComplete="off" onSubmit={onSubmit}>
       <h4>Create new list</h4>
       <input
         type="text"
+        autoComplete="off"
         placeholder="List name"
         value={newListName}
         onChange={(event) => onNewListNameChange(event.target.value)}
       />
       <input
         type="text"
+        autoComplete="off"
         placeholder="Description (optional)"
         value={newListDescription}
         onChange={(event) => onNewListDescriptionChange(event.target.value)}

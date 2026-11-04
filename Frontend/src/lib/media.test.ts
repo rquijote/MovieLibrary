@@ -6,6 +6,8 @@ import {
   buildTvShowDiscoveryEndpoint,
   filterMediaItems,
   fetchAllMediaPages,
+  fetchDiscoveryYearBounds,
+  getMediaYearBounds,
   getAccessiblePageCount,
   filterMediaWithPoster,
   prioritizeMediaWithPoster,
@@ -78,6 +80,60 @@ describe('expanded media filters', () => {
     vote_average: 8, vote_count: 600, popularity: 1, origin_country: [], genre_ids: [18],
   };
 
+  it('finds discovery extremes beyond 500 pages with two global sorted queries', async () => {
+    const calls: URLSearchParams[] = [];
+    const bounds = await fetchDiscoveryYearBounds(
+      '/api/Discover/movies?WithGenres=28&VoteCountGte=250&PrimaryReleaseDateLte=2026-11-04&SortBy=popularity.desc',
+      'movies',
+      async (endpoint) => {
+        const params = new URL(endpoint, 'https://example.test').searchParams;
+        calls.push(params);
+        return {
+          total_pages: 2000,
+          results: [{ ...movie, release_date: params.get('SortBy')?.endsWith('.asc') ? '1895-01-01' : '2026-10-01' }],
+        };
+      },
+    );
+    expect(bounds).toEqual({ min: 1895, max: 2026 });
+    expect(calls.map((params) => params.get('SortBy')))
+      .toEqual(['primary_release_date.asc', 'primary_release_date.desc']);
+    for (const params of calls) {
+      expect(params.get('page')).toBe('1');
+      expect(params.get('WithGenres')).toBe('28');
+      expect(params.get('VoteCountGte')).toBe('250');
+      expect(params.get('PrimaryReleaseDateLte')).toBe('2026-11-04');
+      expect(params.get('PrimaryReleaseDateGte')).toBe('1000-01-01');
+    }
+  });
+
+  it('preserves TV category bounds and status when finding first-air extremes', async () => {
+    const calls: URLSearchParams[] = [];
+    await fetchDiscoveryYearBounds(
+      '/api/Discover/tv?FirstAirDateGte=2021-01-01&FirstAirDateLte=2026-01-01&WithStatus=0',
+      'tvshows', async (endpoint) => {
+        calls.push(new URL(endpoint, 'https://example.test').searchParams);
+        return { results: [show] };
+      },
+    );
+    expect(calls.map((params) => params.get('SortBy'))).toEqual(['first_air_date.asc', 'first_air_date.desc']);
+    expect(calls.every((params) => params.get('FirstAirDateGte') === '2021-01-01'
+      && params.get('FirstAirDateLte') === '2026-01-01' && params.get('WithStatus') === '0')).toBe(true);
+  });
+
+  it('does not present partial year bounds if one global query fails', async () => {
+    await expect(fetchDiscoveryYearBounds('/api/Discover/movies', 'movies', async (endpoint) => {
+      if (endpoint.includes('.desc')) throw new Error('Dates unavailable');
+      return { results: [movie] };
+    })).rejects.toThrow('Dates unavailable');
+  });
+
+  it('ignores unknown feed dates and handles empty discovery results', async () => {
+    expect(getMediaYearBounds([movie, show, { ...movie, release_date: '' }])).toEqual({ min: 2024, max: 2025 });
+    expect(getMediaYearBounds([])).toBeUndefined();
+    expect(await fetchDiscoveryYearBounds('/api/Discover/movies', 'movies', async () => ({ results: [] })))
+      .toBeUndefined();
+  });
+
   it('filters feed dates inclusively by range, excluding unknown dates', () => {
     const items = [movie, show, { ...movie, id: 3, release_date: '' }];
     expect(filterMediaItems(items, undefined, { min: 2024, max: 2025 })).toEqual([movie, show]);
@@ -133,6 +189,22 @@ describe('expanded media filters', () => {
     expect(new Set([...first.results, ...second.results].map((item) => item.id)).size).toBe(30);
     expect(requested).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     expect(progress).toEqual([1, 5, 9, 10]);
+  });
+
+  it('finds inclusive year matches on later feed pages rather than deriving limits from page one', async () => {
+    const requested: number[] = [];
+    const feed = await fetchAllMediaPages('/api/Trending/movies', async (endpoint) => {
+      const page = Number(new URL(endpoint, 'https://example.test').searchParams.get('page'));
+      requested.push(page);
+      return {
+        total_pages: 7,
+        results: [{ ...movie, id: page, release_date: page === 7 ? '1970-01-01' : '2024-06-01' }],
+      };
+    }, new AbortController().signal, () => {});
+    expect(requested).toEqual([1, 2, 3, 4, 5, 6, 7]);
+    expect(paginateFilteredMedia(feed, 1, undefined, { min: 1970, max: 1970 }).results.map((item) => item.id))
+      .toEqual([7]);
+    expect(paginateFilteredMedia(feed, 1).totalResults).toBe(7);
   });
 
   it('keeps exact multiples full and clamps stale page numbers', () => {

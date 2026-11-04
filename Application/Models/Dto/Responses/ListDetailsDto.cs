@@ -27,5 +27,13 @@ namespace Application.Models.Dto.Responses
 
         [JsonPropertyName("poster_path")]
         public string? PosterPath { get; init; }
+
+        /// <summary>Gets the tags assigned to the list.</summary>
+        [JsonPropertyName("tags")]
+        public List<string> Tags { get; init; } = [];
+
+        /// <summary>Gets the preferred movie ordering, including queued additions.</summary>
+        [JsonPropertyName("movie_order")]
+        public List<int> MovieOrder { get; init; } = [];
     }
 }

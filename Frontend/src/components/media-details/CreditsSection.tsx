@@ -70,7 +70,10 @@ function PersonCreditCard({
 }) {
   return (
     <Link className="person-credit-card" to={`/person/${id}`}>
-      <img src={getImageUrl(imagePath, 'w185')} alt="" onError={handleMediaImageError} loading="lazy" />
+      <span className="person-credit-image">
+        <img src={getImageUrl(imagePath, 'w185')} alt="" width={185} height={278}
+          onError={handleMediaImageError} loading="lazy" />
+      </span>
       <span className="person-credit-name">{name}</span>
       <span className="person-credit-description">{description || 'Cast'}</span>
       {count !== null ? <span className="person-credit-description">{count} episodes</span> : null}

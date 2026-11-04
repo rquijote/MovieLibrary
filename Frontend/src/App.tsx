@@ -18,6 +18,8 @@ import { TvShowDetailsPage } from './pages/TvShowDetailsPage';
 import { TvEpisodeDetailsPage } from './pages/TvEpisodeDetailsPage';
 import { TvSeasonDetailsPage } from './pages/TvSeasonDetailsPage';
 import { TvShowsPage } from './pages/TvShowsPage';
+import { AboutPage } from './pages/AboutPage';
+import { SettingsPage } from './pages/SettingsPage';
 
 function App() {
   const session = useSession();
@@ -25,6 +27,8 @@ function App() {
     <Routes key={session.account?.id ?? 'public'}>
       <Route element={<Layout />}>
         <Route path="/" element={<HomePage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/settings" element={<RequireAccount><SettingsPage /></RequireAccount>} />
         <Route path="/movies" element={<MoviesPage />} />
         <Route path="/tvshows" element={<TvShowsPage />} />
         <Route path="/library" element={<RequireAccount><LibraryPage /></RequireAccount>} />

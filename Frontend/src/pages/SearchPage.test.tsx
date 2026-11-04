@@ -6,7 +6,7 @@ import { SearchPage } from './SearchPage';
 vi.mock('../lib/api', () => ({ apiGet: vi.fn() }));
 
 describe('search year filters', () => {
-  it('renders editable year boundaries, sliders and a separate actions row', () => {
+  it('renders compact year boundaries and clear filters without autofill', () => {
     const markup = renderToStaticMarkup(
       <MemoryRouter initialEntries={['/search?q=batman&yearMin=1990&yearMax=2020']}>
         <SearchPage />
@@ -17,7 +17,12 @@ describe('search year filters', () => {
     expect(markup).toContain('To');
     expect(markup).toContain('value="1990"');
     expect(markup).toContain('value="2020"');
-    expect(markup.match(/type="range"/g)).toHaveLength(2);
+    expect(markup).not.toContain('type="range"');
+    const controls = markup.match(/<(?:form|input)\b[^>]*>/g) ?? [];
+    expect(controls.length).toBeGreaterThan(0);
+    for (const control of controls) {
+      expect(control).toContain('autoComplete="off"');
+    }
     expect(markup).toContain('class="media-filter-actions"');
     expect(markup).not.toContain('type="number"');
     expect(markup).not.toContain('Min year');

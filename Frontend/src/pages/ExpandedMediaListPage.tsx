@@ -52,8 +52,6 @@ export function ExpandedMediaListPage() {
   const genreParam = searchParams.get('genreId');
   const genreId = genreParam && /^\d+$/.test(genreParam) ? Number(genreParam) : undefined;
   const [items, setItems] = useState<MediaItem[]>([]);
-  const yearScope = `${mediaType}-${category}-${sourceId}-${genreId}`;
-  const [yearSource, setYearSource] = useState<{ scope: string; items: MediaItem[] }>({ scope: '', items: [] });
   const yearParam = searchParams.get('year');
   const year = yearParam && /^\d{4}$/.test(yearParam) && Number(yearParam) >= 1000
     ? Number(yearParam) : undefined;
@@ -90,7 +88,7 @@ export function ExpandedMediaListPage() {
     [category],
   );
 
-  const endpoint = useMemo(() => {
+  const baseEndpoint = useMemo(() => {
     if (sourceId) {
       if (!parsedMediaType || !relatedCategory) return null;
       return `/api/${parsedMediaType === 'movies' ? 'Movie' : 'TvShow'}/${sourceId}/${relatedCategory}`;
@@ -104,9 +102,7 @@ export function ExpandedMediaListPage() {
         case 'popular':
         case 'top-rated':
         case 'upcoming':
-          return buildFilteredDiscoveryEndpoint(
-            buildMovieDiscoveryEndpoint(parsedCategory, new Date(), genreId), parsedMediaType, yearRange,
-          );
+          return buildMovieDiscoveryEndpoint(parsedCategory, new Date(), genreId);
       }
     }
 
@@ -116,25 +112,26 @@ export function ExpandedMediaListPage() {
         case 'top-rated':
         case 'upcoming':
         case 'on-the-air':
-          return buildFilteredDiscoveryEndpoint(
-            buildTvShowDiscoveryEndpoint(parsedCategory, new Date(), genreId), parsedMediaType, yearRange,
-          );
+          return buildTvShowDiscoveryEndpoint(parsedCategory, new Date(), genreId);
       }
     }
 
-    const baseEndpoint = expandedListEndpoints[parsedMediaType][parsedCategory];
-    if (!baseEndpoint) {
+    const feedEndpoint = expandedListEndpoints[parsedMediaType][parsedCategory];
+    if (!feedEndpoint) {
       return null;
     }
 
     if (parsedCategory === 'upcoming') {
-      return buildUpcomingEndpoint(baseEndpoint, parsedMediaType);
+      return buildUpcomingEndpoint(feedEndpoint, parsedMediaType);
     }
 
-    return baseEndpoint;
-  }, [genreId, parsedCategory, parsedMediaType, relatedCategory, sourceId, yearRange]);
+    return feedEndpoint;
+  }, [genreId, parsedCategory, parsedMediaType, relatedCategory, sourceId]);
 
-  const filtersAllResults = endpoint?.startsWith('/api/Discover/') ?? false;
+  const filtersAllResults = baseEndpoint?.startsWith('/api/Discover/') ?? false;
+  const endpoint = useMemo(() => baseEndpoint && parsedMediaType && filtersAllResults
+    ? buildFilteredDiscoveryEndpoint(baseEndpoint, parsedMediaType, yearRange) : baseEndpoint,
+  [baseEndpoint, filtersAllResults, parsedMediaType, yearRange]);
   const needsFeedScan = !filtersAllResults && (genreId !== undefined || yearRange !== undefined);
   const setCurrentPage = (page: number) => {
     const nextParams = new URLSearchParams(searchParams);
@@ -176,16 +173,12 @@ export function ExpandedMediaListPage() {
             feedCache.current = { endpoint, items: feed };
           }
           const filtered = paginateFilteredMedia(feed, currentPage, genreId, yearRange);
-          setYearSource({ scope: yearScope, items: feed });
           results = filtered.results;
           pageCount = filtered.totalPages;
-          setFilteredCount(filtered.totalResults);
+          if (genreId !== undefined || yearRange !== undefined) setFilteredCount(filtered.totalResults);
         } else {
           const response = await apiGet<MovieListResponse | TvShowListResponse>(buildPagedEndpoint(endpoint, currentPage));
           results = response.results;
-          setYearSource((previous) => yearRange !== undefined
-            && previous.scope === yearScope && previous.items.length > 0
-            ? previous : { scope: yearScope, items: results });
           pageCount = getAccessiblePageCount(response.total_pages);
         }
         if (!active) return;
@@ -210,7 +203,7 @@ export function ExpandedMediaListPage() {
       active = false;
       controller.abort();
     };
-  }, [currentPage, endpoint, genreId, needsFeedScan, parsedMediaType, setSearchParams, yearRange, yearScope]);
+  }, [currentPage, endpoint, genreId, needsFeedScan, parsedMediaType, setSearchParams, yearRange]);
 
   if (!parsedMediaType || (!parsedCategory && !relatedCategory) || !endpoint) {
     return <p>Route not found.</p>;
@@ -224,7 +217,7 @@ export function ExpandedMediaListPage() {
         key={`${parsedMediaType}-${genreId}-${yearMin}-${yearMax}-${filterReset}`}
         className="expanded-media-filters"
         aria-label="Media filters"
-        aria-describedby="media-filter-scope"
+        autoComplete="off"
         onSubmit={(event) => {
           event.preventDefault();
           const data = new FormData(event.currentTarget);
@@ -249,7 +242,7 @@ export function ExpandedMediaListPage() {
       >
         <label className="expanded-genre-filter">
           Genre
-          <select name="genreId" defaultValue={genreId ?? ''}
+          <select name="genreId" autoComplete="off" defaultValue={genreId ?? ''}
             onChange={(event) => event.currentTarget.form?.requestSubmit()}>
             <option value="">All genres</option>
             {(parsedMediaType === 'movies' ? movieGenres : tvGenres).map((genre) => (
@@ -257,7 +250,7 @@ export function ExpandedMediaListPage() {
             ))}
           </select>
         </label>
-        <YearRangeFilter min={yearMin} max={yearMax} items={yearSource.scope === yearScope ? yearSource.items : []}
+        <YearRangeFilter min={yearMin} max={yearMax}
           label={parsedMediaType === 'movies' ? 'Released between' : 'Premiered between'} />
         <div className="media-filter-actions">
         <button type="button" onClick={() => {
@@ -274,11 +267,6 @@ export function ExpandedMediaListPage() {
         </div>
       </form>
       {filterError ? <p role="alert">{filterError}</p> : null}
-      <p id="media-filter-scope" className="muted">
-        {filtersAllResults
-          ? 'Filters apply across all results within this category. Category date and rating limits still apply.'
-          : 'Filters apply across the first 500 available feed pages. Matches are grouped into pages of 20; only the last page may have fewer.'}
-      </p>
       <div className="pagination-controls">
         <button type="button" onClick={() => setCurrentPage(currentPage - 1)} disabled={isLoading || currentPage === 1}>
           ← Previous
@@ -292,7 +280,7 @@ export function ExpandedMediaListPage() {
         <button type="button" onClick={() => setCurrentPage(currentPage + 1)} disabled={isLoading || currentPage >= totalPages}>
           Next →
         </button>
-        <form key={currentPage} className="page-jump" aria-label="Jump to page" onSubmit={(event) => {
+        <form key={currentPage} className="page-jump" aria-label="Jump to page" autoComplete="off" onSubmit={(event) => {
           event.preventDefault();
           const page = Number(new FormData(event.currentTarget).get('page'));
           if (!Number.isInteger(page) || page < 1 || page > totalPages) {
@@ -304,7 +292,7 @@ export function ExpandedMediaListPage() {
           setCurrentPage(page);
         }}>
           <label htmlFor="expanded-page-number">Jump to page</label>
-          <input id="expanded-page-number" name="page" type="text" inputMode="numeric" pattern="[0-9]+"
+          <input id="expanded-page-number" name="page" type="text" autoComplete="off" inputMode="numeric" pattern="[0-9]+"
             aria-label={`Jump to page (1 to ${totalPages})`} required defaultValue={currentPage} disabled={isLoading}
             onChange={(event) => event.currentTarget.setCustomValidity('')} />
           <button type="submit" disabled={isLoading}>Go</button>

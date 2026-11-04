@@ -345,6 +345,7 @@ export interface AccountListSummary {
   name: string;
   description: string;
   item_count: number;
+  tags?: string[];
 }
 
 export interface AccountListsResponse {
@@ -360,6 +361,8 @@ export interface ListDetailsResponse {
   description: string;
   item_count: number;
   items: MovieDto[];
+  tags?: string[];
+  movie_order?: number[];
 }
 
 export interface MediaListResponse<TItem> {

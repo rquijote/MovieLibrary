@@ -185,13 +185,6 @@
   background: rgb(226 232 240 / 10%);
 }
 
-.home-button:focus-visible,
-.home-shortcuts a:focus-visible,
-.home-retry:focus-visible {
-  outline: 2px solid #e2e8f0;
-  outline-offset: 3px;
-}
-
 .home-shortcuts {
   display: flex;
   flex-wrap: wrap;
@@ -240,11 +233,8 @@
   line-height: 1.25;
 }
 
-.home-page .media-row-item:hover,
-.home-page .media-row-item:focus-visible {
+.home-page .media-row-item:hover {
   border-color: var(--home-accent);
-  outline: 2px solid var(--home-accent);
-  outline-offset: 2px;
 }
 
 .home-feed-message {

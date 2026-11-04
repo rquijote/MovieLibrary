@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { GenrePreferencesDialog } from './GenrePreferencesDialog';
 import { HeaderSearch } from './HeaderSearch';
 import { AccountMenu } from './AccountMenu';
 
@@ -11,7 +10,6 @@ const linkClassName = ({ isActive }: { isActive: boolean }) =>
 
 export function AppHeader() {
   const [openDropdown, setOpenDropdown] = useState<DropdownName | null>(null);
-  const [isGenrePreferencesOpen, setIsGenrePreferencesOpen] = useState(false);
   const closeTimer = useRef<number | null>(null);
 
   const clearCloseTimer = () => {
@@ -135,13 +133,9 @@ export function AppHeader() {
           <HeaderSearch />
         </nav>
         <div className="header-account-controls">
-          <AccountMenu profile onPreferences={() => {
-            closeMenu();
-            setIsGenrePreferencesOpen(true);
-          }} />
+          <AccountMenu profile />
         </div>
       </div>
-      {isGenrePreferencesOpen ? <GenrePreferencesDialog onClose={() => setIsGenrePreferencesOpen(false)} /> : null}
     </header>
   );
 }

@@ -30,5 +30,9 @@ namespace Application.Models.Dto.Responses
 
         [JsonPropertyName("item_count")]
         public int ItemCount { get; init; }
+
+        /// <summary>Gets the tags available for filtering this list.</summary>
+        [JsonPropertyName("tags")]
+        public List<string> Tags { get; init; } = [];
     }
 }

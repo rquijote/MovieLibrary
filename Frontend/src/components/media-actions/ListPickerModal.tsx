@@ -207,6 +207,7 @@ export function ListPickerModal({
           </button>
           <input
             type="text"
+            autoComplete="off"
             placeholder="Search lists"
             value={listSearchTerm}
             onChange={(event) => setListSearchTerm(event.target.value)}

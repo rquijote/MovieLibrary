@@ -81,11 +81,12 @@ export function LibraryListDetailsPage() {
   return (
     <>
       <section className="lists-page">
-        <Link className="lists-back" to="/library?tab=lists">Back to your library</Link>
         <header className="lists-heading">
-          <p className="lists-eyebrow">Your collection</p>
           <h1>{list.name}</h1>
           {list.description ? <p className="muted">{list.description}</p> : null}
+          {list.tags?.length ? <div className="list-tags" aria-label="List tags">
+            {list.tags.map((tag) => <span className="list-tag" key={tag}>{tag}</span>)}
+          </div> : null}
         </header>
         <div className="lists-toolbar">
         <span className="muted">{list.item_count} {list.item_count === 1 ? 'movie' : 'movies'}</span>
@@ -120,7 +121,7 @@ export function LibraryListDetailsPage() {
             <p>This will permanently delete "{list.name}". Your movies will not be deleted.</p>
             {deleteError ? <p className="lists-error" role="alert">{deleteError}</p> : null}
             <div className="delete-confirm-actions">
-              <button type="button" autoFocus disabled={isDeleting} className="delete-cancel-button" onClick={() => setIsDeleteModalOpen(false)}>Keep list</button>
+              <button type="button" autoFocus disabled={isDeleting} className="delete-cancel-button" onClick={() => setIsDeleteModalOpen(false)}>Cancel</button>
               <button
                 type="button"
                 className="delete-list-button"

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { apiGet, apiPost, apiUpdateList } from '../lib/api';
 import { SelectedMoviesList } from '../components/lists/SelectedMoviesList';
 import { LoadingState } from '../components/layout/LoadingState';
@@ -15,6 +15,9 @@ export function ListEditorPage() {
   const isEditMode = editListId !== null && Number.isInteger(editListId) && editListId !== 0;
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState('');
+  const [tagError, setTagError] = useState<string | null>(null);
   const [movieSearchQuery, setMovieSearchQuery] = useState('');
   const [movieSearchResults, setMovieSearchResults] = useState<MovieDto[]>([]);
   const [isSearchLoading, setIsSearchLoading] = useState(false);
@@ -47,6 +50,7 @@ export function ListEditorPage() {
         if (!active) return;
         setName(details.name);
         setDescription(details.description ?? '');
+        setTags(details.tags ?? []);
         setSelectedMovies(details.items);
         setOriginalMovieIds(details.items.map((movie) => movie.id));
         setStatusMessage(null);
@@ -122,6 +126,8 @@ export function ListEditorPage() {
       setStatusMessage('Name is required.');
       return;
     }
+    const savedTags = addTag();
+    if (!savedTags) return;
 
     try {
       saveInProgress.current = true;
@@ -131,6 +137,7 @@ export function ListEditorPage() {
         name: trimmedName,
         description: description.trim() || null,
         language: 'en',
+        tags: savedTags,
       };
 
       const targetId = editListId ?? createdListId;
@@ -171,6 +178,32 @@ export function ListEditorPage() {
     setSelectedMovies((current) => current.filter((movie) => movie.id !== movieId));
   };
 
+  const addTag = (): string[] | null => {
+    const tag = tagInput.trim();
+    if (!tag) return tags;
+    if (tag.length > 40 || (tags.length >= 20 && !tags.some((current) => current.toLowerCase() === tag.toLowerCase()))) {
+      setTagError('Use at most 20 tags, each up to 40 characters.');
+      return null;
+    }
+    const next = tags.some((current) => current.toLowerCase() === tag.toLowerCase()) ? tags : [...tags, tag];
+    setTags(next);
+    setTagInput('');
+    setTagError(null);
+    return next;
+  };
+
+  const handleReorder = (movieId: number, targetId: number) => {
+    setSelectedMovies((current) => {
+      const from = current.findIndex((movie) => movie.id === movieId);
+      const to = current.findIndex((movie) => movie.id === targetId);
+      if (from < 0 || to < 0 || from === to) return current;
+      const next = [...current];
+      const [movie] = next.splice(from, 1);
+      next.splice(to, 0, movie);
+      return next;
+    });
+  };
+
   const handleSelectMovie = (movie: MovieDto) => {
     searchVersion.current += 1;
     setSelectedMovies((current) => {
@@ -198,17 +231,15 @@ export function ListEditorPage() {
   };
 
   if (listId && !isEditMode) {
-    return <section className="lists-page"><Link to="/library?tab=lists" className="lists-back">Back to your library</Link>
+    return <section className="lists-page">
       <p className="lists-error" role="alert">This list address is invalid.</p></section>;
   }
 
   return (
     <section className="create-list-page lists-page">
-      <Link className="lists-back" to="/library?tab=lists">Back to your library</Link>
       <header className="lists-heading">
-        <p className="lists-eyebrow">Your collection</p>
-        <h1>{isEditMode ? 'Edit your list' : 'Create a list'}</h1>
-        <p className="muted">A place for your favourites, future watches, and everything in between.</p>
+        <h1>{isEditMode ? 'Edit your list' : 'New list'}</h1>
+        <hr className="list-heading-divider" />
       </header>
 
       {isLoadingExistingList ? <LoadingState variant="inline" label="Preparing your list" /> : null}
@@ -217,24 +248,50 @@ export function ListEditorPage() {
         <button type="button" className="view-more-btn" onClick={() => setLoadAttempt((attempt) => attempt + 1)}>Try again</button>
       </div> : null}
 
-      <form className="list-create-form" onSubmit={(event) => void handleSave(event)}>
+      <form className="list-create-form" autoComplete="off" onSubmit={(event) => void handleSave(event)}>
         <fieldset className="list-editor-fields" disabled={isSaving || isLoadingExistingList || Boolean(loadError)}>
         <div className="list-editor-layout">
         <section className="list-editor-panel">
-        <h2>The details</h2>
-        <label htmlFor="list-name">List name</label>
-        <input id="list-name" type="text" required placeholder="e.g. Sunday night favourites" value={name} onChange={(event) => setName(event.target.value)} />
-        <label htmlFor="list-description">Description <span className="muted">(optional)</span></label>
+        <label htmlFor="list-name">Name</label>
+        <input id="list-name" type="text" autoComplete="off" required maxLength={200} value={name} onChange={(event) => setName(event.target.value)} />
+        <label htmlFor="list-tags">Tags</label>
+        <div className="list-tag-input">
+          <input id="list-tags" type="text" autoComplete="off" value={tagInput} maxLength={40}
+            aria-describedby={tagError ? 'list-tag-error' : undefined}
+            onChange={(event) => { setTagInput(event.target.value); setTagError(null); }}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') { event.preventDefault(); addTag(); }
+            }} />
+          <button type="button" className="view-more-btn" onClick={addTag}>Add tag</button>
+        </div>
+        {tagError ? <p id="list-tag-error" className="lists-error" role="alert">{tagError}</p> : null}
+        <div className="list-tags" aria-label="List tags">
+          {tags.map((tag) => <span className="list-tag" key={tag}>{tag}
+            <button type="button" aria-label={`Remove tag ${tag}`} onClick={() => setTags((current) => current.filter((value) => value !== tag))}>×</button>
+          </span>)}
+        </div>
+        </section>
+        <section className="list-editor-panel list-description-panel">
+        <label htmlFor="list-description">Description</label>
         <textarea
           id="list-description"
-          placeholder="What brings these movies together?"
+          autoComplete="off"
           value={description}
+          maxLength={2000}
           rows={5}
           onChange={(event) => setDescription(event.target.value)}
         />
-        <p className="list-editor-note">Changes are saved to this device first when you are offline.</p>
+        <div className="list-create-actions">
+          <button type="submit" className="view-more-btn" disabled={isSaving || isLoadingExistingList}>
+            {isSaving ? 'Saving...' : 'Save'}
+          </button>
+          <button type="button" className="view-more-btn"
+            onClick={() => navigate(isEditMode && editListId ? `/library/lists/${editListId}` : '/library?tab=lists')}>
+            Cancel
+          </button>
+        </div>
         </section>
-        <section className="list-editor-panel">
+        <section className="list-editor-panel list-movies-panel">
         <div className="list-section-heading"><h2>Your movies</h2><span className="list-count">{selectedMovies.length} selected</span></div>
         <div className="create-list-movie-search" ref={searchContainerRef}>
           <label htmlFor="list-movie-search">Find a movie</label>
@@ -292,29 +349,10 @@ export function ListEditorPage() {
           ) : null}
         </div>
 
-        <SelectedMoviesList items={selectedMovies} onRemove={handleRemoveSelectedMovie} />
+        <SelectedMoviesList items={selectedMovies} onRemove={handleRemoveSelectedMovie} onReorder={handleReorder} />
         </section>
         </div>
         {statusMessage ? <p className="lists-error" role="alert">{statusMessage}</p> : null}
-        <div className="list-create-actions">
-          <button type="submit" className="view-more-btn" disabled={isSaving || isLoadingExistingList}>
-            {isSaving ? 'Saving changes...' : isEditMode ? 'Save changes' : 'Create list'}
-          </button>
-          <button
-            type="button"
-            className="view-more-btn"
-            onClick={() => {
-              if (isEditMode && editListId) {
-                navigate(`/library/lists/${editListId}`);
-                return;
-              }
-
-              navigate('/library');
-            }}
-          >
-            Cancel
-          </button>
-        </div>
         </fieldset>
       </form>
     </section>

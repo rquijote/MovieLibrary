@@ -17,6 +17,7 @@ export function LibraryPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get('tab');
   const activeTab: LibraryTab = getValidTab(tabParam, libraryTabs, 'lists');
+  const selectedTag = searchParams.get('tag') ?? '';
   const [favoriteMovies, setFavoriteMovies] = useState<MovieListResponse | null>(null);
   const [favoriteTv, setFavoriteTv] = useState<TvShowListResponse | null>(null);
   const [watchlistMovies, setWatchlistMovies] = useState<MovieListResponse | null>(null);
@@ -52,8 +53,14 @@ export function LibraryPage() {
           return;
         }
         const accountListsData = await apiGet<AccountListsResponse>('/api/Account/lists?page=1');
+        const allLists = [...accountListsData.results];
+        for (let page = 2; page <= accountListsData.total_pages; page += 1) {
+          if (!active) return;
+          const nextPage = await apiGet<AccountListsResponse>(`/api/Account/lists?page=${page}`);
+          allLists.push(...nextPage.results);
+        }
         if (!active) return;
-        const sortedLists = [...accountListsData.results].sort((left, right) => right.id - left.id);
+        const sortedLists = [...new Map(allLists.map((list) => [list.id, list])).values()].sort((left, right) => right.id - left.id);
         setAccountLists({ ...accountListsData, results: sortedLists });
         setIsTabLoading(false);
 
@@ -96,12 +103,23 @@ export function LibraryPage() {
     }
   }, [activeTab, setSearchParams, tabParam]);
 
+  const tagOptions = [...new Map((accountLists?.results ?? [])
+    .flatMap((list) => list.tags ?? [])
+    .map((tag) => [tag.toLowerCase(), tag])).values()]
+    .sort((left, right) => left.localeCompare(right));
+  const filteredLists = (accountLists?.results ?? []).filter((list) =>
+    !selectedTag || list.tags?.some((tag) => tag.toLowerCase() === selectedTag.toLowerCase()));
+  const changeTag = (tag: string) => {
+    const next = new URLSearchParams(searchParams);
+    if (tag) next.set('tag', tag);
+    else next.delete('tag');
+    setSearchParams(next, { replace: true });
+  };
+
   return (
     <section className="lists-page">
       <header className="lists-heading">
-        <p className="lists-eyebrow">Made for you</p>
         <h1>Your library</h1>
-        <p className="muted">The stories you love, and the ones you have yet to discover.</p>
       </header>
 
       <MiniHeaderTabs
@@ -137,15 +155,29 @@ export function LibraryPage() {
       {!isTabLoading && !error && activeTab === 'lists' ? (
         <div>
           <div className="lists-toolbar">
-            <span className="muted">{accountLists?.total_results ?? 0} lists</span>
+            <div className="lists-tag-filter">
+              <span className="muted" role="status">{selectedTag
+                ? `${filteredLists.length} of ${accountLists?.results.length ?? 0} lists`
+                : `${accountLists?.results.length ?? 0} lists`}</span>
+              <label htmlFor="library-tag-filter">Filter by tag</label>
+              <select id="library-tag-filter" autoComplete="off" value={selectedTag.toLowerCase()} onChange={(event) => changeTag(event.target.value)}>
+                <option value="">All tags</option>
+                {selectedTag && !tagOptions.some((tag) => tag.toLowerCase() === selectedTag.toLowerCase())
+                  ? <option value={selectedTag.toLowerCase()}>{selectedTag}</option> : null}
+                {tagOptions.map((tag) => <option key={tag.toLowerCase()} value={tag.toLowerCase()}>{tag}</option>)}
+              </select>
+              {selectedTag ? <button type="button" className="view-more-btn" onClick={() => changeTag('')}>Clear filter</button> : null}
+            </div>
             <button type="button" className="view-more-btn" onClick={() => navigate('/library/create-list')}>Create a list</button>
           </div>
           <div className="library-lists-main">
-            <AccountListCards
-              lists={accountLists?.results ?? []}
+            {selectedTag && filteredLists.length === 0 ? <div className="lists-empty" role="status">
+              <strong>No lists with this tag.</strong>Choose another tag or clear the filter.
+            </div> : <AccountListCards
+              lists={filteredLists}
               previewPostersByListId={listPreviewPostersById}
               onSelectList={(listId) => navigate(`/library/lists/${listId}`)}
-            />
+            />}
           </div>
 
         </div>

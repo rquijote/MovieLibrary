@@ -25,4 +25,16 @@ describe('selected list movies', () => {
     expect(markup).toContain('2020');
     expect(markup).toContain('stroke-width="1.6"');
   });
+
+  it('offers drag and accessible movement controls without changing removal', () => {
+    const markup = renderToStaticMarkup(
+      <SelectedMoviesList items={[movie, { ...movie, id: 43, title: 'Second movie' }]}
+        onRemove={() => {}} onReorder={() => {}} />,
+    );
+    expect(markup).toContain('draggable="true"');
+    expect(markup).toContain('aria-label="Drag Sunday movie to reorder"');
+    expect(markup).toContain('aria-label="Move Sunday movie up"');
+    expect(markup).toContain('aria-label="Move Sunday movie down"');
+    expect(markup).toContain('aria-label="Remove Sunday movie"');
+  });
 });

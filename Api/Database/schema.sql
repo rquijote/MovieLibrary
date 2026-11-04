@@ -6,6 +6,8 @@ CREATE TABLE IF NOT EXISTS user_lists (
     owner_account_id INT NOT NULL,
     name VARCHAR(200) NOT NULL,
     description VARCHAR(2000) NOT NULL DEFAULT '',
+    tags JSON NULL,
+    movie_order JSON NULL,
     INDEX ix_user_lists_owner (owner_account_id, id)
 ) ENGINE=InnoDB;
 

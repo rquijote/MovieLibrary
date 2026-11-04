@@ -17,7 +17,7 @@ function offlineWorker(): Plugin {
         for (const file of Object.values(bundle)) {
           version.update(file.type === 'asset' ? file.source : file.code)
         }
-        const urls = [...Object.keys(bundle), 'favicon.svg', 'icons.svg'].map((file) => `${base}${file}`)
+        const urls = [...Object.keys(bundle), 'favicon.svg', 'icons.svg', 'tmdb-logo.svg'].map((file) => `${base}${file}`)
         const source = readFileSync(new URL('./offline-worker.js', import.meta.url), 'utf8')
           .replace('__VERSION__', version.digest('hex').slice(0, 12))
           .replace('__PRECACHE__', JSON.stringify(urls))
